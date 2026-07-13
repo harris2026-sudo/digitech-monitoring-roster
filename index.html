@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roster On-Call — Digitech Monitoring Team</title>
+<style>
+  :root{
+    --navy:#1F3864;
+    --accent:#2E5FA3;
+    --hilite:#D6E4F0;
+    --zebra:#F2F2F2;
+    --green:#1E7A34;
+    --green-bg:#C6EFCE;
+    --red-bg:#FFC7CE;
+    --red-fg:#9C0006;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Arial, "Helvetica Neue", sans-serif;background:#EEF2F7;color:#222;}
+  .app{max-width:1040px;margin:0 auto;padding:16px 16px 60px;}
+  header{background:var(--navy);color:#fff;padding:18px 20px;border-radius:10px;margin-bottom:14px;}
+  header h1{margin:0 0 2px;font-size:19px;}
+  header p{margin:0;font-size:12px;opacity:.85;}
+  .mode-badge{display:inline-block;margin-top:8px;font-size:10.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .tab{flex:1;text-align:center;padding:10px;border-radius:8px;background:#fff;color:var(--navy);font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:2px solid transparent;}
+  .tab.active{background:var(--navy);color:#fff;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .card-box{background:#fff;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .card-box h3{margin:0 0 10px;font-size:13.5px;color:var(--navy);}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px;}
+  .controls label{font-size:11px;font-weight:bold;color:var(--navy);display:block;margin-bottom:3px;}
+  .controls input, .controls select{border:1px solid #c7d3e0;border-radius:6px;padding:7px 9px;font-size:13px;font-family:Arial;}
+  .btn{border:none;border-radius:6px;padding:9px 14px;font-size:12.5px;font-weight:bold;cursor:pointer;font-family:Arial;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:var(--navy);}
+  .btn-ghost{background:var(--hilite);color:var(--navy);}
+  .btn-ghost:hover{background:#c3d7ee;}
+  .btn-danger{background:var(--red-bg);color:var(--red-fg);}
+  .btn-sm{padding:5px 10px;font-size:11px;}
+
+  .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .month-nav .btn{padding:7px 11px;}
+  .month-nav .label{font-weight:bold;color:var(--navy);font-size:15px;min-width:150px;text-align:center;}
+
+  .palette{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;color:#fff;font-size:12px;font-weight:bold;cursor:grab;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.15);}
+  .chip:active{cursor:grabbing;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.7);}
+  .palette-hint{font-size:11px;color:#667;margin:-6px 0 12px;}
+
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cal-weekday{text-align:center;font-size:11px;font-weight:bold;color:var(--navy);padding:4px 0;}
+  .cal-cell{background:#fff;border-radius:8px;min-height:76px;padding:6px;box-shadow:0 1px 2px rgba(0,0,0,.08);border:2px solid transparent;cursor:pointer;position:relative;}
+  .cal-cell.pad{background:transparent;box-shadow:none;cursor:default;}
+  .cal-cell.dragover{border-color:var(--accent);background:var(--hilite);}
+  .cal-cell.today{border-color:var(--navy);}
+  .cal-date{font-size:11px;color:#889;font-weight:bold;}
+  .cal-cell.today .cal-date{color:var(--navy);}
+  .cal-assign{margin-top:6px;}
+  .cal-chip{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:6px;color:#fff;font-size:10.5px;font-weight:bold;cursor:grab;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cal-chip .pin{font-size:9px;opacity:.85;}
+  .cal-empty-hint{font-size:10px;color:#bbb;text-align:center;margin-top:14px;}
+
+  .popover{position:fixed;background:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:8px;z-index:999;min-width:170px;}
+  .popover .p-title{font-size:10.5px;font-weight:bold;color:#889;padding:4px 6px 6px;}
+  .popover .p-opt{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:bold;}
+  .popover .p-opt:hover{background:var(--zebra);}
+  .popover .p-opt .dot{width:10px;height:10px;border-radius:50%;}
+  .popover .p-clear{color:var(--red-fg);border-top:1px solid #eee;margin-top:4px;padding-top:8px;}
+
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:14px;}
+  .summary .s-card{border-radius:8px;padding:9px 10px;color:#fff;}
+  .summary .s-card .num{font-size:18px;font-weight:bold;}
+  .summary .s-card .lab{font-size:10.5px;opacity:.9;}
+
+  .order-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+  .order-item{display:flex;align-items:center;gap:8px;background:var(--zebra);border-radius:8px;padding:7px 10px;}
+  .order-item .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .order-item .name{flex:1;font-size:12.5px;font-weight:bold;color:#333;}
+  .order-item .mv{border:none;background:#fff;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.1);}
+
+  .team-add-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .team-add-form input[type=text]{flex:1;min-width:140px;}
+
+  .save-bar{position:sticky;bottom:0;background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 -2px 8px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:8px;}
+  .save-status{font-size:11.5px;color:#667;font-weight:bold;}
+  .save-status.dirty{color:var(--red-fg);}
+  .save-status.clean{color:var(--green);}
+
+  footer{text-align:center;font-size:10.5px;color:var(--accent);font-style:italic;margin-top:16px;}
+
+  #toastWrap{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+  .toast{display:flex;align-items:center;gap:10px;min-width:220px;max-width:340px;padding:12px 16px;border-radius:8px;color:#fff;font-size:13px;font-weight:600;background:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:0;transform:translateX(20px);transition:opacity .25s ease,transform .25s ease;}
+  .toast.show{opacity:1;transform:translateX(0);}
+  .toast.toast-success{background:#1f7a3f;}
+  .toast.toast-error{background:#b3261e;}
+
+  input[type=file]{display:none;}
+
+  @media (max-width:640px){
+    .cal-cell{min-height:58px;padding:4px;}
+    .cal-chip{font-size:9.5px;padding:3px 4px;}
+    .month-nav .label{font-size:13px;min-width:110px;}
+  }
+  @media print{
+    .tabs, .controls, .palette, .palette-hint, .save-bar, header, footer, #toastWrap{display:none !important;}
+    .cal-cell{border:1px solid #ccc;}
+  }
+</style>
+</head>
+<body>
+<div id="toastWrap"></div>
+<div class="app">
+  <header>
+    <h1>📅 Roster On-Call / Standby — Digitech Monitoring Team</h1>
+    <p>Site Reliability Engineer · Digital Sustainability Operation · PT Borneo Indobara</p>
+    <span class="mode-badge" id="modeBadge">📂 Mode: File-based (Export / Import JSON) — tidak memakai localStorage</span>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-view="roster">🗓️ Roster</div>
+    <div class="tab" data-view="rotasi">🔁 Rotasi Otomatis</div>
+    <div class="tab" data-view="data">💾 Data</div>
+  </div>
+
+  <!-- ===================== VIEW: ROSTER ===================== -->
+  <div class="view active" id="view-roster">
+    <div class="card-box">
+      <div class="month-nav">
+        <button class="btn btn-ghost" id="prevMonth">◀</button>
+        <div class="label" id="monthLabel"></div>
+        <button class="btn btn-ghost" id="nextMonth">▶</button>
+        <button class="btn btn-ghost btn-sm" id="todayBtn" style="margin-left:auto;">Bulan ini</button>
+        <button class="btn btn-ghost btn-sm" id="printBtn">🖨️ Cetak</button>
+      </div>
+
+      <div class="palette" id="palette"></div>
+      <div class="palette-hint">Seret (drag) chip anggota ke tanggal untuk assign · atau klik/tap tanggal untuk pilih cepat · seret chip di kalender antar tanggal untuk tukar jadwal.</div>
+
+      <div class="cal-grid" id="calWeekdays"></div>
+      <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+
+      <div class="summary" id="summaryCards"></div>
+    </div>
+
+    <div class="save-bar">
+      <span class="save-status clean" id="saveStatus">✅ Tersimpan (sudah di-export)</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" id="unlockMonthBtn">🔓 Kembalikan semua ke rotasi otomatis (bulan ini)</button>
+        <button class="btn btn-primary btn-sm" id="quickExportBtn">💾 Export sekarang</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: ROTASI ===================== -->
+  <div class="view" id="view-rotasi">
+    <div class="card-box">
+      <h3>👥 Anggota Tim</h3>
+      <div class="order-list" id="orderList"></div>
+      <div class="team-add-form">
+        <input type="text" id="newMemberName" placeholder="Nama anggota baru...">
+        <button class="btn btn-primary btn-sm" id="addMemberBtn">+ Tambah</button>
+      </div>
+    </div>
+
+    <div class="card-box">
+      <h3>⚙️ Pola Rotasi Otomatis</h3>
+      <div class="controls">
+        <div>
+          <label>Siklus pergantian</label>
+          <select id="cycleSelect">
+            <option value="1">Setiap 1 hari</option>
+            <option value="2">Setiap 2 hari</option>
+            <option value="3">Setiap 3 hari</option>
+            <option value="7">Mingguan (7 hari)</option>
+            <option value="14">Dua mingguan (14 hari)</option>
+          </select>
+        </div>
+        <div>
+          <label>Tanggal mulai rotasi</label>
+          <input type="date" id="startDateInput">
+        </div>
+        <div>
+          <label>Mulai dengan</label>
+          <select id="startPersonSelect"></select>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:#667;margin-top:4px;">
+        Perubahan di atas langsung berlaku ke seluruh kalender secara otomatis — kecuali tanggal yang sudah kamu pin manual (📌) di tab Roster.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== VIEW: DATA ===================== -->
+  <div class="view" id="view-data">
+    <div class="card-box">
+      <h3>💾 Export Data</h3>
+      <p style="font-size:12px;color:#556;">Aplikasi ini <b>tidak</b> memakai localStorage / window.storage — semua data hanya tersimpan selama tab browser terbuka. Export ke file secara berkala agar tidak hilang, lalu import kembali saat membuka ulang.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="exportJsonBtn">⬇️ Export JSON (lengkap + setting rotasi)</button>
+        <button class="btn btn-ghost" id="exportCsvBtn">⬇️ Export CSV (untuk Excel)</button>
+      </div>
+    </div>
+    <div class="card-box">
+      <h3>📂 Import Data</h3>
+      <p style="font-size:12px;color:#556;">Pilih file JSON hasil export sebelumnya untuk memuat kembali data roster, anggota tim, dan konfigurasi rotasi.</p>
+      <button class="btn btn-ghost" id="importJsonBtn">📂 Pilih File JSON...</button>
+      <input type="file" id="importJsonFile" accept="application/json">
+    </div>
+  </div>
+
+  <footer>Maintain. Monitor. Improve. — Digitech Monitoring Team</footer>
+</div>
+
+<script>
+/* ==================== STATE (in-memory only, no localStorage / window.storage) ==================== */
+const PALETTE_COLORS = ['#2E5FA3','#1E8E7E','#E07A3F','#7A5FBF','#C2547A','#3F9142','#C99A2E','#C0392B','#566573','#0E7C86'];
+let colorCursor = 0;
+function nextColor(){ const c = PALETTE_COLORS[colorCursor % PALETTE_COLORS.length]; colorCursor++; return c; }
+function uid(){ return 'm' + Date.now().toString(36) + Math.floor(Math.random()*1000); }
+
+function todayISO(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function firstOfThisMonth(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+}
+function parseISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function toISO(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+
+const defaultTeam = ['Harris','Nico','Lukman','Taufik','Adhe'].map(name => ({id: uid(), name, color: nextColor()}));
+
+let state = {
+  team: defaultTeam,
+  rotation: {
+    order: defaultTeam.map(m => m.id),
+    cycleDays: 7,
+    startDate: firstOfThisMonth(),
+    startPersonId: defaultTeam[0].id
+  },
+  overrides: {} // { 'YYYY-MM-DD': personId }  -> manual pin, wins over auto rotation
+};
+let currentMonth = firstOfThisMonth(); // 'YYYY-MM-01'
+let dirty = false;
+let openPopover = null;
+
+function markDirty(){ dirty = true; renderSaveStatus(); }
+function renderSaveStatus(){
+  const el = document.getElementById('saveStatus');
+  if(dirty){ el.textContent = '⚠️ Ada perubahan belum di-export'; el.className = 'save-status dirty'; }
+  else { el.textContent = '✅ Tersimpan (sudah di-export)'; el.className = 'save-status clean'; }
+}
+
+function showToast(message, type){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' toast-' + type : '');
+  el.textContent = message;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2600);
+}
+
+window.addEventListener('beforeunload', (e) => {
+  if(dirty){ e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ==================== ROTATION ENGINE ==================== */
+function memberById(id){ return state.team.find(m => m.id === id); }
+
+function autoAssignFor(dateISO){
+  const cfg = state.rotation;
+  if(!cfg.order.length) return null;
+  const start = parseISO(cfg.startDate);
+  const d = parseISO(dateISO);
+  if(d < start) return null;
+  const diffDays = Math.round((d - start) / 86400000);
+  const cycleIndex = Math.floor(diffDays / cfg.cycleDays);
+  const startIdx = Math.max(0, cfg.order.indexOf(cfg.startPersonId));
+  const idx = ((startIdx + cycleIndex) % cfg.order.length + cfg.order.length) % cfg.order.length;
+  return cfg.order[idx];
+}
+
+function assignedFor(dateISO){
+  if(state.overrides[dateISO]) return { personId: state.overrides[dateISO], locked: true };
+  const auto = autoAssignFor(dateISO);
+  return auto ? { personId: auto, locked: false } : null;
+}
+
+function setOverride(dateISO, personId){
+  state.overrides[dateISO] = personId;
+  markDirty();
+}
+function clearOverride(dateISO){
+  delete state.overrides[dateISO];
+  markDirty();
+}
+function swapCells(dateA, dateB){
+  const a = assignedFor(dateA);
+  const b = assignedFor(dateB);
+  if(a) setOverride(dateB, a.personId); else clearOverride(dateB);
+  if(b) setOverride(dateA, b.personId); else clearOverride(dateA);
+}
+
+/* ==================== TABS ==================== */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.view).classList.add('active');
+    closePopover();
+  };
+});
+
+/* ==================== PALETTE (drag source) ==================== */
+function renderPalette(){
+  const el = document.getElementById('palette');
+  el.innerHTML = state.team.map(m => `
+    <div class="chip" style="background:${m.color}" draggable="true" data-member="${m.id}">
+      <span class="dot"></span>${m.name}
+    </div>
+  `).join('');
+  el.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', JSON.stringify({type:'palette', id: chip.dataset.member}));
+    });
+  });
+}
+
+/* ==================== CALENDAR ==================== */
+const WEEKDAYS = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+
+function renderMonthLabel(){
+  const d = parseISO(currentMonth);
+  const label = d.toLocaleDateString('id-ID', { month:'long', year:'numeric' });
+  document.getElementById('monthLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function renderWeekdayHeader(){
+  document.getElementById('calWeekdays').innerHTML = WEEKDAYS.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+}
+
+function renderCalendar(){
+  renderMonthLabel();
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const total = daysInMonth(y,m);
+  const firstDow = (new Date(y,m,1).getDay() + 6) % 7; // Monday=0
+  const cells = [];
+  for(let i=0;i<firstDow;i++) cells.push(null);
+  for(let day=1; day<=total; day++) cells.push(day);
+  while(cells.length % 7 !== 0) cells.push(null);
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = cells.map(day => {
+    if(day === null) return `<div class="cal-cell pad"></div>`;
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const a = assignedFor(iso);
+    const isToday = iso === todayISO();
+    let chipHtml = `<div class="cal-empty-hint">—</div>`;
+    if(a){
+      const person = memberById(a.personId);
+      if(person){
+        chipHtml = `<div class="cal-chip" style="background:${person.color}" draggable="true" data-date="${iso}">
+          ${a.locked ? '<span class="pin">📌</span>' : ''}<span>${person.name}</span>
+        </div>`;
+      }
+    }
+    return `<div class="cal-cell${isToday ? ' today' : ''}" data-date="${iso}">
+      <div class="cal-date">${day}</div>
+      <div class="cal-assign">${chipHtml}</div>
+    </div>`;
+  }).join('');
+
+  wireCalendarEvents();
+  renderSummary(cells.filter(x=>x!==null).map(day => `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`));
+}
+
+function wireCalendarEvents(){
+  document.querySelectorAll('.cal-cell[data-date]').forEach(cell => {
+    cell.addEventListener('dragover', e => { e.preventDefault(); cell.classList.add('dragover'); });
+    cell.addEventListener('dragleave', () => cell.classList.remove('dragover'));
+    cell.addEventListener('drop', e => {
+      e.preventDefault();
+      cell.classList.remove('dragover');
+      let data;
+      try{ data = JSON.parse(e.dataTransfer.getData('text/plain')); }catch(err){ return; }
+      const targetDate = cell.dataset.date;
+      if(data.type === 'palette'){
+        setOverride(targetDate, data.id);
+        renderCalendar();
+        showToast('Jadwal diperbarui.', 'success');
+      } else if(data.type === 'swap' && data.date !== targetDate){
+        swapCells(data.date, targetDate);
+        renderCalendar();
+        showToast('Jadwal ditukar.', 'success');
+      }
+    });
+    cell.addEventListener('click', (e) => {
+      if(e.target.closest('.cal-chip') && e.target.closest('.cal-chip').dataset.date){
+        openCellPopover(cell.dataset.date, cell);
+      } else {
+        openCellPopover(cell.dataset.date, cell);
+      }
+    });
+  });
+  document.querySelectorAll('.cal-chip[data-date]').forEach(chip => {
+    chip.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      e.dataTransfer.setData('text/plain', JSON.stringify({type:'swap', date: chip.dataset.date}));
+    });
+  });
+}
+
+function openCellPopover(dateISO, anchorEl){
+  closePopover();
+  const rect = anchorEl.getBoundingClientRect();
+  const pop = document.createElement('div');
+  pop.className = 'popover';
+  const dLabel = parseISO(dateISO).toLocaleDateString('id-ID', {weekday:'short', day:'numeric', month:'short'});
+  pop.innerHTML = `<div class="p-title">Assign — ${dLabel}</div>` +
+    state.team.map(m => `<div class="p-opt" data-id="${m.id}"><span class="dot" style="background:${m.color}"></span>${m.name}</div>`).join('') +
+    `<div class="p-opt p-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
+  document.body.appendChild(pop);
+  const top = Math.min(rect.bottom + 6, window.innerHeight - pop.offsetHeight - 10);
+  const left = Math.min(rect.left, window.innerWidth - 190);
+  pop.style.top = top + 'px';
+  pop.style.left = Math.max(8,left) + 'px';
+  pop.querySelectorAll('.p-opt').forEach(opt => {
+    opt.onclick = (ev) => {
+      ev.stopPropagation();
+      if(opt.dataset.clear){ clearOverride(dateISO); showToast('Dikembalikan ke rotasi otomatis.', 'success'); }
+      else { setOverride(dateISO, opt.dataset.id); showToast('Jadwal diperbarui.', 'success'); }
+      renderCalendar();
+      closePopover();
+    };
+  });
+  openPopover = pop;
+  setTimeout(() => document.addEventListener('click', outsidePopoverClick), 0);
+}
+function outsidePopoverClick(e){
+  if(openPopover && !openPopover.contains(e.target)){ closePopover(); }
+}
+function closePopover(){
+  if(openPopover){ openPopover.remove(); openPopover = null; document.removeEventListener('click', outsidePopoverClick); }
+}
+
+function renderSummary(monthDates){
+  const counts = {};
+  state.team.forEach(m => counts[m.id] = 0);
+  monthDates.forEach(iso => {
+    const a = assignedFor(iso);
+    if(a && counts[a.personId] !== undefined) counts[a.personId]++;
+  });
+  const el = document.getElementById('summaryCards');
+  el.innerHTML = state.team.map(m => `
+    <div class="s-card" style="background:${m.color}">
+      <div class="num">${counts[m.id]}</div>
+      <div class="lab">${m.name} — hari jaga</div>
+    </div>
+  `).join('');
+}
+
+/* ==================== MONTH NAV ==================== */
+document.getElementById('prevMonth').onclick = () => { shiftMonth(-1); };
+document.getElementById('nextMonth').onclick = () => { shiftMonth(1); };
+document.getElementById('todayBtn').onclick = () => { currentMonth = firstOfThisMonth(); renderCalendar(); };
+document.getElementById('printBtn').onclick = () => window.print();
+function shiftMonth(delta){
+  const d = parseISO(currentMonth);
+  d.setMonth(d.getMonth() + delta);
+  currentMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+  renderCalendar();
+}
+
+document.getElementById('unlockMonthBtn').onclick = () => {
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const total = daysInMonth(y,m);
+  let count = 0;
+  for(let day=1; day<=total; day++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    if(state.overrides[iso]){ delete state.overrides[iso]; count++; }
+  }
+  if(count){ markDirty(); renderCalendar(); showToast(`${count} tanggal dikembalikan ke rotasi otomatis.`, 'success'); }
+  else { showToast('Tidak ada override manual di bulan ini.', 'error'); }
+};
+
+/* ==================== ROTASI TAB ==================== */
+function renderOrderList(){
+  const el = document.getElementById('orderList');
+  el.innerHTML = state.rotation.order.map((id, idx) => {
+    const m = memberById(id);
+    if(!m) return '';
+    return `<div class="order-item" data-id="${id}">
+      <span class="dot" style="background:${m.color}"></span>
+      <span class="name">${idx+1}. ${m.name}</span>
+      <button class="mv" data-act="up" ${idx===0?'disabled':''}>▲</button>
+      <button class="mv" data-act="down" ${idx===state.rotation.order.length-1?'disabled':''}>▼</button>
+      <button class="mv" data-act="del" title="Hapus dari tim">✕</button>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.mv').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.closest('.order-item').dataset.id;
+      const idx = state.rotation.order.indexOf(id);
+      if(btn.dataset.act === 'up' && idx > 0){
+        [state.rotation.order[idx-1], state.rotation.order[idx]] = [state.rotation.order[idx], state.rotation.order[idx-1]];
+      } else if(btn.dataset.act === 'down' && idx < state.rotation.order.length-1){
+        [state.rotation.order[idx+1], state.rotation.order[idx]] = [state.rotation.order[idx], state.rotation.order[idx+1]];
+      } else if(btn.dataset.act === 'del'){
+        if(state.team.length <= 1){ showToast('Minimal harus ada 1 anggota.', 'error'); return; }
+        if(!confirm('Hapus anggota ini dari tim? Override manual yang memakai nama ini di kalender akan tetap tersimpan tapi tidak akan tampil.')) return;
+        state.team = state.team.filter(m => m.id !== id);
+        state.rotation.order = state.rotation.order.filter(x => x !== id);
+        if(state.rotation.startPersonId === id) state.rotation.startPersonId = state.rotation.order[0];
+      }
+      markDirty();
+      renderAll();
+    };
+  });
+}
+
+document.getElementById('addMemberBtn').onclick = () => {
+  const input = document.getElementById('newMemberName');
+  const name = input.value.trim();
+  if(!name){ showToast('Nama tidak boleh kosong.', 'error'); return; }
+  const m = { id: uid(), name, color: nextColor() };
+  state.team.push(m);
+  state.rotation.order.push(m.id);
+  input.value = '';
+  markDirty();
+  renderAll();
+  showToast(`${name} ditambahkan ke tim.`, 'success');
+};
+document.getElementById('newMemberName').addEventListener('keydown', e => {
+  if(e.key === 'Enter') document.getElementById('addMemberBtn').click();
+});
+
+function renderRotationConfig(){
+  document.getElementById('cycleSelect').value = String(state.rotation.cycleDays);
+  document.getElementById('startDateInput').value = state.rotation.startDate;
+  const sel = document.getElementById('startPersonSelect');
+  sel.innerHTML = state.team.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  sel.value = state.rotation.startPersonId;
+}
+document.getElementById('cycleSelect').onchange = (e) => { state.rotation.cycleDays = Number(e.target.value); markDirty(); renderCalendar(); };
+document.getElementById('startDateInput').onchange = (e) => { state.rotation.startDate = e.target.value; markDirty(); renderCalendar(); };
+document.getElementById('startPersonSelect').onchange = (e) => { state.rotation.startPersonId = e.target.value; markDirty(); renderCalendar(); };
+
+/* ==================== EXPORT / IMPORT ==================== */
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('exportJsonBtn').onclick = () => {
+  const payload = JSON.stringify(state, null, 2);
+  downloadBlob(payload, `roster-digitech-${todayISO()}.json`, 'application/json');
+  dirty = false; renderSaveStatus();
+  showToast('Data berhasil di-export (JSON).', 'success');
+};
+document.getElementById('quickExportBtn').onclick = () => document.getElementById('exportJsonBtn').click();
+
+document.getElementById('exportCsvBtn').onclick = () => {
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const total = daysInMonth(y,m);
+  let rows = [['Tanggal','Hari','Petugas Standby','Status']];
+  for(let day=1; day<=total; day++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const a = assignedFor(iso);
+    const person = a ? memberById(a.personId) : null;
+    const dayName = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long'});
+    rows.push([iso, dayName, person ? person.name : '-', a && a.locked ? 'Manual' : 'Otomatis']);
+  }
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadBlob(csv, `roster-digitech-${currentMonth}.csv`, 'text/csv');
+  showToast('CSV berhasil di-export.', 'success');
+};
+
+document.getElementById('importJsonBtn').onclick = () => document.getElementById('importJsonFile').click();
+document.getElementById('importJsonFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!parsed.team || !parsed.rotation) throw new Error('Format tidak dikenali');
+      state = parsed;
+      dirty = false;
+      renderAll();
+      renderSaveStatus();
+      showToast('Data berhasil di-import.', 'success');
+    }catch(err){
+      showToast('Gagal import: file tidak valid.', 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ==================== INIT ==================== */
+function renderAll(){
+  renderPalette();
+  renderWeekdayHeader();
+  renderCalendar();
+  renderOrderList();
+  renderRotationConfig();
+}
+renderAll();
+</script>
+</body>
+</html>
