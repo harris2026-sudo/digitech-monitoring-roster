@@ -23,14 +23,18 @@
   header p{margin:0;font-size:12px;opacity:.85;}
   .mode-badge{display:inline-block;margin-top:8px;font-size:10.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;}
 
-  .tabs{display:flex;gap:6px;margin-bottom:14px;}
-  .tab{flex:1;text-align:center;padding:10px;border-radius:8px;background:#fff;color:var(--navy);font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:2px solid transparent;}
+  .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{flex:1;min-width:110px;text-align:center;padding:10px 8px;border-radius:8px;background:#fff;color:var(--navy);font-weight:bold;font-size:12.5px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:2px solid transparent;}
   .tab.active{background:var(--navy);color:#fff;}
+  .tab.tab-alert{color:var(--red-fg);}
+  .tab.tab-alert.active{background:var(--red-fg);color:#fff;}
   .view{display:none;}
   .view.active{display:block;}
 
   .card-box{background:#fff;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
   .card-box h3{margin:0 0 10px;font-size:13.5px;color:var(--navy);}
+
+  .division-banner{color:#fff;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:14px;margin-bottom:12px;}
 
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px;}
   .controls label{font-size:11px;font-weight:bold;color:var(--navy);display:block;margin-bottom:3px;}
@@ -43,7 +47,7 @@
   .btn-danger{background:var(--red-bg);color:var(--red-fg);}
   .btn-sm{padding:5px 10px;font-size:11px;}
 
-  .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
   .month-nav .btn{padding:7px 11px;}
   .month-nav .label{font-weight:bold;color:var(--navy);font-size:15px;min-width:150px;text-align:center;}
 
@@ -53,28 +57,77 @@
   .chip .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.7);}
   .palette-hint{font-size:11px;color:#667;margin:-6px 0 12px;}
 
+  .onduty-panel{margin-bottom:12px;}
+  .today-card{background:linear-gradient(135deg,var(--navy),var(--accent));color:#fff;border-radius:10px;padding:12px 14px;transition:background .2s ease;}
+  .today-card.today-card-alert{background:linear-gradient(135deg,#7a1f1f,var(--red-fg));}
+  .today-label{font-size:10.5px;opacity:.85;margin-bottom:6px;font-weight:bold;}
+  .today-main{display:flex;align-items:center;gap:8px;}
+  .today-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px rgba(255,255,255,.4);}
+  .today-name{font-size:16px;font-weight:bold;flex:1;}
+  .today-tag{font-size:10px;background:rgba(255,255,255,.2);padding:3px 8px;border-radius:10px;font-weight:bold;white-space:nowrap;}
+  .today-leave{margin-top:8px;font-size:11.5px;opacity:.9;}
+  .today-warn{margin-top:8px;font-size:11.5px;background:rgba(255,255,255,.18);padding:6px 8px;border-radius:6px;font-weight:bold;}
+
+  .overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;}
+  .overview-card{cursor:pointer;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:transform .15s ease,box-shadow .15s ease;}
+  .overview-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,.15);}
+  .overview-card-header{padding:10px 14px;color:#fff;font-weight:bold;font-size:13px;}
+  .overview-card-body{background:#fff;padding:14px;}
+  .onduty-sub{font-size:11px;color:#889;margin-bottom:4px;}
+  .onduty-name-lg{font-size:18px;font-weight:bold;line-height:1.3;}
+  .onduty-badge{display:inline-block;background:var(--green-bg);color:var(--green);font-size:10px;font-weight:bold;padding:3px 9px;border-radius:10px;margin-top:8px;letter-spacing:.3px;}
+  .onduty-badge.alert{background:var(--red-bg);color:var(--red-fg);}
+
+  .conflict-banner{display:none;background:var(--red-bg);color:var(--red-fg);border-radius:8px;padding:10px 12px;font-size:12px;font-weight:bold;margin-top:12px;line-height:1.5;}
+  .filter-status{display:none;align-items:center;justify-content:space-between;gap:10px;background:var(--hilite);color:var(--navy);padding:8px 12px;border-radius:8px;font-size:12px;font-weight:bold;margin-bottom:10px;flex-wrap:wrap;}
+
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
   .cal-weekday{text-align:center;font-size:11px;font-weight:bold;color:var(--navy);padding:4px 0;}
   .cal-cell{background:#fff;border-radius:8px;min-height:76px;padding:6px;box-shadow:0 1px 2px rgba(0,0,0,.08);border:2px solid transparent;cursor:pointer;position:relative;}
   .cal-cell.pad{background:transparent;box-shadow:none;cursor:default;}
   .cal-cell.dragover{border-color:var(--accent);background:var(--hilite);}
   .cal-cell.today{border-color:var(--navy);}
+  .cal-cell.conflict{border-color:var(--red-fg);background:var(--red-bg);}
+  .cal-cell.dimmed{opacity:.22;}
+  .cal-cell.highlight{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;}
   .cal-date{font-size:11px;color:#889;font-weight:bold;}
   .cal-cell.today .cal-date{color:var(--navy);}
+  .cal-cell.conflict .cal-date{color:var(--red-fg);}
   .cal-assign{margin-top:6px;}
   .cal-chip{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:6px;color:#fff;font-size:10.5px;font-weight:bold;cursor:grab;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .cal-chip .pin{font-size:9px;opacity:.85;}
   .cal-empty-hint{font-size:10px;color:#bbb;text-align:center;margin-top:14px;}
+  .conflict-badge{position:absolute;top:4px;right:4px;font-size:11px;}
+  .cal-leave-tags{margin-top:4px;font-size:9px;color:var(--red-fg);font-weight:bold;line-height:1.3;}
 
-  .popover{position:fixed;background:#fff;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:8px;z-index:999;min-width:170px;}
-  .popover .p-title{font-size:10.5px;font-weight:bold;color:#889;padding:4px 6px 6px;}
-  .popover .p-opt{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:bold;}
-  .popover .p-opt:hover{background:var(--zebra);}
-  .popover .p-opt .dot{width:10px;height:10px;border-radius:50%;}
-  .popover .p-clear{color:var(--red-fg);border-top:1px solid #eee;margin-top:4px;padding-top:8px;}
+  .detail-backdrop{position:fixed;inset:0;background:rgba(15,25,45,.4);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:998;}
+  .detail-backdrop.show{opacity:1;pointer-events:auto;}
+  .detail-panel{position:fixed;top:0;right:0;height:100%;width:330px;max-width:92vw;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.22);z-index:999;transform:translateX(100%);transition:transform .28s ease;display:flex;flex-direction:column;}
+  .detail-panel.show{transform:translateX(0);}
+  .detail-header{background:var(--navy);color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  .detail-date{font-weight:bold;font-size:13.5px;line-height:1.3;}
+  .detail-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0;}
+  .detail-close:hover{background:rgba(255,255,255,.28);}
+  .detail-body{padding:14px;overflow-y:auto;flex:1;}
+  .detail-section-title{font-size:10.5px;font-weight:bold;color:#889;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.4px;}
+  .detail-section-title:first-child{margin-top:0;}
+  .detail-opt{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold;margin-bottom:6px;border:2px solid transparent;}
+  .detail-opt:hover{background:var(--zebra);}
+  .detail-opt.selected{border-color:var(--accent);background:var(--hilite);}
+  .detail-opt .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .detail-clear{color:var(--red-fg);}
+  .detail-crit-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;background:var(--zebra);margin-bottom:6px;font-size:12.5px;font-weight:bold;cursor:pointer;}
+  .detail-crit-row input{width:16px;height:16px;flex-shrink:0;}
+  .detail-conflict-note{background:var(--red-bg);color:var(--red-fg);border-radius:8px;padding:10px;font-size:11.5px;font-weight:bold;margin-top:12px;line-height:1.5;}
+  @media (max-width:640px){
+    .detail-panel{width:100%;max-width:100%;top:auto;bottom:0;height:auto;max-height:85vh;border-radius:16px 16px 0 0;transform:translateY(100%);}
+    .detail-panel.show{transform:translateY(0);}
+  }
 
   .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:14px;}
-  .summary .s-card{border-radius:8px;padding:9px 10px;color:#fff;}
+  .summary .s-card{border-radius:8px;padding:9px 10px;color:#fff;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;border:3px solid transparent;}
+  .summary .s-card:hover{transform:translateY(-2px);}
+  .summary .s-card.s-card-active{border-color:var(--navy);box-shadow:0 3px 8px rgba(0,0,0,.25);}
   .summary .s-card .num{font-size:18px;font-weight:bold;}
   .summary .s-card .lab{font-size:10.5px;opacity:.9;}
 
@@ -82,15 +135,16 @@
   .order-item{display:flex;align-items:center;gap:8px;background:var(--zebra);border-radius:8px;padding:7px 10px;}
   .order-item .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
   .order-item .name{flex:1;font-size:12.5px;font-weight:bold;color:#333;}
-  .order-item .mv{border:none;background:#fff;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.1);}
+  .order-item .mv{border:none;background:#fff;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.1);flex-shrink:0;}
 
   .team-add-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
   .team-add-form input[type=text]{flex:1;min-width:140px;}
 
-  .save-bar{position:sticky;bottom:0;background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 -2px 8px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:8px;}
+  .save-bar{position:sticky;bottom:0;background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 -2px 8px rgba(0,0,0,.08);display:flex;justify-content:center;align-items:center;margin-top:6px;}
   .save-status{font-size:11.5px;color:#667;font-weight:bold;}
-  .save-status.dirty{color:var(--red-fg);}
+  .save-status.dirty{color:#C99A2E;}
   .save-status.clean{color:var(--green);}
+  .save-status.error{color:var(--red-fg);}
 
   footer{text-align:center;font-size:10.5px;color:var(--accent);font-style:italic;margin-top:16px;}
 
@@ -115,114 +169,94 @@
 </head>
 <body>
 <div id="toastWrap"></div>
+<div class="detail-backdrop" id="detailBackdrop"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div class="detail-date" id="detailDate"></div>
+    <button class="detail-close" id="detailClose">✕</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
 <div class="app">
   <header>
     <h1>📅 Roster On-Call / Standby — Digitech Monitoring Team</h1>
     <p>Site Reliability Engineer · Digital Sustainability Operation · PT Borneo Indobara</p>
-    <span class="mode-badge" id="modeBadge">📂 Mode: File-based (Export / Import JSON) — tidak memakai localStorage</span>
+    <span class="mode-badge" id="modeBadge">☁️ Mode: Auto-save (window.storage) — memuat...</span>
   </header>
 
-  <div class="tabs">
-    <div class="tab active" data-view="roster">🗓️ Roster</div>
-    <div class="tab" data-view="rotasi">🔁 Rotasi Otomatis</div>
-    <div class="tab" data-view="data">💾 Data</div>
-  </div>
+  <div class="tabs" id="tabsBar"></div>
 
-  <!-- ===================== VIEW: ROSTER ===================== -->
-  <div class="view active" id="view-roster">
+  <!-- ===================== VIEW: OVERVIEW ===================== -->
+  <div class="view active" id="view-overview">
     <div class="card-box">
-      <div class="month-nav">
-        <button class="btn btn-ghost" id="prevMonth">◀</button>
-        <div class="label" id="monthLabel"></div>
-        <button class="btn btn-ghost" id="nextMonth">▶</button>
-        <button class="btn btn-ghost btn-sm" id="todayBtn" style="margin-left:auto;">Bulan ini</button>
-        <button class="btn btn-ghost btn-sm" id="printBtn">🖨️ Cetak</button>
-      </div>
-
-      <div class="palette" id="palette"></div>
-      <div class="palette-hint">Seret (drag) chip anggota ke tanggal untuk assign · atau klik/tap tanggal untuk pilih cepat · seret chip di kalender antar tanggal untuk tukar jadwal.</div>
-
-      <div class="cal-grid" id="calWeekdays"></div>
-      <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
-
-      <div class="summary" id="summaryCards"></div>
-    </div>
-
-    <div class="save-bar">
-      <span class="save-status clean" id="saveStatus">✅ Tersimpan (sudah di-export)</span>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost btn-sm" id="unlockMonthBtn">🔓 Kembalikan semua ke rotasi otomatis (bulan ini)</button>
-        <button class="btn btn-primary btn-sm" id="quickExportBtn">💾 Export sekarang</button>
-      </div>
+      <h3>🏠 Ringkasan ONDUTY Hari Ini</h3>
+      <p style="font-size:12px;color:#556;">Klik salah satu kartu untuk membuka jadwal lengkap divisi tersebut.</p>
+      <div class="overview-grid" id="overviewGrid"></div>
+      <div class="conflict-banner" id="conflictBannerOverview"></div>
     </div>
   </div>
 
-  <!-- ===================== VIEW: ROTASI ===================== -->
-  <div class="view" id="view-rotasi">
-    <div class="card-box">
-      <h3>👥 Anggota Tim</h3>
-      <div class="order-list" id="orderList"></div>
-      <div class="team-add-form">
-        <input type="text" id="newMemberName" placeholder="Nama anggota baru...">
-        <button class="btn btn-primary btn-sm" id="addMemberBtn">+ Tambah</button>
-      </div>
-    </div>
+  <!-- ===================== VIEW: DIVISI (di-generate JS) ===================== -->
+  <div id="divisionViewsMount"></div>
 
+  <!-- ===================== VIEW: KONFLIK ===================== -->
+  <div class="view" id="view-konflik">
     <div class="card-box">
-      <h3>⚙️ Pola Rotasi Otomatis</h3>
-      <div class="controls">
-        <div>
-          <label>Siklus pergantian</label>
-          <select id="cycleSelect">
-            <option value="1">Setiap 1 hari</option>
-            <option value="2">Setiap 2 hari</option>
-            <option value="3">Setiap 3 hari</option>
-            <option value="7">Mingguan (7 hari)</option>
-            <option value="14">Dua mingguan (14 hari)</option>
-          </select>
-        </div>
-        <div>
-          <label>Tanggal mulai rotasi</label>
-          <input type="date" id="startDateInput">
-        </div>
-        <div>
-          <label>Mulai dengan</label>
-          <select id="startPersonSelect"></select>
-        </div>
-      </div>
-      <div style="font-size:11.5px;color:#667;margin-top:4px;">
-        Perubahan di atas langsung berlaku ke seluruh kalender secara otomatis — kecuali tanggal yang sudah kamu pin manual (📌) di tab Roster.
-      </div>
+      <h3>⚠️ Deteksi Konflik Cuti Bersamaan</h3>
+      <p style="font-size:12px;color:#556;">
+        Sistem otomatis menandai <b>konflik</b> jika ketiga nama berikut tercatat cuti pada tanggal yang sama (lintas divisi):
+        <b id="critNamesLabel">Harris, Sony Salubongga, Nyco</b> — memastikan minimal 1 dari mereka tetap standby.
+        Tandai status cuti lewat panel detail tanggal di masing-masing tab divisi.
+      </p>
+      <div id="conflictList"></div>
     </div>
   </div>
 
   <!-- ===================== VIEW: DATA ===================== -->
   <div class="view" id="view-data">
     <div class="card-box">
-      <h3>💾 Export Data</h3>
-      <p style="font-size:12px;color:#556;">Aplikasi ini <b>tidak</b> memakai localStorage / window.storage — semua data hanya tersimpan selama tab browser terbuka. Export ke file secara berkala agar tidak hilang, lalu import kembali saat membuka ulang.</p>
+      <h3>☁️ Penyimpanan Otomatis</h3>
+      <p style="font-size:12px;color:#556;">Aplikasi ini menyimpan seluruh data (tim, rotasi per divisi, override, tanda cuti) secara <b>otomatis</b> ke penyimpanan server (<code>window.storage</code>) setiap ada perubahan — tidak perlu export/import manual, dan data tetap ada walau tab browser ditutup atau dibuka ulang. Tombol di bawah hanya untuk backup opsional.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="exportJsonBtn">⬇️ Export JSON (lengkap + setting rotasi)</button>
-        <button class="btn btn-ghost" id="exportCsvBtn">⬇️ Export CSV (untuk Excel)</button>
+        <button class="btn btn-primary" id="exportJsonBtn">⬇️ Backup JSON (lengkap + setting rotasi)</button>
+        <button class="btn btn-ghost" id="exportCsvBtn">⬇️ Export CSV (untuk Excel, semua divisi)</button>
       </div>
     </div>
     <div class="card-box">
-      <h3>📂 Import Data</h3>
-      <p style="font-size:12px;color:#556;">Pilih file JSON hasil export sebelumnya untuk memuat kembali data roster, anggota tim, dan konfigurasi rotasi.</p>
+      <h3>📂 Restore dari Backup</h3>
+      <p style="font-size:12px;color:#556;">Pilih file JSON hasil backup sebelumnya untuk memuat ulang data — hasil restore ini juga akan langsung disimpan otomatis.</p>
       <button class="btn btn-ghost" id="importJsonBtn">📂 Pilih File JSON...</button>
       <input type="file" id="importJsonFile" accept="application/json">
     </div>
+  </div>
+
+  <div class="save-bar">
+    <span class="save-status clean" id="saveStatus">☁️ Memuat...</span>
   </div>
 
   <footer>Maintain. Monitor. Improve. — Digitech Monitoring Team</footer>
 </div>
 
 <script>
-/* ==================== STATE (in-memory only, no localStorage / window.storage) ==================== */
+/* ==================== KONFIGURASI DIVISI ==================== */
+const DIVISIONS_CONFIG = [
+  { id:'maint', name:'Maintenance & Support', icon:'🔧', color:'#2E5FA3',
+    memberNames:['Harris','Nyco','Taufik','Adhe Setiawan','Lukman Gunawan'] },
+  { id:'proj', name:'Project & Acceleration', icon:'🚀', color:'#1E8E7E',
+    memberNames:['Sony Salubongga','Abdillah','Ishaq Arifin'] },
+  { id:'dev', name:'Development', icon:'💻', color:'#C99A2E',
+    memberNames:['Dani Suryanda','Raka'] }
+];
+// Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
+const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
+const STORAGE_KEY = 'roster:state';
+
+/* ==================== STATE (persisted via window.storage) ==================== */
 const PALETTE_COLORS = ['#2E5FA3','#1E8E7E','#E07A3F','#7A5FBF','#C2547A','#3F9142','#C99A2E','#C0392B','#566573','#0E7C86'];
 let colorCursor = 0;
 function nextColor(){ const c = PALETTE_COLORS[colorCursor % PALETTE_COLORS.length]; colorCursor++; return c; }
 function uid(){ return 'm' + Date.now().toString(36) + Math.floor(Math.random()*1000); }
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
 function todayISO(){
   const d = new Date();
@@ -233,32 +267,122 @@ function firstOfThisMonth(){
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
 }
 function parseISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
-function toISO(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+const WEEKDAYS = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
 
-const defaultTeam = ['Harris','Nico','Lukman','Taufik','Adhe'].map(name => ({id: uid(), name, color: nextColor()}));
-
-let state = {
-  team: defaultTeam,
-  rotation: {
-    order: defaultTeam.map(m => m.id),
-    cycleDays: 7,
-    startDate: firstOfThisMonth(),
-    startPersonId: defaultTeam[0].id
-  },
-  overrides: {} // { 'YYYY-MM-DD': personId }  -> manual pin, wins over auto rotation
-};
-let currentMonth = firstOfThisMonth(); // 'YYYY-MM-01'
-let dirty = false;
-let openPopover = null;
-
-function markDirty(){ dirty = true; renderSaveStatus(); }
-function renderSaveStatus(){
-  const el = document.getElementById('saveStatus');
-  if(dirty){ el.textContent = '⚠️ Ada perubahan belum di-export'; el.className = 'save-status dirty'; }
-  else { el.textContent = '✅ Tersimpan (sudah di-export)'; el.className = 'save-status clean'; }
+function buildDefaultState(){
+  colorCursor = 0;
+  const team = [];
+  const divisions = DIVISIONS_CONFIG.map(dc => {
+    const memberIds = dc.memberNames.map(name => {
+      const m = { id: uid(), name, color: nextColor(), divisionId: dc.id };
+      team.push(m);
+      return m.id;
+    });
+    return {
+      id: dc.id,
+      rotation: { order: memberIds.slice(), cycleDays: 7, startDate: firstOfThisMonth(), startPersonId: memberIds[0] },
+      overrides: {}
+    };
+  });
+  return {
+    team,
+    divisions,
+    criticalLeave: {},
+    criticalTeamIds: team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id)
+  };
 }
 
+// Migrasi dari state versi lama (single rotation, tanpa divisi)
+function migrateOldState(old){
+  const nameToDivision = {};
+  DIVISIONS_CONFIG.forEach(dc => dc.memberNames.forEach(n => nameToDivision[n] = dc.id));
+  old.team.forEach(m => {
+    if(!m.divisionId) m.divisionId = nameToDivision[m.name] || DIVISIONS_CONFIG[0].id;
+  });
+  const oldRot = old.rotation || {};
+  const oldOverrides = old.overrides || {};
+  old.divisions = DIVISIONS_CONFIG.map(dc => {
+    const memberIds = old.team.filter(m => m.divisionId === dc.id).map(m => m.id);
+    return {
+      id: dc.id,
+      rotation: {
+        order: memberIds,
+        cycleDays: oldRot.cycleDays || 7,
+        startDate: oldRot.startDate || firstOfThisMonth(),
+        startPersonId: memberIds.includes(oldRot.startPersonId) ? oldRot.startPersonId : memberIds[0]
+      },
+      overrides: {}
+    };
+  });
+  Object.keys(oldOverrides).forEach(dateISO => {
+    const personId = oldOverrides[dateISO];
+    const person = old.team.find(m => m.id === personId);
+    if(person){
+      const div = old.divisions.find(d => d.id === person.divisionId);
+      if(div) div.overrides[dateISO] = personId;
+    }
+  });
+  delete old.rotation;
+  delete old.overrides;
+  return old;
+}
+
+let state = null;
+let currentMonth = firstOfThisMonth();
+let dirty = false;
+let saveTimer = null;
+let filterPersonId = {};
+let activeTab = 'overview';
+let currentDetailDate = null;
+let currentDetailDiv = null;
+DIVISIONS_CONFIG.forEach(dc => { filterPersonId[dc.id] = null; });
+
+/* ==================== PERSISTENCE (window.storage) ==================== */
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      let parsed = JSON.parse(res.value);
+      if(parsed && parsed.team){
+        parsed.team.forEach(m => { if(m.name === 'Wawan') m.name = 'Lukman Gunawan'; });
+        if(!parsed.divisions) parsed = migrateOldState(parsed);
+        if(!parsed.criticalLeave) parsed.criticalLeave = {};
+        if(!parsed.criticalTeamIds) parsed.criticalTeamIds = parsed.team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id);
+        state = parsed;
+        colorCursor = state.team.length;
+        return;
+      }
+    }
+    state = buildDefaultState();
+  }catch(err){
+    state = buildDefaultState();
+  }
+}
+
+async function persistState(){
+  try{
+    const res = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+    if(!res) throw new Error('empty result');
+    dirty = false;
+    renderSaveStatus('clean');
+  }catch(err){
+    renderSaveStatus('error');
+    showToast('⚠️ Gagal menyimpan otomatis. Periksa koneksi lalu coba lagi.', 'error');
+  }
+}
+function markDirty(){
+  dirty = true;
+  renderSaveStatus('dirty');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persistState, 500);
+}
+function renderSaveStatus(mode){
+  const el = document.getElementById('saveStatus');
+  if(mode === 'dirty'){ el.textContent = '💾 Menyimpan...'; el.className = 'save-status dirty'; }
+  else if(mode === 'error'){ el.textContent = '⚠️ Gagal tersimpan — cek koneksi'; el.className = 'save-status error'; }
+  else { el.textContent = '☁️ Tersimpan otomatis'; el.className = 'save-status clean'; }
+}
 function showToast(message, type){
   const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
@@ -266,19 +390,20 @@ function showToast(message, type){
   el.textContent = message;
   wrap.appendChild(el);
   requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2600);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3200);
 }
+window.addEventListener('beforeunload', (e) => { if(dirty){ e.preventDefault(); e.returnValue = ''; } });
 
-window.addEventListener('beforeunload', (e) => {
-  if(dirty){ e.preventDefault(); e.returnValue = ''; }
-});
-
-/* ==================== ROTATION ENGINE ==================== */
+/* ==================== HELPERS ==================== */
 function memberById(id){ return state.team.find(m => m.id === id); }
+function divisionState(divId){ return state.divisions.find(d => d.id === divId); }
+function divisionConfig(divId){ return DIVISIONS_CONFIG.find(d => d.id === divId); }
 
-function autoAssignFor(dateISO){
-  const cfg = state.rotation;
-  if(!cfg.order.length) return null;
+/* ==================== ROTATION ENGINE (per divisi) ==================== */
+function autoAssignFor(divId, dateISO){
+  const div = divisionState(divId);
+  if(!div || !div.rotation.order.length) return null;
+  const cfg = div.rotation;
   const start = parseISO(cfg.startDate);
   const d = parseISO(dateISO);
   if(d < start) return null;
@@ -288,84 +413,285 @@ function autoAssignFor(dateISO){
   const idx = ((startIdx + cycleIndex) % cfg.order.length + cfg.order.length) % cfg.order.length;
   return cfg.order[idx];
 }
-
-function assignedFor(dateISO){
-  if(state.overrides[dateISO]) return { personId: state.overrides[dateISO], locked: true };
-  const auto = autoAssignFor(dateISO);
+function assignedFor(divId, dateISO){
+  const div = divisionState(divId);
+  if(div.overrides[dateISO]) return { personId: div.overrides[dateISO], locked: true };
+  const auto = autoAssignFor(divId, dateISO);
   return auto ? { personId: auto, locked: false } : null;
 }
+function setOverride(divId, dateISO, personId){ divisionState(divId).overrides[dateISO] = personId; markDirty(); }
+function clearOverride(divId, dateISO){ delete divisionState(divId).overrides[dateISO]; markDirty(); }
+function swapCells(divId, dateA, dateB){
+  const a = assignedFor(divId, dateA);
+  const b = assignedFor(divId, dateB);
+  if(a) setOverride(divId, dateB, a.personId); else clearOverride(divId, dateB);
+  if(b) setOverride(divId, dateA, b.personId); else clearOverride(divId, dateA);
+}
 
-function setOverride(dateISO, personId){
-  state.overrides[dateISO] = personId;
+/* ==================== KONFLIK (lintas divisi) ==================== */
+function toggleCriticalLeave(dateISO, personId){
+  const arr = state.criticalLeave[dateISO] ? state.criticalLeave[dateISO].slice() : [];
+  const idx = arr.indexOf(personId);
+  if(idx >= 0) arr.splice(idx, 1); else arr.push(personId);
+  if(arr.length) state.criticalLeave[dateISO] = arr; else delete state.criticalLeave[dateISO];
   markDirty();
 }
-function clearOverride(dateISO){
-  delete state.overrides[dateISO];
-  markDirty();
+function isConflictDate(dateISO){
+  const arr = state.criticalLeave[dateISO] || [];
+  return state.criticalTeamIds.length > 0 && state.criticalTeamIds.every(id => arr.includes(id));
 }
-function swapCells(dateA, dateB){
-  const a = assignedFor(dateA);
-  const b = assignedFor(dateB);
-  if(a) setOverride(dateB, a.personId); else clearOverride(dateB);
-  if(b) setOverride(dateA, b.personId); else clearOverride(dateA);
+function conflictDatesInMonth(y, m){
+  const total = daysInMonth(y, m);
+  const list = [];
+  for(let day = 1; day <= total; day++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    if(isConflictDate(iso)) list.push(iso);
+  }
+  return list;
+}
+function criticalTrioLabel(){
+  return state.criticalTeamIds.map(id => memberById(id)).filter(Boolean).map(m => m.name).join(', ');
 }
 
 /* ==================== TABS ==================== */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('view-' + tab.dataset.view).classList.add('active');
-    closePopover();
-  };
-});
-
-/* ==================== PALETTE (drag source) ==================== */
-function renderPalette(){
-  const el = document.getElementById('palette');
-  el.innerHTML = state.team.map(m => `
-    <div class="chip" style="background:${m.color}" draggable="true" data-member="${m.id}">
-      <span class="dot"></span>${m.name}
-    </div>
-  `).join('');
-  el.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', JSON.stringify({type:'palette', id: chip.dataset.member}));
-    });
+function renderTabsBar(){
+  const bar = document.getElementById('tabsBar');
+  let html = `<div class="tab${activeTab === 'overview' ? ' active' : ''}" data-view="overview">🏠 Overview</div>`;
+  DIVISIONS_CONFIG.forEach(dc => {
+    html += `<div class="tab${activeTab === dc.id ? ' active' : ''}" data-view="${dc.id}">${dc.icon} ${dc.name}</div>`;
   });
+  html += `<div class="tab tab-alert${activeTab === 'konflik' ? ' active' : ''}" data-view="konflik">⚠️ Konflik</div>`;
+  html += `<div class="tab${activeTab === 'data' ? ' active' : ''}" data-view="data">💾 Data</div>`;
+  bar.innerHTML = html;
+  bar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
+}
+function switchTab(view){
+  activeTab = view;
+  renderTabsBar();
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + view);
+  if(el) el.classList.add('active');
+  closeDetailPanel();
+  if(view === 'konflik') renderConflictList();
 }
 
-/* ==================== CALENDAR ==================== */
-const WEEKDAYS = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+/* ==================== BUILD DIVISION VIEW SHELL ==================== */
+function buildDivisionViewShell(dc){
+  return `
+  <div class="view" id="view-${dc.id}">
+    <div class="card-box">
+      <div class="division-banner" style="background:${dc.color}">${dc.icon} ${dc.name}</div>
+      <div class="onduty-panel" id="onduty-${dc.id}"></div>
+      <div class="month-nav">
+        <button class="btn btn-ghost" data-act="prev" data-div="${dc.id}">◀</button>
+        <div class="label" id="monthLabel-${dc.id}"></div>
+        <button class="btn btn-ghost" data-act="next" data-div="${dc.id}">▶</button>
+        <button class="btn btn-ghost btn-sm" data-act="today" data-div="${dc.id}" style="margin-left:auto;">Bulan ini</button>
+        <button class="btn btn-ghost btn-sm" data-act="unlock" data-div="${dc.id}">🔓 Reset bulan ini</button>
+      </div>
+      <div class="palette" id="palette-${dc.id}"></div>
+      <div class="palette-hint">Seret chip ke tanggal untuk assign standby · klik tanggal untuk buka detail &amp; tandai cuti tim kritikal · seret chip di kalender antar tanggal untuk tukar jadwal · klik kartu nama di ringkasan untuk highlight jadwalnya.</div>
+      <div class="filter-status" id="filterStatus-${dc.id}"></div>
+      <div class="cal-grid" id="calWeekdays-${dc.id}"></div>
+      <div class="cal-grid" id="calGrid-${dc.id}" style="margin-top:6px;"></div>
+      <div class="summary" id="summaryCards-${dc.id}"></div>
+    </div>
+    <div class="card-box">
+      <h3>👥 Anggota &amp; Rotasi — ${dc.name}</h3>
+      <div class="order-list" id="orderList-${dc.id}"></div>
+      <div class="team-add-form">
+        <input type="text" id="newMemberName-${dc.id}" placeholder="Nama anggota baru...">
+        <button class="btn btn-primary btn-sm" data-act="add" data-div="${dc.id}">+ Tambah</button>
+      </div>
+      <div class="controls" style="margin-top:12px;">
+        <div>
+          <label>Siklus pergantian</label>
+          <select id="cycleSelect-${dc.id}" data-div="${dc.id}">
+            <option value="1">Setiap 1 hari</option>
+            <option value="2">Setiap 2 hari</option>
+            <option value="3">Setiap 3 hari</option>
+            <option value="7">Mingguan (7 hari)</option>
+            <option value="14">Dua mingguan (14 hari)</option>
+          </select>
+        </div>
+        <div>
+          <label>Tanggal mulai rotasi</label>
+          <input type="date" id="startDateInput-${dc.id}" data-div="${dc.id}">
+        </div>
+        <div>
+          <label>Mulai dengan</label>
+          <select id="startPersonSelect-${dc.id}" data-div="${dc.id}"></select>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
 
-function renderMonthLabel(){
+/* ==================== DELEGATED EVENTS UNTUK VIEW DIVISI ==================== */
+const mountEl = document.getElementById('divisionViewsMount');
+mountEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-act]');
+  if(!btn) return;
+  const divId = btn.dataset.div;
+  if(btn.dataset.act === 'prev') shiftMonth(-1);
+  else if(btn.dataset.act === 'next') shiftMonth(1);
+  else if(btn.dataset.act === 'today'){ currentMonth = firstOfThisMonth(); renderAllDivisions(); }
+  else if(btn.dataset.act === 'add') addMemberToDivision(divId);
+  else if(btn.dataset.act === 'unlock') resetMonthOverrides(divId);
+});
+mountEl.addEventListener('change', (e) => {
+  const el = e.target;
+  const divId = el.dataset.div;
+  if(!divId) return;
+  const div = divisionState(divId);
+  if(el.id.startsWith('cycleSelect-')){ div.rotation.cycleDays = Number(el.value); markDirty(); renderDivision(divId); }
+  else if(el.id.startsWith('startDateInput-')){ div.rotation.startDate = el.value; markDirty(); renderDivision(divId); }
+  else if(el.id.startsWith('startPersonSelect-')){ div.rotation.startPersonId = el.value; markDirty(); renderDivision(divId); }
+});
+mountEl.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && e.target.id && e.target.id.startsWith('newMemberName-')){
+    addMemberToDivision(e.target.id.replace('newMemberName-',''));
+  }
+});
+function shiftMonth(delta){
   const d = parseISO(currentMonth);
-  const label = d.toLocaleDateString('id-ID', { month:'long', year:'numeric' });
-  document.getElementById('monthLabel').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+  d.setMonth(d.getMonth() + delta);
+  currentMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+  renderAllDivisions();
 }
-
-function renderWeekdayHeader(){
-  document.getElementById('calWeekdays').innerHTML = WEEKDAYS.map(w => `<div class="cal-weekday">${w}</div>`).join('');
-}
-
-function renderCalendar(){
-  renderMonthLabel();
+function resetMonthOverrides(divId){
+  const div = divisionState(divId);
   const d = parseISO(currentMonth);
   const y = d.getFullYear(), m = d.getMonth();
   const total = daysInMonth(y,m);
-  const firstDow = (new Date(y,m,1).getDay() + 6) % 7; // Monday=0
+  let count = 0;
+  for(let day=1; day<=total; day++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    if(div.overrides[iso]){ delete div.overrides[iso]; count++; }
+  }
+  if(count){ markDirty(); renderDivision(divId); showToast(`${count} tanggal dikembalikan ke rotasi otomatis.`, 'success'); }
+  else showToast('Tidak ada override manual di bulan ini.', 'error');
+}
+function addMemberToDivision(divId){
+  const input = document.getElementById('newMemberName-' + divId);
+  const name = input.value.trim();
+  if(!name){ showToast('Nama tidak boleh kosong.', 'error'); return; }
+  const m = { id: uid(), name, color: nextColor(), divisionId: divId };
+  state.team.push(m);
+  divisionState(divId).rotation.order.push(m.id);
+  input.value = '';
+  markDirty();
+  renderDivision(divId);
+  showToast(`${name} ditambahkan ke ${divisionConfig(divId).name}.`, 'success');
+}
+
+/* ==================== RENDER: PALETTE, ORDER LIST, ROTATION CONFIG ==================== */
+function renderPalette(divId){
+  const div = divisionState(divId);
+  const el = document.getElementById('palette-' + divId);
+  el.innerHTML = div.rotation.order.map(id => {
+    const m = memberById(id); if(!m) return '';
+    return `<div class="chip" style="background:${m.color}" draggable="true" data-member="${m.id}"><span class="dot"></span>${m.name}</div>`;
+  }).join('');
+  el.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', JSON.stringify({type:'palette', id: chip.dataset.member, div: divId}));
+    });
+  });
+}
+function renderOrderList(divId){
+  const div = divisionState(divId);
+  const el = document.getElementById('orderList-' + divId);
+  el.innerHTML = div.rotation.order.map((id, idx) => {
+    const m = memberById(id);
+    if(!m) return '';
+    const isCrit = state.criticalTeamIds.includes(id);
+    return `<div class="order-item" data-id="${id}">
+      <span class="dot" style="background:${m.color}"></span>
+      <span class="name">${idx+1}. ${m.name}${isCrit ? ' <span title="Tim Kritikal" style="color:var(--red-fg);">⚠️</span>' : ''}</span>
+      <button class="mv" data-act="up" ${idx===0?'disabled':''}>▲</button>
+      <button class="mv" data-act="down" ${idx===div.rotation.order.length-1?'disabled':''}>▼</button>
+      <button class="mv" data-act="del" title="Hapus dari divisi">✕</button>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.mv').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.closest('.order-item').dataset.id;
+      const idx = div.rotation.order.indexOf(id);
+      if(btn.dataset.act === 'up' && idx > 0){
+        [div.rotation.order[idx-1], div.rotation.order[idx]] = [div.rotation.order[idx], div.rotation.order[idx-1]];
+      } else if(btn.dataset.act === 'down' && idx < div.rotation.order.length-1){
+        [div.rotation.order[idx+1], div.rotation.order[idx]] = [div.rotation.order[idx], div.rotation.order[idx+1]];
+      } else if(btn.dataset.act === 'del'){
+        if(div.rotation.order.length <= 1){ showToast('Minimal harus ada 1 anggota di divisi ini.', 'error'); return; }
+        if(!confirm(`Hapus anggota ini dari ${divisionConfig(divId).name}?`)) return;
+        state.team = state.team.filter(m => m.id !== id);
+        div.rotation.order = div.rotation.order.filter(x => x !== id);
+        state.criticalTeamIds = state.criticalTeamIds.filter(x => x !== id);
+        if(div.rotation.startPersonId === id) div.rotation.startPersonId = div.rotation.order[0];
+      }
+      markDirty();
+      renderDivision(divId);
+    };
+  });
+}
+function renderRotationConfig(divId){
+  const div = divisionState(divId);
+  document.getElementById('cycleSelect-' + divId).value = String(div.rotation.cycleDays);
+  document.getElementById('startDateInput-' + divId).value = div.rotation.startDate;
+  const sel = document.getElementById('startPersonSelect-' + divId);
+  sel.innerHTML = div.rotation.order.map(id => { const m = memberById(id); return m ? `<option value="${id}">${m.name}</option>` : ''; }).join('');
+  sel.value = div.rotation.startPersonId;
+}
+
+/* ==================== RENDER: ONDUTY PANEL ==================== */
+function todayLabel(){
+  return 'HARI INI — ' + parseISO(todayISO()).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'}).toUpperCase();
+}
+function renderOnDuty(divId){
+  const el = document.getElementById('onduty-' + divId);
+  const iso = todayISO();
+  const a = assignedFor(divId, iso);
+  const person = a ? memberById(a.personId) : null;
+  const critArr = state.criticalLeave[iso] || [];
+  const critInThisDiv = critArr.map(id => memberById(id)).filter(m => m && m.divisionId === divId).map(m => m.name);
+  const conflict = isConflictDate(iso);
+  el.innerHTML = `
+    <div class="today-card${conflict ? ' today-card-alert' : ''}" style="cursor:pointer;" id="ondutyClick-${divId}">
+      <div class="today-label">📍 ${todayLabel()}</div>
+      <div class="today-main">
+        <span class="today-dot" style="background:${person ? person.color : 'rgba(255,255,255,.4)'}"></span>
+        <span class="today-name">${person ? person.name : 'Belum ada petugas'}</span>
+        <span class="today-tag">${a && a.locked ? '📌 MANUAL' : 'ONDUTY'}</span>
+      </div>
+      ${critInThisDiv.length ? `<div class="today-leave">🏖️ Cuti: ${critInThisDiv.join(', ')}</div>` : ''}
+      ${conflict ? `<div class="today-warn">⚠️ Konflik tim kritikal hari ini (lintas divisi) — cek tab Konflik.</div>` : ''}
+    </div>`;
+  document.getElementById('ondutyClick-' + divId).onclick = () => openDetailPanel(divId, iso);
+}
+
+/* ==================== RENDER: KALENDER PER DIVISI ==================== */
+function renderDivisionCalendar(divId){
+  const div = divisionState(divId);
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  document.getElementById('monthLabel-' + divId).textContent = capitalize(d.toLocaleDateString('id-ID', {month:'long', year:'numeric'}));
+  const total = daysInMonth(y,m);
+  const firstDow = (new Date(y,m,1).getDay() + 6) % 7;
   const cells = [];
   for(let i=0;i<firstDow;i++) cells.push(null);
   for(let day=1; day<=total; day++) cells.push(day);
   while(cells.length % 7 !== 0) cells.push(null);
 
-  const grid = document.getElementById('calGrid');
+  document.getElementById('calWeekdays-' + divId).innerHTML = WEEKDAYS.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+
+  const grid = document.getElementById('calGrid-' + divId);
   grid.innerHTML = cells.map(day => {
     if(day === null) return `<div class="cal-cell pad"></div>`;
     const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const a = assignedFor(iso);
+    const a = assignedFor(divId, iso);
     const isToday = iso === todayISO();
+    const conflict = isConflictDate(iso);
     let chipHtml = `<div class="cal-empty-hint">—</div>`;
     if(a){
       const person = memberById(a.personId);
@@ -375,18 +701,30 @@ function renderCalendar(){
         </div>`;
       }
     }
-    return `<div class="cal-cell${isToday ? ' today' : ''}" data-date="${iso}">
+    const leaveArrDiv = (state.criticalLeave[iso] || []).map(id => memberById(id)).filter(mm => mm && mm.divisionId === divId);
+    const leaveTag = leaveArrDiv.length ? `<div class="cal-leave-tags">🏖️ ${leaveArrDiv.map(mm => mm.name.split(' ')[0]).join(', ')}</div>` : '';
+    const fp = filterPersonId[divId];
+    const isMatch = fp && a && a.personId === fp;
+    const isDimmed = fp && !isMatch;
+    const cls = ['cal-cell'];
+    if(isToday) cls.push('today');
+    if(conflict) cls.push('conflict');
+    if(isDimmed) cls.push('dimmed');
+    if(isMatch) cls.push('highlight');
+    return `<div class="${cls.join(' ')}" data-date="${iso}" title="${conflict ? '⚠️ Konflik: ' + criticalTrioLabel() + ' cuti bersamaan' : ''}">
       <div class="cal-date">${day}</div>
       <div class="cal-assign">${chipHtml}</div>
+      ${leaveTag}
+      ${conflict ? '<div class="conflict-badge">⚠️</div>' : ''}
     </div>`;
   }).join('');
 
-  wireCalendarEvents();
-  renderSummary(cells.filter(x=>x!==null).map(day => `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`));
+  wireCalendarEvents(divId);
+  renderFilterStatusForDiv(divId);
+  renderSummaryForDiv(divId, cells.filter(x => x !== null).map(day => `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`));
 }
-
-function wireCalendarEvents(){
-  document.querySelectorAll('.cal-cell[data-date]').forEach(cell => {
+function wireCalendarEvents(divId){
+  document.querySelectorAll(`#calGrid-${divId} .cal-cell[data-date]`).forEach(cell => {
     cell.addEventListener('dragover', e => { e.preventDefault(); cell.classList.add('dragover'); });
     cell.addEventListener('dragleave', () => cell.classList.remove('dragover'));
     cell.addEventListener('drop', e => {
@@ -395,169 +733,207 @@ function wireCalendarEvents(){
       let data;
       try{ data = JSON.parse(e.dataTransfer.getData('text/plain')); }catch(err){ return; }
       const targetDate = cell.dataset.date;
-      if(data.type === 'palette'){
-        setOverride(targetDate, data.id);
-        renderCalendar();
+      if(data.type === 'palette' && data.div === divId){
+        setOverride(divId, targetDate, data.id);
+        renderDivision(divId);
+        renderOverview();
         showToast('Jadwal diperbarui.', 'success');
-      } else if(data.type === 'swap' && data.date !== targetDate){
-        swapCells(data.date, targetDate);
-        renderCalendar();
+      } else if(data.type === 'swap' && data.div === divId && data.date !== targetDate){
+        swapCells(divId, data.date, targetDate);
+        renderDivision(divId);
+        renderOverview();
         showToast('Jadwal ditukar.', 'success');
       }
     });
-    cell.addEventListener('click', (e) => {
-      if(e.target.closest('.cal-chip') && e.target.closest('.cal-chip').dataset.date){
-        openCellPopover(cell.dataset.date, cell);
-      } else {
-        openCellPopover(cell.dataset.date, cell);
+    cell.addEventListener('click', () => openDetailPanel(divId, cell.dataset.date));
+  });
+  document.querySelectorAll(`#calGrid-${divId} .cal-chip[data-date]`).forEach(chip => {
+    chip.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      e.dataTransfer.setData('text/plain', JSON.stringify({type:'swap', date: chip.dataset.date, div: divId}));
+    });
+  });
+}
+function renderFilterStatusForDiv(divId){
+  const el = document.getElementById('filterStatus-' + divId);
+  const fp = filterPersonId[divId];
+  if(!fp){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  const m = memberById(fp);
+  if(!m){ filterPersonId[divId] = null; el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  el.innerHTML = `<span>🔍 Menyorot jadwal: <b>${m.name}</b></span>`;
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-ghost btn-sm';
+  btn.textContent = '✕ Hapus filter';
+  btn.onclick = () => { filterPersonId[divId] = null; renderDivisionCalendar(divId); };
+  el.appendChild(btn);
+}
+function renderSummaryForDiv(divId, monthDates){
+  const div = divisionState(divId);
+  const counts = {};
+  div.rotation.order.forEach(id => counts[id] = 0);
+  monthDates.forEach(iso => { const a = assignedFor(divId, iso); if(a && counts[a.personId] !== undefined) counts[a.personId]++; });
+  const el = document.getElementById('summaryCards-' + divId);
+  el.innerHTML = div.rotation.order.map(id => {
+    const m = memberById(id); if(!m) return '';
+    const active = filterPersonId[divId] === id;
+    return `<div class="s-card${active ? ' s-card-active' : ''}" style="background:${m.color}" data-id="${id}" title="Klik untuk highlight jadwal ${m.name}">
+      <div class="num">${counts[id]}</div>
+      <div class="lab">${m.name} — hari jaga</div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.s-card').forEach(card => {
+    card.onclick = () => {
+      filterPersonId[divId] = filterPersonId[divId] === card.dataset.id ? null : card.dataset.id;
+      renderDivisionCalendar(divId);
+    };
+  });
+}
+
+/* ==================== DETAIL PANEL (geser) ==================== */
+function openDetailPanel(divId, dateISO){
+  currentDetailDate = dateISO;
+  currentDetailDiv = divId;
+  const panel = document.getElementById('detailPanel');
+  const backdrop = document.getElementById('detailBackdrop');
+  const dc = divisionConfig(divId);
+  const dLabel = parseISO(dateISO).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('detailDate').innerHTML = `<div style="font-size:10px;opacity:.8;margin-bottom:2px;">${dc.icon} ${dc.name}</div>${dLabel}`;
+  renderDetailBody(divId, dateISO);
+  panel.classList.add('show');
+  backdrop.classList.add('show');
+}
+function closeDetailPanel(){
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('detailBackdrop').classList.remove('show');
+  currentDetailDate = null;
+  currentDetailDiv = null;
+}
+function renderDetailBody(divId, dateISO){
+  const div = divisionState(divId);
+  const body = document.getElementById('detailBody');
+  const a = assignedFor(divId, dateISO);
+  const critArr = state.criticalLeave[dateISO] || [];
+  const conflict = isConflictDate(dateISO);
+
+  let html = '<div class="detail-section-title">👤 Petugas Standby</div>';
+  html += div.rotation.order.map(id => {
+    const m = memberById(id);
+    if(!m) return '';
+    const sel = a && a.personId === m.id ? ' selected' : '';
+    return `<div class="detail-opt${sel}" data-id="${m.id}"><span class="dot" style="background:${m.color}"></span>${m.name}${a && a.personId===m.id && a.locked ? ' 📌' : ''}</div>`;
+  }).join('');
+  html += `<div class="detail-opt detail-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
+
+  if(state.criticalTeamIds.length){
+    html += '<div class="detail-section-title">🏖️ Tandai Cuti Tim Kritikal (lintas divisi)</div>';
+    html += state.criticalTeamIds.map(id => {
+      const m = memberById(id);
+      if(!m) return '';
+      const checked = critArr.includes(id) ? 'checked' : '';
+      return `<label class="detail-crit-row"><input type="checkbox" data-crit="${id}" ${checked}><span class="dot" style="background:${m.color}"></span>${m.name}</label>`;
+    }).join('');
+  }
+  if(conflict){
+    html += `<div class="detail-conflict-note">⚠️ Konflik: ${criticalTrioLabel()} cuti bersamaan pada tanggal ini — pastikan ada yang standby.</div>`;
+  }
+  body.innerHTML = html;
+
+  body.querySelectorAll('.detail-opt[data-id]').forEach(opt => {
+    opt.onclick = () => {
+      setOverride(divId, dateISO, opt.dataset.id);
+      showToast('Jadwal diperbarui.', 'success');
+      renderDivision(divId);
+      renderOverview();
+      renderDetailBody(divId, dateISO);
+    };
+  });
+  body.querySelector('.detail-clear').onclick = () => {
+    clearOverride(divId, dateISO);
+    showToast('Dikembalikan ke rotasi otomatis.', 'success');
+    renderDivision(divId);
+    renderOverview();
+    renderDetailBody(divId, dateISO);
+  };
+  body.querySelectorAll('[data-crit]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      toggleCriticalLeave(dateISO, cb.dataset.crit);
+      renderAllDivisions();
+      renderDetailBody(divId, dateISO);
+      if(activeTab === 'konflik') renderConflictList();
+      if(isConflictDate(dateISO)){
+        showToast(`⚠️ Konflik! ${criticalTrioLabel()} cuti bersamaan. Pastikan ada yang standby.`, 'error');
       }
     });
   });
-  document.querySelectorAll('.cal-chip[data-date]').forEach(chip => {
-    chip.addEventListener('dragstart', e => {
-      e.stopPropagation();
-      e.dataTransfer.setData('text/plain', JSON.stringify({type:'swap', date: chip.dataset.date}));
-    });
-  });
 }
+document.getElementById('detailClose').onclick = closeDetailPanel;
+document.getElementById('detailBackdrop').onclick = closeDetailPanel;
 
-function openCellPopover(dateISO, anchorEl){
-  closePopover();
-  const rect = anchorEl.getBoundingClientRect();
-  const pop = document.createElement('div');
-  pop.className = 'popover';
-  const dLabel = parseISO(dateISO).toLocaleDateString('id-ID', {weekday:'short', day:'numeric', month:'short'});
-  pop.innerHTML = `<div class="p-title">Assign — ${dLabel}</div>` +
-    state.team.map(m => `<div class="p-opt" data-id="${m.id}"><span class="dot" style="background:${m.color}"></span>${m.name}</div>`).join('') +
-    `<div class="p-opt p-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
-  document.body.appendChild(pop);
-  const top = Math.min(rect.bottom + 6, window.innerHeight - pop.offsetHeight - 10);
-  const left = Math.min(rect.left, window.innerWidth - 190);
-  pop.style.top = top + 'px';
-  pop.style.left = Math.max(8,left) + 'px';
-  pop.querySelectorAll('.p-opt').forEach(opt => {
-    opt.onclick = (ev) => {
-      ev.stopPropagation();
-      if(opt.dataset.clear){ clearOverride(dateISO); showToast('Dikembalikan ke rotasi otomatis.', 'success'); }
-      else { setOverride(dateISO, opt.dataset.id); showToast('Jadwal diperbarui.', 'success'); }
-      renderCalendar();
-      closePopover();
+/* ==================== RENDER: OVERVIEW ==================== */
+function renderOverview(){
+  const el = document.getElementById('overviewGrid');
+  const iso = todayISO();
+  el.innerHTML = DIVISIONS_CONFIG.map(dc => {
+    const div = divisionState(dc.id);
+    const a = assignedFor(dc.id, iso);
+    const person = a ? memberById(a.personId) : null;
+    const conflict = isConflictDate(iso);
+    return `<div class="overview-card" data-div="${dc.id}">
+      <div class="overview-card-header" style="background:${dc.color}">${dc.icon} ${dc.name}</div>
+      <div class="overview-card-body">
+        <div class="onduty-sub">${div.rotation.order.length} anggota</div>
+        <div class="onduty-name-lg" style="color:${person ? person.color : '#999'}">${person ? person.name : 'Belum ada petugas'}</div>
+        <span class="onduty-badge${conflict ? ' alert' : ''}">${conflict ? '⚠️ ADA KONFLIK' : (a && a.locked ? '📌 MANUAL' : '● ONDUTY')}</span>
+      </div>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.overview-card').forEach(card => {
+    card.onclick = () => {
+      switchTab(card.dataset.div);
+      openDetailPanel(card.dataset.div, todayISO());
     };
   });
-  openPopover = pop;
-  setTimeout(() => document.addEventListener('click', outsidePopoverClick), 0);
+  renderOverviewConflictBanner();
 }
-function outsidePopoverClick(e){
-  if(openPopover && !openPopover.contains(e.target)){ closePopover(); }
-}
-function closePopover(){
-  if(openPopover){ openPopover.remove(); openPopover = null; document.removeEventListener('click', outsidePopoverClick); }
-}
-
-function renderSummary(monthDates){
-  const counts = {};
-  state.team.forEach(m => counts[m.id] = 0);
-  monthDates.forEach(iso => {
-    const a = assignedFor(iso);
-    if(a && counts[a.personId] !== undefined) counts[a.personId]++;
-  });
-  const el = document.getElementById('summaryCards');
-  el.innerHTML = state.team.map(m => `
-    <div class="s-card" style="background:${m.color}">
-      <div class="num">${counts[m.id]}</div>
-      <div class="lab">${m.name} — hari jaga</div>
-    </div>
-  `).join('');
-}
-
-/* ==================== MONTH NAV ==================== */
-document.getElementById('prevMonth').onclick = () => { shiftMonth(-1); };
-document.getElementById('nextMonth').onclick = () => { shiftMonth(1); };
-document.getElementById('todayBtn').onclick = () => { currentMonth = firstOfThisMonth(); renderCalendar(); };
-document.getElementById('printBtn').onclick = () => window.print();
-function shiftMonth(delta){
+function renderOverviewConflictBanner(){
   const d = parseISO(currentMonth);
-  d.setMonth(d.getMonth() + delta);
-  currentMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
-  renderCalendar();
+  const list = conflictDatesInMonth(d.getFullYear(), d.getMonth());
+  const el = document.getElementById('conflictBannerOverview');
+  if(!list.length){ el.style.display = 'none'; el.innerHTML = ''; return; }
+  const dayNums = list.map(iso => parseISO(iso).getDate()).join(', ');
+  el.style.display = 'block';
+  el.innerHTML = `⚠️ <b>${list.length} hari konflik bulan ini</b> — ${criticalTrioLabel()} cuti bersamaan pada tanggal: ${dayNums}. Lihat detail &amp; rekomendasi di tab "⚠️ Konflik".`;
 }
 
-document.getElementById('unlockMonthBtn').onclick = () => {
-  const d = parseISO(currentMonth);
-  const y = d.getFullYear(), m = d.getMonth();
-  const total = daysInMonth(y,m);
-  let count = 0;
-  for(let day=1; day<=total; day++){
-    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    if(state.overrides[iso]){ delete state.overrides[iso]; count++; }
+/* ==================== RENDER: KONFLIK TAB ==================== */
+function renderConflictList(){
+  const el = document.getElementById('conflictList');
+  document.getElementById('critNamesLabel').textContent = criticalTrioLabel();
+  const dates = Object.keys(state.criticalLeave).filter(isConflictDate).sort();
+  if(!dates.length){
+    el.innerHTML = '<div style="font-size:12.5px;color:var(--green);font-weight:bold;">✅ Tidak ada konflik tercatat saat ini.</div>';
+    return;
   }
-  if(count){ markDirty(); renderCalendar(); showToast(`${count} tanggal dikembalikan ke rotasi otomatis.`, 'success'); }
-  else { showToast('Tidak ada override manual di bulan ini.', 'error'); }
-};
-
-/* ==================== ROTASI TAB ==================== */
-function renderOrderList(){
-  const el = document.getElementById('orderList');
-  el.innerHTML = state.rotation.order.map((id, idx) => {
-    const m = memberById(id);
-    if(!m) return '';
-    return `<div class="order-item" data-id="${id}">
-      <span class="dot" style="background:${m.color}"></span>
-      <span class="name">${idx+1}. ${m.name}</span>
-      <button class="mv" data-act="up" ${idx===0?'disabled':''}>▲</button>
-      <button class="mv" data-act="down" ${idx===state.rotation.order.length-1?'disabled':''}>▼</button>
-      <button class="mv" data-act="del" title="Hapus dari tim">✕</button>
+  el.innerHTML = dates.map(iso => {
+    const label = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    return `<div class="order-item" style="background:var(--red-bg);align-items:flex-start;">
+      <span style="flex:1;font-size:12.5px;color:var(--red-fg);"><b>${label}</b><br>${criticalTrioLabel()} tercatat cuti bersamaan — tidak ada yang standby.<br><i>Rekomendasi: assign standby manual di tab divisi terkait, atau geser cuti salah satu personel.</i></span>
+      <button class="mv" data-date="${iso}" title="Hapus semua tanda cuti tim kritikal pada tanggal ini">✕</button>
     </div>`;
   }).join('');
   el.querySelectorAll('.mv').forEach(btn => {
     btn.onclick = () => {
-      const id = btn.closest('.order-item').dataset.id;
-      const idx = state.rotation.order.indexOf(id);
-      if(btn.dataset.act === 'up' && idx > 0){
-        [state.rotation.order[idx-1], state.rotation.order[idx]] = [state.rotation.order[idx], state.rotation.order[idx-1]];
-      } else if(btn.dataset.act === 'down' && idx < state.rotation.order.length-1){
-        [state.rotation.order[idx+1], state.rotation.order[idx]] = [state.rotation.order[idx], state.rotation.order[idx+1]];
-      } else if(btn.dataset.act === 'del'){
-        if(state.team.length <= 1){ showToast('Minimal harus ada 1 anggota.', 'error'); return; }
-        if(!confirm('Hapus anggota ini dari tim? Override manual yang memakai nama ini di kalender akan tetap tersimpan tapi tidak akan tampil.')) return;
-        state.team = state.team.filter(m => m.id !== id);
-        state.rotation.order = state.rotation.order.filter(x => x !== id);
-        if(state.rotation.startPersonId === id) state.rotation.startPersonId = state.rotation.order[0];
-      }
+      delete state.criticalLeave[btn.dataset.date];
       markDirty();
-      renderAll();
+      renderAllDivisions();
+      renderConflictList();
+      showToast('Tanda cuti pada tanggal tersebut dihapus.', 'success');
     };
   });
 }
 
-document.getElementById('addMemberBtn').onclick = () => {
-  const input = document.getElementById('newMemberName');
-  const name = input.value.trim();
-  if(!name){ showToast('Nama tidak boleh kosong.', 'error'); return; }
-  const m = { id: uid(), name, color: nextColor() };
-  state.team.push(m);
-  state.rotation.order.push(m.id);
-  input.value = '';
-  markDirty();
-  renderAll();
-  showToast(`${name} ditambahkan ke tim.`, 'success');
-};
-document.getElementById('newMemberName').addEventListener('keydown', e => {
-  if(e.key === 'Enter') document.getElementById('addMemberBtn').click();
-});
-
-function renderRotationConfig(){
-  document.getElementById('cycleSelect').value = String(state.rotation.cycleDays);
-  document.getElementById('startDateInput').value = state.rotation.startDate;
-  const sel = document.getElementById('startPersonSelect');
-  sel.innerHTML = state.team.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-  sel.value = state.rotation.startPersonId;
-}
-document.getElementById('cycleSelect').onchange = (e) => { state.rotation.cycleDays = Number(e.target.value); markDirty(); renderCalendar(); };
-document.getElementById('startDateInput').onchange = (e) => { state.rotation.startDate = e.target.value; markDirty(); renderCalendar(); };
-document.getElementById('startPersonSelect').onchange = (e) => { state.rotation.startPersonId = e.target.value; markDirty(); renderCalendar(); };
-
-/* ==================== EXPORT / IMPORT ==================== */
+/* ==================== EXPORT / IMPORT (backup opsional) ==================== */
 function downloadBlob(content, filename, mime){
   const blob = new Blob([content], {type: mime});
   const url = URL.createObjectURL(blob);
@@ -566,32 +942,29 @@ function downloadBlob(content, filename, mime){
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
 }
-
 document.getElementById('exportJsonBtn').onclick = () => {
-  const payload = JSON.stringify(state, null, 2);
-  downloadBlob(payload, `roster-digitech-${todayISO()}.json`, 'application/json');
-  dirty = false; renderSaveStatus();
-  showToast('Data berhasil di-export (JSON).', 'success');
+  downloadBlob(JSON.stringify(state, null, 2), `roster-digitech-${todayISO()}.json`, 'application/json');
+  showToast('Backup JSON berhasil diunduh.', 'success');
 };
-document.getElementById('quickExportBtn').onclick = () => document.getElementById('exportJsonBtn').click();
-
 document.getElementById('exportCsvBtn').onclick = () => {
   const d = parseISO(currentMonth);
   const y = d.getFullYear(), m = d.getMonth();
   const total = daysInMonth(y,m);
-  let rows = [['Tanggal','Hari','Petugas Standby','Status']];
-  for(let day=1; day<=total; day++){
-    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const a = assignedFor(iso);
-    const person = a ? memberById(a.personId) : null;
-    const dayName = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long'});
-    rows.push([iso, dayName, person ? person.name : '-', a && a.locked ? 'Manual' : 'Otomatis']);
-  }
+  let rows = [['Divisi','Tanggal','Hari','Petugas Standby','Status','Cuti Tim Kritikal','Konflik']];
+  DIVISIONS_CONFIG.forEach(dc => {
+    for(let day=1; day<=total; day++){
+      const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const a = assignedFor(dc.id, iso);
+      const person = a ? memberById(a.personId) : null;
+      const dayName = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long'});
+      const leaveNames = (state.criticalLeave[iso] || []).map(id => memberById(id)).filter(mm => mm && mm.divisionId === dc.id).map(mm => mm.name).join(' & ');
+      rows.push([dc.name, iso, dayName, person ? person.name : '-', a && a.locked ? 'Manual' : 'Otomatis', leaveNames, isConflictDate(iso) ? 'YA' : '']);
+    }
+  });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   downloadBlob(csv, `roster-digitech-${currentMonth}.csv`, 'text/csv');
   showToast('CSV berhasil di-export.', 'success');
 };
-
 document.getElementById('importJsonBtn').onclick = () => document.getElementById('importJsonFile').click();
 document.getElementById('importJsonFile').addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -599,15 +972,19 @@ document.getElementById('importJsonFile').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = () => {
     try{
-      const parsed = JSON.parse(reader.result);
-      if(!parsed.team || !parsed.rotation) throw new Error('Format tidak dikenali');
+      let parsed = JSON.parse(reader.result);
+      if(!parsed.team) throw new Error('Format tidak dikenali');
+      parsed.team.forEach(m => { if(m.name === 'Wawan') m.name = 'Lukman Gunawan'; });
+      if(!parsed.divisions) parsed = migrateOldState(parsed);
+      if(!parsed.criticalLeave) parsed.criticalLeave = {};
+      if(!parsed.criticalTeamIds) parsed.criticalTeamIds = parsed.team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id);
       state = parsed;
-      dirty = false;
-      renderAll();
-      renderSaveStatus();
-      showToast('Data berhasil di-import.', 'success');
+      markDirty();
+      renderAllDivisions();
+      renderConflictList();
+      showToast('Data berhasil di-restore dan disimpan otomatis.', 'success');
     }catch(err){
-      showToast('Gagal import: file tidak valid.', 'error');
+      showToast('Gagal restore: file tidak valid.', 'error');
     }
   };
   reader.readAsText(file);
@@ -615,14 +992,27 @@ document.getElementById('importJsonFile').addEventListener('change', (e) => {
 });
 
 /* ==================== INIT ==================== */
-function renderAll(){
-  renderPalette();
-  renderWeekdayHeader();
-  renderCalendar();
-  renderOrderList();
-  renderRotationConfig();
+function renderDivision(divId){
+  renderPalette(divId);
+  renderDivisionCalendar(divId);
+  renderOrderList(divId);
+  renderRotationConfig(divId);
+  renderOnDuty(divId);
 }
-renderAll();
+function renderAllDivisions(){
+  DIVISIONS_CONFIG.forEach(dc => renderDivision(dc.id));
+  renderOverview();
+}
+
+(async function init(){
+  mountEl.innerHTML = DIVISIONS_CONFIG.map(buildDivisionViewShell).join('');
+  await loadState();
+  renderTabsBar();
+  renderAllDivisions();
+  renderConflictList();
+  renderSaveStatus('clean');
+  document.getElementById('modeBadge').textContent = '☁️ Mode: Auto-save (window.storage) — tersimpan otomatis, tanpa localStorage';
+})();
 </script>
 </body>
 </html>
