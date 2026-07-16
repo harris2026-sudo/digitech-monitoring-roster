@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Digitech Daily Checklist Assistant</title>
+<title>Roster On-Call — Digitech Monitoring Team</title>
 <style>
   :root{
     --navy:#1F3864;
@@ -12,625 +12,523 @@
     --zebra:#F2F2F2;
     --green:#1E7A34;
     --green-bg:#C6EFCE;
-    --yellow-bg:#FFEB9C;
-    --yellow-fg:#7A6000;
-    --blue-bg:#BDD7EE;
-    --blue-fg:#1F4E79;
     --red-bg:#FFC7CE;
     --red-fg:#9C0006;
-    --grey-bg:#E7E6E6;
-    --grey-fg:#555;
-    --gold-bg:#FFD966;
-    --gold-fg:#7F6000;
-    --black-bg:#1a1a1a;
-    --black-fg:#fff;
   }
   *{box-sizing:border-box;}
   body{margin:0;font-family:Arial, "Helvetica Neue", sans-serif;background:#EEF2F7;color:#222;}
-  .app{max-width:920px;margin:0 auto;padding:16px 16px 60px;}
+  .app{max-width:1040px;margin:0 auto;padding:16px 16px 60px;}
   header{background:var(--navy);color:#fff;padding:18px 20px;border-radius:10px;margin-bottom:14px;}
   header h1{margin:0 0 2px;font-size:19px;}
   header p{margin:0;font-size:12px;opacity:.85;}
-  header [contenteditable="true"]{outline:none;border-radius:4px;padding:1px 3px;cursor:text;}
-  header [contenteditable="true"]:hover{background:rgba(255,255,255,.08);}
-  header [contenteditable="true"]:focus{background:rgba(255,255,255,.15);box-shadow:0 0 0 1.5px rgba(255,255,255,.4);}
-  .header-edit-hint{font-size:9.5px;opacity:.6;margin-top:4px;}
-
-  .storage-badge{
-    display:inline-block;margin-top:8px;font-size:10.5px;padding:3px 9px;border-radius:12px;
-    background:rgba(255,255,255,.15);color:#fff;
-  }
+  .mode-badge{display:inline-block;margin-top:8px;font-size:10.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;}
 
   .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-  .tab{
-    flex:1;min-width:130px;text-align:center;padding:10px;border-radius:8px;background:#fff;color:var(--navy);
-    font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);
-    border:2px solid transparent;
-  }
+  .tabs-sub{margin-top:-8px;margin-bottom:14px;}
+  .tabs-sub .tab{font-size:11.5px;padding:8px 8px;background:#F5F8FC;}
+  .tabs-sub .tab.active{background:var(--accent);color:#fff;}
+  .tabs-sub2{margin-top:-8px;margin-bottom:14px;}
+  .tabs-sub2 .tab{font-size:11.5px;padding:8px 8px;background:#F5F8FC;}
+  .tabs-sub2 .tab.active{background:var(--navy);color:#fff;}
+  .tabs-sub2 .tab.tab-alert.active{background:var(--red-fg);color:#fff;}
+  .tab{flex:1;min-width:110px;text-align:center;padding:10px 8px;border-radius:8px;background:#fff;color:var(--navy);font-weight:bold;font-size:12.5px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:2px solid transparent;white-space:nowrap;}
   .tab.active{background:var(--navy);color:#fff;}
-
+  .tab.tab-alert{color:var(--red-fg);}
+  .tab.tab-alert.active{background:var(--red-fg);color:#fff;}
   .view{display:none;}
   .view.active{display:block;}
 
-  .controls{display:flex;flex-wrap:wrap;gap:10px;background:#fff;padding:12px;border-radius:10px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);align-items:center;}
+  .card-box{background:#fff;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .card-box h3{margin:0 0 10px;font-size:13.5px;color:var(--navy);}
+
+  .division-banner{color:#fff;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:14px;margin-bottom:12px;}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px;}
   .controls label{font-size:11px;font-weight:bold;color:var(--navy);display:block;margin-bottom:3px;}
-  .controls input[type=date], .controls input[type=text], .controls input[type=month], .controls input[type=number], .controls select{
-    border:1px solid #c7d3e0;border-radius:6px;padding:7px 9px;font-size:13px;font-family:Arial;
-  }
-  .controls .grow{flex:1;min-width:140px;}
-  .btn{border:none;border-radius:6px;padding:9px 14px;font-size:13px;font-weight:bold;cursor:pointer;font-family:Arial;}
+  .controls input, .controls select{border:1px solid #c7d3e0;border-radius:6px;padding:7px 9px;font-size:13px;font-family:Arial;}
+  .btn{border:none;border-radius:6px;padding:9px 14px;font-size:12.5px;font-weight:bold;cursor:pointer;font-family:Arial;}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover{background:var(--navy);}
   .btn-ghost{background:var(--hilite);color:var(--navy);}
   .btn-ghost:hover{background:#c3d7ee;}
+  .btn-danger{background:var(--red-bg);color:var(--red-fg);}
+  .btn-sm{padding:5px 10px;font-size:11px;}
 
-  .summary{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;}
-  .summary .card{background:#fff;border-radius:10px;padding:10px 6px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-  .summary .card .num{font-size:20px;font-weight:bold;color:var(--navy);}
-  .summary .card .lab{font-size:9.5px;color:#667;margin-top:2px;text-transform:uppercase;letter-spacing:.3px;}
-  .summary .card.clickable{cursor:pointer;transition:transform .12s,box-shadow .12s;border:1.5px solid transparent;}
-  .summary .card.clickable:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(31,56,100,.18);border-color:var(--hilite);}
-  .summary .card.clickable:active{transform:translateY(0);}
-  /* Modal detail status rekap (klik card ringkasan) */
-  .rekap-status-list{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;}
-  .rekap-status-item{background:#F7F9FC;border-left:4px solid var(--accent);border-radius:8px;padding:8px 10px;cursor:pointer;transition:background .12s;}
-  .rekap-status-item:hover{background:var(--hilite);}
-  .rekap-status-item .rsi-date{font-size:11px;font-weight:bold;color:var(--navy);}
-  .rekap-status-item .rsi-task{font-size:12.5px;color:#333;margin-top:2px;}
-  .rekap-status-item .rsi-note{font-size:11px;color:#667;margin-top:3px;font-style:italic;}
-  .rekap-status-empty{font-size:12.5px;color:#889;text-align:center;padding:20px 0;}
+  .month-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .month-nav .btn{padding:7px 11px;}
+  .month-nav .label{font-weight:bold;color:var(--navy);font-size:15px;min-width:150px;text-align:center;}
 
-  .progress-wrap{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-  .progress-wrap .top{display:flex;justify-content:space-between;font-size:12px;font-weight:bold;color:var(--navy);margin-bottom:6px;}
-  .progress-bar{height:10px;background:#e3e9f0;border-radius:6px;overflow:hidden;}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--navy));border-radius:6px;transition:width .3s;}
+  .palette{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;color:#fff;font-size:12px;font-weight:bold;cursor:grab;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.15);}
+  .chip:active{cursor:grabbing;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.7);}
+  .palette-hint{font-size:11px;color:#667;margin:-6px 0 12px;}
 
-  .category{background:#fff;border-radius:10px;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-  .category-head{background:var(--accent);color:#fff;padding:10px 14px;font-size:13.5px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;}
-  .category-head .chev{transition:transform .2s;font-size:11px;}
-  .category-head.collapsed .chev{transform:rotate(-90deg);}
-  .editable-label{outline:none;border-radius:4px;padding:1px 3px;cursor:text;}
-  .category-head .editable-label:hover{background:rgba(255,255,255,.15);}
-  .category-head .editable-label:focus{background:rgba(255,255,255,.22);box-shadow:0 0 0 1.5px rgba(255,255,255,.5);cursor:text;}
-  .task-title .editable-label:hover{background:var(--hilite);}
-  .task-title .editable-label:focus{background:var(--hilite);box-shadow:0 0 0 1.5px var(--accent);}
-  .task-del-btn{background:none;border:none;color:#c0392b;font-size:10.5px;font-weight:bold;cursor:pointer;margin-left:8px;padding:2px 4px;}
-  .task-del-btn:hover{text-decoration:underline;}
-  .row-actions{display:inline-flex;gap:4px;margin-left:8px;vertical-align:middle;}
-  .row-actions button{border:none;border-radius:5px;font-size:10.5px;font-weight:bold;cursor:pointer;padding:3px 7px;font-family:Arial;}
-  .row-edit-btn{background:var(--hilite);color:var(--navy);}
-  .row-edit-btn:hover{background:#c3d7ee;}
-  .row-hapus-btn{background:var(--red-bg);color:var(--red-fg);}
-  .row-hapus-btn:hover{background:#f8b3bc;}
-  .task-title{display:flex;align-items:center;flex-wrap:wrap;}
-  .hidden-chip-bar{padding:8px 14px 12px;font-size:11.5px;}
-  .hidden-chip-bar .restore-link{color:var(--accent);font-weight:bold;cursor:pointer;text-decoration:underline;}
-  .add-task-wrap{padding:10px 14px 14px;}
-  .add-task-btn{background:var(--hilite);color:var(--navy);border:1.5px dashed var(--accent);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:bold;cursor:pointer;width:100%;text-align:left;}
-  .add-task-btn:hover{background:var(--accent);color:#fff;border-style:solid;}
-  .add-task-form{display:flex;gap:8px;margin-top:8px;}
-  .add-task-form.hidden{display:none;}
-  .add-task-form input{flex:1;border:1px solid #c7d3e0;border-radius:6px;padding:8px 10px;font-size:13px;font-family:Arial;}
-  .category-head-actions{display:flex;align-items:center;gap:10px;}
-  .category-del-btn{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;padding:3px 7px;font-size:12px;cursor:pointer;line-height:1;}
-  .category-del-btn:hover{background:rgba(220,53,69,.85);}
-  .add-category-wrap{margin-top:4px;margin-bottom:16px;}
-  .add-category-btn{background:#fff;color:var(--navy);border:1.5px dashed var(--accent);border-radius:10px;padding:12px 14px;font-size:13px;font-weight:bold;cursor:pointer;width:100%;text-align:center;}
-  .add-category-btn:hover{background:var(--accent);color:#fff;border-style:solid;}
-  .add-category-wrap .add-task-form{padding:0 2px;}
-  .category-body{padding:4px 0;}
-  .category-body.hidden{display:none;}
+  .onduty-panel{margin-bottom:12px;}
+  .today-card{background:linear-gradient(135deg,var(--navy),var(--accent));color:#fff;border-radius:10px;padding:12px 14px;transition:background .2s ease;display:none;}
 
-  .task{padding:10px 14px;border-bottom:1px solid #eee;}
-  .task:nth-child(even){background:var(--zebra);}
-  .task:last-child{border-bottom:none;}
-  .task-title{font-size:13px;margin-bottom:8px;color:#222;}
-  .status-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
-  .status-btn{border:1.5px solid #d3dbe6;background:#fff;color:#556;border-radius:14px;padding:5px 11px;font-size:11.5px;font-weight:bold;cursor:pointer;font-family:Arial;}
-  .status-btn[data-status="Checked"].active{background:var(--green-bg);border-color:var(--green);color:var(--green);}
-  .status-btn[data-status="Follow up"].active{background:var(--yellow-bg);border-color:#d8b400;color:var(--yellow-fg);}
-  .status-btn[data-status="Continue"].active{background:var(--blue-bg);border-color:#6a9bcf;color:var(--blue-fg);}
-  .status-btn[data-status="Not yet"].active{background:var(--red-bg);border-color:#d9848c;color:var(--red-fg);}
-  .status-btn[data-status="Information"].active{background:var(--grey-bg);border-color:#aaa;color:var(--grey-fg);}
-  .status-btn[data-status="n/a"].active{background:var(--grey-bg);border-color:#aaa;color:var(--grey-fg);}
+  /* ---- Gaya Roster (mengikuti referensi DCVA Roster: avatar, ONDUTY, mode toggle) ---- */
+  .rs-sync-banner{font-size:11.5px;padding:8px 12px;border-radius:6px;margin-bottom:12px;font-weight:bold;background:var(--green-bg);color:var(--green);}
+  .rs-sync-banner.dirty{background:var(--hilite);color:var(--navy);}
+  .rs-sync-banner.error{background:var(--red-bg);color:var(--red-fg);}
+  .rs-modeselect{display:flex;gap:6px;margin-bottom:14px;}
+  .rs-modeselect button{border:none;background:#fff;color:var(--navy);font-weight:bold;font-size:12px;padding:9px 14px;border-radius:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);font-family:Arial;}
+  .rs-modeselect button.active{background:var(--navy);color:#fff;}
+  .rs-date-heading{font-weight:bold;color:var(--navy);font-size:15px;margin-bottom:12px;}
+  .rs-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;flex-shrink:0;border:2.5px solid transparent;}
+  .rs-avatar-empty{background:#EEF1F5 !important;color:#B7C0CC;border-color:#E2E8F0 !important;}
+  .rs-shiftnow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;}
+  .rs-shiftnow-card{position:relative;background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid transparent;transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;cursor:pointer;}
+  .rs-shiftnow-card.is-live{border-color:#1E7A34;box-shadow:0 4px 16px rgba(30,122,52,.22);transform:translateY(-2px);}
+  .rs-shiftnow-card.is-conflict{border-color:var(--red-fg);box-shadow:0 4px 16px rgba(156,0,6,.22);}
+  .rs-unified-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;border:2px solid #1E7A34;box-shadow:0 4px 16px rgba(30,122,52,.22);}
+  .rs-unified-card .rs-shiftnow-card{background:transparent;border:none;box-shadow:none;padding:0 0 16px;transform:none !important;}
+  .rs-unified-card .month-nav{margin-top:0;}
+  .rs-shiftnow-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
+  .rs-shiftnow-label{font-weight:bold;color:var(--navy);font-size:13px;}
+  .rs-shiftnow-time{font-size:11px;color:#667;}
+  .rs-live-badge{display:none;align-items:center;gap:4px;background:#1E7A34;color:#fff;font-size:10px;font-weight:bold;padding:3px 8px;border-radius:20px;letter-spacing:.3px;white-space:nowrap;}
+  .rs-shiftnow-card.is-live .rs-live-badge{display:inline-flex;}
+  .rs-shiftnow-card.is-conflict .rs-live-badge{display:inline-flex;background:var(--red-fg);}
+  .rs-live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:rsPulse 1.4s infinite;}
+  @keyframes rsPulse{0%{opacity:1;}50%{opacity:.25;}100%{opacity:1;}}
+  .rs-shiftnow-person{display:flex;align-items:center;gap:12px;}
+  .rs-shiftnow-card.is-live .rs-avatar, .rs-shiftnow-card.is-conflict .rs-avatar{width:56px !important;height:56px !important;box-shadow:0 0 0 3px rgba(30,122,52,.15);}
+  .rs-shiftnow-card.is-conflict .rs-avatar{box-shadow:0 0 0 3px rgba(156,0,6,.15);}
+  .rs-shiftnow-name{font-weight:bold;color:var(--navy);font-size:14px;}
+  .rs-shiftnow-code{font-size:11px;color:#667;}
 
-  .task textarea{width:100%;border:1px solid #dbe2ea;border-radius:6px;padding:7px 9px;font-family:Arial;font-size:12px;resize:vertical;min-height:32px;color:#333;}
+  .rs-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .rs-status-block{background:#F8FAFC;border-radius:10px;padding:10px 12px;}
+  .rs-status-label{font-size:10.5px;font-weight:bold;color:#556;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;}
+  .rs-status-person{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:bold;color:#222;margin-bottom:6px;}
+  .rs-status-person:last-child{margin-bottom:0;}
+  .rs-status-person-main{font-size:14px;color:var(--navy);}
+  .rs-status-empty{font-size:11.5px;color:#aaa;}
+  @media (max-width:520px){ .rs-status-grid{grid-template-columns:1fr;} }
+  .rs-extra-panel{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:16px;}
+  .rs-extra-title{font-weight:bold;color:var(--navy);font-size:14px;margin-bottom:10px;}
+  .rs-extra-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--zebra);font-size:13px;}
+  .rs-extra-row:first-of-type{border-top:none;}
+  .rs-extra-label{flex:0 0 70px;color:#667;font-size:12px;}
+  .rs-extra-name{font-weight:bold;color:var(--navy);}
+  .rs-week-table-wrap{overflow-x:auto;background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  table.rs-table{border-collapse:collapse;width:100%;font-size:12px;}
+  table.rs-table th, table.rs-table td{border:1px solid #E2E8F0;padding:8px;text-align:center;white-space:nowrap;}
+  table.rs-table thead th{background:var(--navy);color:#fff;font-weight:bold;position:sticky;top:0;}
+  table.rs-table tbody tr:nth-child(odd){background:var(--zebra);}
+  table.rs-table tbody tr.is-today td{background:#DCE9FA;}
+  table.rs-table td.rowlabel{background:var(--hilite);color:var(--navy);font-weight:bold;text-align:left;}
+  .rs-table-person{display:flex;flex-direction:column;align-items:center;gap:3px;}
 
-  .save-bar{position:sticky;bottom:0;background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 -2px 8px rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center;margin-top:6px;flex-wrap:wrap;gap:4px;}
-  .save-status{font-size:11.5px;color:#667;}
-  .save-status.saved{color:var(--green);font-weight:bold;}
-  .save-status.error{color:var(--red-fg);font-weight:bold;}
+  .conflict-banner{display:none;background:var(--red-bg);color:var(--red-fg);border-radius:8px;padding:10px 12px;font-size:12px;font-weight:bold;margin-top:12px;line-height:1.5;}
+  .filter-status{display:none;align-items:center;justify-content:space-between;gap:10px;background:var(--hilite);color:var(--navy);padding:8px 12px;border-radius:8px;font-size:12px;font-weight:bold;margin-bottom:10px;flex-wrap:wrap;}
+
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .cal-weekday{text-align:center;font-size:11px;font-weight:bold;color:var(--navy);padding:4px 0;}
+  .cal-cell{background:#fff;border-radius:8px;min-height:76px;padding:6px;box-shadow:0 1px 2px rgba(0,0,0,.08);border:2px solid transparent;cursor:pointer;position:relative;}
+  .cal-cell.pad{background:transparent;box-shadow:none;cursor:default;}
+  .cal-cell.dragover{border-color:var(--accent);background:var(--hilite);}
+  .cal-cell.today{border-color:var(--navy);}
+  .cal-cell.conflict{border-color:var(--red-fg);background:var(--red-bg);}
+  .cal-cell.dimmed{opacity:.22;}
+  .cal-cell.highlight{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset;}
+  .cal-date{font-size:11px;color:#889;font-weight:bold;}
+  .cal-cell.today .cal-date{color:var(--navy);}
+  .cal-cell.conflict .cal-date{color:var(--red-fg);}
+  .cal-assign{margin-top:6px;}
+  .cal-chip{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:6px;color:#fff;font-size:10.5px;font-weight:bold;cursor:grab;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cal-chip .pin{font-size:9px;opacity:.85;}
+  .cal-empty-hint{font-size:10px;color:#bbb;text-align:center;margin-top:14px;}
+  .conflict-badge{position:absolute;top:4px;right:4px;font-size:11px;}
+  .cal-leave-tags{margin-top:4px;font-size:9px;color:var(--red-fg);font-weight:bold;line-height:1.3;}
+
+  .ondoff-section{margin-top:14px;}
+  .ondoff-title{margin:0 0 8px;font-size:13px;color:var(--navy);}
+  .ondoff-subtitle{font-size:11px;font-weight:700;color:#667;margin-bottom:6px;letter-spacing:.02em;}
+  .ondoff-list{display:flex;flex-direction:column;gap:6px;}
+  .ondoff-card{border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;}
+  .ondoff-head{display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer;background:#F8FAFC;user-select:none;}
+  .ondoff-head:hover{background:#EEF3F9;}
+  .ondoff-head .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .ondoff-head .name{flex:1;font-weight:bold;font-size:12.5px;color:#222;}
+  .ondoff-head .count{font-size:11px;color:#556;background:#fff;border-radius:10px;padding:2px 8px;border:1px solid #E2E8F0;}
+  .ondoff-head .chev{font-size:10px;color:#889;transition:transform .15s;}
+  .ondoff-card.open .ondoff-head .chev{transform:rotate(180deg);}
+  .ondoff-body{display:none;padding:8px 10px 10px;flex-wrap:wrap;gap:6px;}
+  .ondoff-card.open .ondoff-body{display:flex;}
+  .ondoff-body .empty{font-size:11px;color:#aaa;}
+  .date-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #D8E0EA;border-radius:6px;padding:4px 7px;font-size:11px;font-weight:bold;color:var(--navy);cursor:pointer;}
+  .date-chip:hover{background:var(--hilite);}
+  .date-chip.leave-chip{color:var(--red-fg);border-color:#F2C7CC;}
+  .date-chip .rm{margin-left:2px;color:#999;font-weight:normal;cursor:pointer;}
+  .date-chip .rm:hover{color:var(--red-fg);}
+  .ondoff-add-form{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+  .ondoff-add-form select, .ondoff-add-form input{padding:7px 8px;border:1px solid #D8E0EA;border-radius:6px;font-size:12px;font-family:Arial;}
+
+  .detail-backdrop{position:fixed;inset:0;background:rgba(15,25,45,.4);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:998;}
+  .detail-backdrop.show{opacity:1;pointer-events:auto;}
+  .detail-panel{position:fixed;top:0;right:0;height:100%;width:330px;max-width:92vw;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.22);z-index:999;transform:translateX(100%);transition:transform .28s ease;display:flex;flex-direction:column;}
+  .detail-panel.show{transform:translateX(0);}
+  .detail-header{background:var(--navy);color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  .detail-date{font-weight:bold;font-size:13.5px;line-height:1.3;}
+  .detail-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0;}
+  .detail-close:hover{background:rgba(255,255,255,.28);}
+  .detail-body{padding:14px;overflow-y:auto;flex:1;}
+  .detail-section-title{font-size:10.5px;font-weight:bold;color:#889;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.4px;}
+  .detail-section-title:first-child{margin-top:0;}
+  .detail-opt{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:bold;margin-bottom:6px;border:2px solid transparent;}
+  .detail-opt:hover{background:var(--zebra);}
+  .detail-opt.selected{border-color:var(--accent);background:var(--hilite);}
+  .detail-opt .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .detail-clear{color:var(--red-fg);}
+  .detail-crit-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;background:var(--zebra);margin-bottom:6px;font-size:12.5px;font-weight:bold;cursor:pointer;}
+  .detail-crit-row input{width:16px;height:16px;flex-shrink:0;}
+  .detail-group-label{font-size:11px;font-weight:bold;color:var(--navy);margin:8px 0 4px;}
+  .detail-conflict-note{background:var(--red-bg);color:var(--red-fg);border-radius:8px;padding:10px;font-size:11.5px;font-weight:bold;margin-top:12px;line-height:1.5;}
+  @media (max-width:640px){
+    .detail-panel{width:100%;max-width:100%;top:auto;bottom:0;height:auto;max-height:85vh;border-radius:16px 16px 0 0;transform:translateY(100%);}
+    .detail-panel.show{transform:translateY(0);}
+  }
+
+  .summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:14px;}
+  .summary .s-card{border-radius:8px;padding:9px 10px;color:#fff;cursor:pointer;transition:transform .15s ease, box-shadow .15s ease;border:3px solid transparent;}
+  .summary .s-card:hover{transform:translateY(-2px);}
+  .summary .s-card.s-card-active{border-color:var(--navy);box-shadow:0 3px 8px rgba(0,0,0,.25);}
+  .summary .s-card .num{font-size:18px;font-weight:bold;}
+  .summary .s-card .lab{font-size:10.5px;opacity:.9;}
+
+  .order-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+  .order-item{display:flex;align-items:center;gap:8px;background:var(--zebra);border-radius:8px;padding:7px 10px;}
+  .order-item .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .order-item .name{flex:1;font-size:12.5px;font-weight:bold;color:#333;}
+  .order-item .mv{border:none;background:#fff;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.1);flex-shrink:0;}
+
+  .team-add-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .team-add-form input[type=text]{flex:1;min-width:140px;}
+
+  .save-bar{position:sticky;bottom:0;background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 -2px 8px rgba(0,0,0,.08);display:flex;justify-content:center;align-items:center;margin-top:6px;}
+  .save-status{font-size:11.5px;color:#667;font-weight:bold;}
+  .save-status.dirty{color:#C99A2E;}
+  .save-status.clean{color:var(--green);}
+  .save-status.error{color:var(--red-fg);}
 
   footer{text-align:center;font-size:10.5px;color:var(--accent);font-style:italic;margin-top:16px;}
 
-  .history-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-  .history-chip{background:var(--hilite);color:var(--navy);border-radius:14px;padding:4px 10px;font-size:11px;cursor:pointer;border:1px solid #c3d7ee;}
-  .history-chip:hover{background:#c3d7ee;}
-
-  /* Rekap view */
-  .rekap-modeselect{display:flex;gap:6px;margin-bottom:12px;}
-  .rekap-modeselect button{flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--hilite);background:#fff;color:var(--navy);font-weight:bold;font-size:12.5px;cursor:pointer;}
-  .rekap-modeselect button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-
-  .day-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:8px;padding:9px 12px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);}
-  .day-row[data-date]:hover{box-shadow:0 2px 6px rgba(0,0,0,.15);background:var(--hilite);}
-  .day-row .d-date{width:100px;font-size:12px;font-weight:bold;color:var(--navy);}
-  .day-row .d-bar{flex:1;height:8px;background:#e6ebf1;border-radius:5px;overflow:hidden;}
-  .day-row .d-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--navy));border-radius:5px;}
-  .day-row .d-pct{width:44px;text-align:right;font-size:12px;font-weight:bold;color:var(--navy);}
-  .day-row.empty{opacity:.4;}
-
-  .month-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:8px;padding:9px 12px;margin-bottom:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);}
-  .month-row .m-name{width:90px;font-size:12px;font-weight:bold;color:var(--navy);}
-
-  .follow-item{background:#fff;border-left:4px solid var(--yellow-bg);border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:12px;}
-  .follow-item.notyet{border-left-color:#d9848c;}
-  .follow-item .fi-date{font-weight:bold;color:var(--navy);margin-right:6px;}
-  .follow-item .fi-status{display:inline-block;font-size:10px;font-weight:bold;padding:2px 7px;border-radius:10px;margin-left:6px;}
-  .follow-item .fi-status.fu{background:var(--yellow-bg);color:var(--yellow-fg);}
-  .follow-item .fi-status.ny{background:var(--red-bg);color:var(--red-fg);}
-
-  .section-title{font-size:13px;font-weight:bold;color:var(--navy);margin:16px 0 8px;}
-  .empty-note{font-size:12px;color:#999;text-align:center;padding:14px;}
-
-  @media (max-width:600px){
-    .summary{grid-template-columns:repeat(3,1fr);}
-  }
-
-  /* Follow Up view */
-  .fu-toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-  .fu-filter{border:1.5px solid var(--hilite);background:#fff;color:var(--navy);border-radius:14px;padding:6px 12px;font-size:12px;font-weight:bold;cursor:pointer;}
-  .fu-filter.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-  .fu-form{background:#fff;border-radius:10px;padding:12px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-wrap:wrap;gap:10px;}
-  .fu-form label{font-size:11px;font-weight:bold;color:var(--navy);display:block;margin-bottom:3px;}
-  .fu-form input, .fu-form select, .fu-form textarea{border:1px solid #c7d3e0;border-radius:6px;padding:7px 9px;font-size:13px;font-family:Arial;width:100%;}
-  .fu-form .f-grow{flex:2;min-width:200px;}
-  .fu-form .f-small{flex:1;min-width:120px;}
-  .fu-card{background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);border-left:5px solid #ccc;}
-  .fu-card.status-Open{border-left-color:#6a9bcf;}
-  .fu-card.status-Onprogress{border-left-color:#d8b400;}
-  .fu-card.status-Hold{border-left-color:#d9848c;}
-  .fu-card.status-Close{border-left-color:var(--green);}
-  .fu-card .fu-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-  .fu-card .fu-desc{font-size:13px;color:#222;font-weight:bold;margin-bottom:4px;}
-  .fu-card .fu-meta{font-size:11px;color:#667;}
-  .fu-card .fu-note{font-size:12px;color:#556;margin-top:6px;}
-  .select-with-actions{display:flex;gap:4px;}
-  .select-with-actions select{flex:1;min-width:0;}
-  .icon-btn{border:none;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;padding:0 9px;font-family:Arial;flex-shrink:0;}
-  .icon-btn-add{background:var(--hilite);color:var(--navy);}
-  .icon-btn-add:hover{background:#c3d7ee;}
-  .icon-btn-del{background:var(--red-bg);color:var(--red-fg);}
-  .icon-btn-del:hover{background:#f8b3bc;}
-
-  /* Modal Kelola Vendor */
-  .modal-overlay{position:fixed;inset:0;background:rgba(20,30,45,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px;}
-  .modal-overlay.active{display:flex;}
-  .modal-box{background:#fff;border-radius:14px;max-width:420px;width:100%;max-height:82vh;overflow-y:auto;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.3);position:relative;}
-  .modal-box h3{margin:0 0 14px;color:var(--navy);font-size:16px;padding-right:20px;}
-  .modal-close-x{position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:#889;line-height:1;padding:2px;}
-  .modal-close-x:hover{color:var(--red-fg);}
-  .vendor-add-row{display:flex;gap:8px;margin-bottom:12px;}
-  .vendor-add-row input{flex:1;border:1px solid #c7d3e0;border-radius:6px;padding:9px 10px;font-size:13px;font-family:Arial;}
-  .vendor-item-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;}
-  .vendor-item{display:flex;justify-content:space-between;align-items:center;background:var(--zebra);border-radius:8px;padding:8px 10px;font-size:13px;color:#223;}
-  .vendor-item .vendor-item-del{background:var(--red-bg);color:var(--red-fg);border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:bold;cursor:pointer;font-family:Arial;flex-shrink:0;}
-  .vendor-item .vendor-item-del:hover{background:#f8b3bc;}
-  .vendor-item .vendor-item-del.confirming{background:var(--red-fg);color:#fff;}
-  .vendor-empty-note{font-size:12px;color:#889;text-align:center;padding:10px 0;}
-  .fu-badge{display:inline-block;font-size:10.5px;font-weight:bold;padding:3px 10px;border-radius:12px;white-space:nowrap;}
-  .fu-badge.Open{background:var(--blue-bg);color:var(--blue-fg);}
-  .fu-badge.Onprogress{background:var(--yellow-bg);color:var(--yellow-fg);}
-  .fu-badge.Hold{background:var(--red-bg);color:var(--red-fg);}
-  .fu-badge.Close{background:var(--green-bg);color:var(--green);}
-  .fu-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-  .fu-actions select{border:1px solid #c7d3e0;border-radius:6px;padding:4px 6px;font-size:11.5px;font-family:Arial;}
-  .fu-del{border:1.5px solid #e39aa1;background:var(--red-bg);color:var(--red-fg);border-radius:14px;padding:5px 14px;font-size:11.5px;font-weight:bold;cursor:pointer;font-family:Arial;}
-  .fu-del:hover{background:#ffb3bd;}
-  /* ---- Roster ---- */
-  .roster-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
-  .roster-chip{
-    display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--hilite);
-    border-radius:20px;padding:5px 12px;font-size:12px;font-weight:bold;color:var(--navy);
-    box-shadow:0 1px 3px rgba(0,0,0,.06);
-  }
-  .roster-chip .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-  .roster-sync-banner{font-size:11.5px;padding:7px 12px;border-radius:6px;margin-bottom:12px;font-weight:bold;}
-  .roster-sync-banner.syncing{background:var(--hilite);color:var(--navy);}
-  .roster-sync-banner.ok{background:var(--green-bg);color:var(--green);}
-  .roster-sync-banner.error{background:var(--red-bg);color:var(--red-fg);}
-  .roster-editable-label{outline:none;border-radius:4px;padding:1px 3px;cursor:text;}
-  .roster-editable-label:hover{background:rgba(31,56,100,.06);}
-  .roster-editable-label:focus{background:rgba(31,56,100,.12);box-shadow:0 0 0 1.5px rgba(31,56,100,.3);}
-  .roster-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-  .roster-modeselect{display:flex;gap:6px;}
-  .roster-modeselect button{
-    border:none;background:#fff;color:var(--navy);font-weight:bold;font-size:12px;padding:8px 14px;
-    border-radius:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);
-  }
-  .roster-modeselect button.active{background:var(--navy);color:#fff;}
-  .roster-empty{background:#fff;border-radius:10px;padding:30px 16px;text-align:center;color:var(--grey-fg);font-size:13px;}
-  /* ---- Avatar foto & Shift-Now cards ---- */
-  .roster-avatar{
-    border-radius:50%;overflow:hidden;flex-shrink:0;border:2.5px solid transparent;
-    display:flex;align-items:center;justify-content:center;background:#eee;
-  }
-  .roster-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
-  .roster-avatar-initial{color:#fff;font-weight:bold;font-size:15px;}
-  .roster-avatar-empty{background:#EEF1F5;color:#B7C0CC;font-weight:bold;border-color:#E2E8F0 !important;}
-  .roster-shiftnow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px;}
-  .roster-shiftnow-card{
-    position:relative;background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);
-    border:2px solid transparent;transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;
-  }
-  .roster-shiftnow-card.is-live{
-    border-color:#1E7A34;box-shadow:0 4px 16px rgba(30,122,52,.22);transform:translateY(-2px);
-  }
-  .roster-shiftnow-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .roster-shiftnow-label{font-weight:bold;color:var(--navy);font-size:13px;}
-  .roster-shiftnow-time{font-size:11px;color:var(--grey-fg);}
-  .roster-live-badge{
-    display:none;align-items:center;gap:4px;background:#1E7A34;color:#fff;font-size:10px;font-weight:bold;
-    padding:3px 8px;border-radius:20px;letter-spacing:.3px;
-  }
-  .roster-shiftnow-card.is-live .roster-live-badge{display:inline-flex;}
-  .roster-live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:rosterPulse 1.4s infinite;}
-  @keyframes rosterPulse{0%{opacity:1;}50%{opacity:.25;}100%{opacity:1;}}
-  .roster-shiftnow-person{display:flex;align-items:center;gap:12px;}
-  .roster-shiftnow-card.is-live .roster-avatar{width:56px !important;height:56px !important;border-color:#1E7A34;box-shadow:0 0 0 3px rgba(30,122,52,.15);}
-  .roster-shiftnow-name{font-weight:bold;color:var(--navy);font-size:14px;}
-  .roster-shiftnow-code{font-size:11px;color:var(--grey-fg);}
-  .roster-daycard{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:16px;margin-bottom:12px;border:2px solid transparent;}
-  .roster-daycard.highlight{border-color:var(--accent);box-shadow:0 2px 8px rgba(46,95,163,.18);}
-  .roster-daycard-date{font-weight:bold;color:var(--navy);font-size:14px;margin-bottom:10px;}
-  .roster-shift-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--zebra);font-size:13px;}
-  .roster-shift-row:first-of-type{border-top:none;}
-  .roster-shift-row.muted{color:var(--grey-fg);font-size:12px;}
-  .roster-shift-label{flex:0 0 170px;color:var(--grey-fg);font-size:12px;}
-  .roster-shift-name{font-weight:bold;color:var(--navy);}
-  .roster-cell-badge{
-    display:inline-block;min-width:34px;text-align:center;color:#fff;font-weight:bold;
-    font-size:11px;padding:3px 8px;border-radius:12px;
-  }
-  .roster-week-cards{display:flex;flex-direction:column;}
-  .roster-week{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px;overflow:hidden;}
-  .roster-week-title{background:var(--accent);color:#fff;padding:10px 14px;font-weight:bold;font-size:13px;}
-  .roster-table-wrap{overflow-x:auto;}
-  table.roster-table{border-collapse:collapse;width:100%;font-size:12px;}
-  table.roster-table th, table.roster-table td{border:1px solid #E2E8F0;padding:7px 8px;text-align:center;white-space:nowrap;}
-  table.roster-table thead th{background:var(--navy);color:#fff;font-weight:bold;}
-  table.roster-table td.rowlabel{background:var(--hilite);color:var(--navy);font-weight:bold;text-align:left;}
-  table.roster-table tbody tr:nth-child(odd){background:var(--zebra);}
-  table.roster-table tbody tr.is-today td{background:#DCE9FA;}
-  /* ---- Toast notifikasi ---- */
   #toastWrap{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
-  .toast{
-    display:flex;align-items:center;gap:10px;min-width:220px;max-width:340px;
-    padding:12px 16px;border-radius:8px;color:#fff;font-size:13px;font-weight:600;
-    background:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,.18);
-    opacity:0;transform:translateX(20px);transition:opacity .25s ease,transform .25s ease;
-  }
+  .toast{display:flex;align-items:center;gap:10px;min-width:220px;max-width:340px;padding:12px 16px;border-radius:8px;color:#fff;font-size:13px;font-weight:600;background:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:0;transform:translateX(20px);transition:opacity .25s ease,transform .25s ease;}
   .toast.show{opacity:1;transform:translateX(0);}
   .toast.toast-success{background:#1f7a3f;}
   .toast.toast-error{background:#b3261e;}
+
+  input[type=file]{display:none;}
+
+  @media (max-width:640px){
+    .cal-cell{min-height:58px;padding:4px;}
+    .cal-chip{font-size:9.5px;padding:3px 4px;}
+    .month-nav .label{font-size:13px;min-width:110px;}
+  }
+  @media print{
+    .tabs, .controls, .palette, .palette-hint, .save-bar, header, footer, #toastWrap{display:none !important;}
+    .cal-cell{border:1px solid #ccc;}
+  }
 </style>
 </head>
 <body>
 <div id="toastWrap"></div>
+<div class="detail-backdrop" id="detailBackdrop"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div class="detail-date" id="detailDate"></div>
+    <button class="detail-close" id="detailClose">✕</button>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
 <div class="app">
   <header>
-    <h1 contenteditable="true" id="headerTitle">📋 Digitech Daily Checklist Assistant</h1>
-    <p contenteditable="true" id="headerSubtitle">Site Reliability Engineer · Digital Sustainability Operation · PT Borneo Indobara</p>
-    <span class="storage-badge" contenteditable="true" id="storageBadge">Site Reliability Engineer</span>
+    <h1>📅 Roster On-Call / Standby — Digitech Monitoring Team</h1>
+    <p>Site Reliability Engineer · Digital Sustainability Operation · PT Borneo Indobara</p>
+    <span class="mode-badge" id="modeBadge">☁️ Mode: Auto-save (Google Sheets) — memuat...</span>
   </header>
 
-  <div class="tabs">
-    <div class="tab active" data-view="harian">✅ Checklist Harian</div>
-    <div class="tab" data-view="followup">🔄 Follow Up</div>
-    <div class="tab" data-view="rekap">📊 Rekap</div>
-    <div class="tab" data-view="roster">🗓️ Roster</div>
-  </div>
+  <div class="tabs" id="tabsBar"></div>
+  <div class="tabs tabs-sub2" id="utilTabsBar"></div>
 
-  <!-- ================= VIEW: HARIAN ================= -->
-  <div class="view active" id="view-harian">
-    <div class="controls">
-      <div>
-        <label>Tanggal</label>
-        <input type="date" id="dateInput">
-      </div>
-      <div>
-        <label>Shift</label>
-        <select id="shiftInput">
-          <option>Shift 1</option>
-          <option>Shift 2</option>
-          <option>Shift 3</option>
-          <option>Non Shift</option>
-        </select>
-      </div>
-      <div class="grow">
-        <label>PIC</label>
-        <select id="picInput" style="width:100%;">
-          <option>Harris</option>
-          <option>Nico Fahryan Sandy</option>
-          <option>Lukman Gunawan</option>
-          <option>Taufik Wirayudha</option>
-          <option>Adhe Setiawan</option>
-        </select>
-      </div>
-      <div style="align-self:flex-end;display:flex;gap:8px;">
-        <button class="btn btn-ghost" id="resetBtn">Reset Hari Ini</button>
-        <button class="btn btn-primary" id="saveBtn">💾 Simpan</button>
-      </div>
-    </div>
-
-    <div class="progress-wrap">
-      <div class="top"><span>Progress hari ini</span><span id="progressPct">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-    </div>
-
-    <div class="summary" id="summaryCards"></div>
-
-    <div id="categories"></div>
-
-    <div class="progress-wrap" style="margin-top:4px;">
-      <div class="top" style="margin-bottom:8px;"><span>📅 Riwayat Tersimpan</span></div>
-      <div class="history-list" id="historyList"><span style="font-size:11px;color:#999;">Memuat...</span></div>
-    </div>
-
-    <div class="save-bar">
-      <span class="save-status" id="saveStatus">Belum disimpan</span>
-      <span style="font-size:10.5px;color:#99a;" id="saveHint">Data tersimpan otomatis per tanggal</span>
-    </div>
-  </div>
-
-  <!-- ================= VIEW: FOLLOW UP ================= -->
-  <div class="view" id="view-followup">
-    <div class="fu-subview active" id="fu-sub-general">
-      <div class="fu-form">
-        <div class="f-grow">
-          <label>Deskripsi Temuan / Task</label>
-          <input type="text" id="fuDesc" placeholder="Contoh: Follow up sensor Lane 1 resin degradation">
-        </div>
-        <div class="f-small">
-          <label>Vendor</label>
-          <div class="select-with-actions">
-            <select id="fuVendor">
-              <option value="">-</option>
-            </select>
-            <button type="button" class="icon-btn icon-btn-add" id="fuVendorManageBtn" title="Kelola daftar vendor (tambah/hapus)">⚙️</button>
-          </div>
-        </div>
-        <div class="f-small">
-          <label>PIC</label>
-          <div class="select-with-actions">
-            <select id="fuPic">
-              <option value="">-</option>
-            </select>
-            <button type="button" class="icon-btn icon-btn-add" id="fuPicManageBtn" title="Kelola daftar PIC (tambah/hapus)">⚙️</button>
-          </div>
-        </div>
-        <div class="f-small">
-          <label>Due Date</label>
-          <input type="date" id="fuDue">
-        </div>
-        <div class="f-small">
-          <label>Status</label>
-          <select id="fuStatus">
-            <option>Open</option>
-            <option>Onprogress</option>
-            <option>Hold</option>
-            <option>Close</option>
-          </select>
-        </div>
-        <div class="f-grow">
-          <label>Catatan</label>
-          <input type="text" id="fuNote" placeholder="Catatan tambahan (opsional)">
-        </div>
-        <div style="align-self:flex-end;">
-          <button class="btn btn-primary" id="fuAddBtn">+ Tambah Follow Up</button>
-        </div>
-      </div>
-
-      <div class="summary" id="fuSummaryCards"></div>
-
-      <div class="fu-toolbar" id="fuFilterBar"></div>
-      <div id="fuList"></div>
-    </div>
-
-  </div>
-
-  <!-- ================= MODAL: KELOLA VENDOR ================= -->
-  <div class="modal-overlay" id="vendorModalOverlay">
-    <div class="modal-box">
-      <button type="button" class="modal-close-x" id="vendorModalCloseBtn" title="Tutup">✕</button>
-      <h3>🏷️ Kelola Daftar Vendor</h3>
-      <div class="vendor-add-row">
-        <input type="text" id="vendorModalInput" placeholder="Nama vendor baru...">
-        <button type="button" class="btn btn-primary" id="vendorModalAddBtn">+ Tambah</button>
-      </div>
-      <div id="vendorModalMsg" style="display:none;font-size:11.5px;color:var(--red-fg);font-weight:bold;margin-bottom:8px;"></div>
-      <div class="vendor-item-list" id="vendorModalList"></div>
-      <div style="text-align:right;margin-top:14px;">
-        <button type="button" class="btn btn-ghost" id="vendorModalDoneBtn">Selesai</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MODAL: KELOLA PIC ================= -->
-  <div class="modal-overlay" id="picModalOverlay">
-    <div class="modal-box">
-      <button type="button" class="modal-close-x" id="picModalCloseBtn" title="Tutup">✕</button>
-      <h3>👤 Kelola Daftar PIC</h3>
-      <div class="vendor-add-row">
-        <input type="text" id="picModalInput" placeholder="Nama PIC baru...">
-        <button type="button" class="btn btn-primary" id="picModalAddBtn">+ Tambah</button>
-      </div>
-      <div id="picModalMsg" style="display:none;font-size:11.5px;color:var(--red-fg);font-weight:bold;margin-bottom:8px;"></div>
-      <div class="vendor-item-list" id="picModalList"></div>
-      <div style="text-align:right;margin-top:14px;">
-        <button type="button" class="btn btn-ghost" id="picModalDoneBtn">Selesai</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MODAL: DETAIL STATUS REKAP (klik card ringkasan) ================= -->
-  <div class="modal-overlay" id="rekapStatusModalOverlay">
-    <div class="modal-box" style="max-width:480px;">
-      <button type="button" class="modal-close-x" id="rekapStatusModalCloseBtn" title="Tutup">✕</button>
-      <h3 id="rekapStatusModalTitle">Detail Status</h3>
-      <div id="rekapStatusModalSub" style="font-size:11.5px;color:#667;margin-bottom:10px;"></div>
-      <div class="rekap-status-list" id="rekapStatusModalList"></div>
-      <div style="text-align:right;margin-top:14px;">
-        <button type="button" class="btn btn-ghost" id="rekapStatusModalDoneBtn">Tutup</button>
-      </div>
-    </div>
-  </div>
-  <!-- ================= VIEW: REKAP ================= -->
-  <div class="view" id="view-rekap">
-    <div class="rekap-modeselect">
-      <button data-mode="week" class="active">Mingguan</button>
-      <button data-mode="month">Bulanan</button>
-      <button data-mode="year">Tahunan</button>
-    </div>
-
-    <div class="controls" id="rekapControls"></div>
-
-    <div class="progress-wrap">
-      <div class="top"><span id="rekapAvgLabel">Rata-rata penyelesaian periode ini</span><span id="rekapAvgPct">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="rekapAvgFill" style="width:0%"></div></div>
-    </div>
-
-    <div class="summary" id="rekapSummaryCards"></div>
-
-    <div id="rekapDetail"></div>
-
-    <div class="section-title">🟡 Item Follow up / 🔴 Belum Selesai dalam periode ini</div>
-    <div class="summary" id="rekapFuSummaryCards"></div>
-    <div class="fu-toolbar" id="rekapFuFilterBar"></div>
-    <div id="rekapFollowList"></div>
-
-    <div style="margin-top:16px;">
-      <button type="button" id="rekapFuDebugToggle" style="font-size:12px;color:#888;background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;">🔍 Debug Sinkronisasi</button>
-      <pre id="rekapFuDebugBox" style="display:none;margin-top:8px;padding:10px;background:#f7f7f7;border:1px solid #ddd;border-radius:6px;font-size:11px;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow:auto;"></pre>
-    </div>
-  </div>
-
-  <!-- ================= VIEW: ROSTER ================= -->
-  <div class="view" id="view-roster">
-    <div id="rosterSyncBanner" class="roster-sync-banner syncing">Menyinkronkan data roster dari Google Sheets...</div>
-    <div class="roster-toolbar">
-      <div class="roster-modeselect">
+  <!-- ===================== VIEW: OVERVIEW ===================== -->
+  <div class="view active" id="view-overview">
+    <div class="card-box">
+      <div class="rs-sync-banner" id="rsSyncBanner">✓ Tersimpan otomatis · Google Sheets</div>
+      <div class="rs-modeselect" id="overviewModeSelect">
         <button data-mode="today" class="active">Hari Ini</button>
         <button data-mode="week">Minggu Ini</button>
         <button data-mode="month">Bulan Ini</button>
       </div>
-      <button class="btn btn-ghost" id="rosterRefreshBtn">↻ Sinkron Ulang</button>
+      <div class="rs-date-heading" id="overviewDateHeading"></div>
+      <div id="overviewBody"></div>
     </div>
-    <div id="rosterContent"></div>
+  </div>
+
+  <!-- ===================== VIEW: DIVISI (di-generate JS) ===================== -->
+  <div id="divisionViewsMount"></div>
+
+  <!-- ===================== VIEW: DATA ===================== -->
+  <div class="view" id="view-data">
+    <div class="card-box">
+      <h3>☁️ Penyimpanan Otomatis</h3>
+      <p style="font-size:12px;color:#556;">Aplikasi ini menyimpan seluruh data (tim, rotasi per divisi, override, tanda cuti) secara <b>otomatis</b> ke penyimpanan server (<code>Google Sheets</code>) setiap ada perubahan — tidak perlu export/import manual, dan data tetap ada walau tab browser ditutup atau dibuka ulang. Tombol di bawah hanya untuk backup opsional.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="exportJsonBtn">⬇️ Backup JSON (lengkap + setting rotasi)</button>
+        <button class="btn btn-ghost" id="exportCsvBtn">⬇️ Export CSV (untuk Excel, semua divisi)</button>
+      </div>
+    </div>
+    <div class="card-box">
+      <h3>📂 Restore dari Backup</h3>
+      <p style="font-size:12px;color:#556;">Pilih file JSON hasil backup sebelumnya untuk memuat ulang data — hasil restore ini juga akan langsung disimpan otomatis.</p>
+      <button class="btn btn-ghost" id="importJsonBtn">📂 Pilih File JSON...</button>
+      <input type="file" id="importJsonFile" accept="application/json">
+    </div>
+  </div>
+
+  <div class="save-bar">
+    <span class="save-status clean" id="saveStatus">☁️ Memuat...</span>
   </div>
 
   <footer>Maintain. Monitor. Improve. — Digitech Monitoring Team</footer>
 </div>
 
 <script>
-/* ============================================================
-   KONFIGURASI BACKEND STORAGE
-   App ini di-hosting sendiri (GitHub Pages), sehingga window.storage
-   (fitur khusus Claude.ai) tidak tersedia. Sebagai gantinya, semua
-   data (checklist harian, follow up, label, dsb) disimpan ke Google
-   Sheets lewat Google Apps Script Web App — supaya sinkron antar
-   device & antar personil tim (Nico, Lukman, Taufik, Adhe).
+/* ==================== KONFIGURASI DIVISI ==================== */
+const DIVISIONS_CONFIG = [
+  { id:'maint', name:'Maintenance & Support', icon:'🔧', color:'#2E5FA3',
+    memberNames:['Harris','Nyco','Taufik','Lukman Gunawan','Adhe Setiawan'] },
+  { id:'proj', name:'Project & Acceleration', icon:'🚀', color:'#1E8E7E',
+    memberNames:['Sony Salubongga','Abdillah','Ishaq Arifin'] },
+  { id:'dev', name:'Development', icon:'💻', color:'#C99A2E',
+    memberNames:['Dani Suryanda','Raka'] }
+];
+// Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
+const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
+const STORAGE_KEY = 'roster:state';
 
-   CARA ISI:
-   1. Deploy backend "Code.gs" sebagai Web App (lihat panduan di file itu).
-   2. Copy URL Web App-nya (format: https://script.google.com/macros/s/XXXX/exec)
-   3. Paste ke APPS_SCRIPT_URL di bawah ini, ganti nilai kosong "".
-   ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0EpZSa7vIfM4Cer00gK04wR0bdStSN6lCMk_6rFENdWt3jEWyErCm2r1RtegruGmQ/exec"; // <-- WAJIB DIISI setelah deploy Apps Script
+/* ==================== KONFIGURASI BACKEND (Google Apps Script) ====================
+   Ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
+   Bentuknya: https://script.google.com/macros/s/XXXXXXXXXXXX/exec */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLwZFTIVr2T3YhA9nj1713k0kfbU5CNBcOJ5M5X58BG3kpYmo7DraUB9sXMSQSh3k0ng/exec';
 
-/* ---------------- STORAGE LAYER (backend Google Sheets via Apps Script) ---------------- */
-function requireStorageConfig(){
-  if (!APPS_SCRIPT_URL) {
-    throw new Error('APPS_SCRIPT_URL belum diisi. Deploy backend Code.gs lalu isi URL-nya di config script.');
+/* Store object: meniru interface window.storage (get/set/delete/list),
+   tapi backend-nya Google Sheets via Apps Script Web App.
+   Semua request pakai GET (bukan POST) supaya tidak kena masalah
+   "Failed to fetch" akibat redirect internal Google Apps Script. */
+const sheetStore = {
+  async get(key){
+    const url = `${APPS_SCRIPT_URL}?action=get&key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Gagal mengambil data');
+    if(data.value === null || data.value === undefined || data.value === '') return null;
+    return { key, value: data.value };
+  },
+  async set(key, value){
+    // Pakai POST + text/plain (bukan application/json) supaya browser TIDAK
+    // mengirim CORS preflight (OPTIONS) yang tidak didukung Apps Script.
+    // Payload lewat body, bukan query string, jadi tidak kena batas panjang URL.
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'set', key, value })
+    });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Gagal menyimpan data');
+    return { key, value };
+  },
+  async delete(key){
+    const url = `${APPS_SCRIPT_URL}?action=delete&key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Gagal menghapus data');
+    return data;
+  }
+};
+
+/* ==================== IMPORT JADWAL DARI "Rooster BIB.xlsx" (Google Sheets) ====================
+   Sumber: tab "Rooster 2026", periode 29-Des-2025 s/d 2-Apr-2026.
+   Legend sumber: ON(1)=standby, OFF(2)=libur, HO(3)=home office, Leave(4)=cuti.
+   Tanggal di bawah ini adalah status NON-ON (OFF/HO/Leave) → ditandai sebagai "Cuti" (Day-off) di tool ini. */
+const SCHEDULE_IMPORT_MAINT = {
+  'Harris': ['2026-01-26', '2026-01-27', '2026-01-28', '2026-01-29', '2026-01-30', '2026-01-31', '2026-02-01', '2026-02-02', '2026-02-03', '2026-02-04', '2026-02-05', '2026-03-19', '2026-03-20', '2026-03-21', '2026-03-22', '2026-03-23', '2026-03-24', '2026-03-25', '2026-03-26', '2026-03-27', '2026-03-28'],
+  'Lukman Gunawan': ['2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08', '2026-01-09', '2026-01-10', '2026-01-11', '2026-01-12', '2026-02-21', '2026-02-22', '2026-02-23', '2026-02-24', '2026-02-25', '2026-02-26', '2026-02-27', '2026-02-28', '2026-03-28', '2026-03-29', '2026-03-30', '2026-03-31', '2026-04-01', '2026-04-02'],
+  'Nyco': ['2025-12-29', '2025-12-30', '2025-12-31', '2026-01-01', '2026-02-13', '2026-02-14', '2026-02-15', '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19', '2026-02-20', '2026-03-11', '2026-03-12', '2026-03-13', '2026-03-14', '2026-03-15', '2026-03-16', '2026-03-17', '2026-03-18'],
+  'Taufik': ['2026-01-14', '2026-01-15', '2026-01-16', '2026-01-17', '2026-01-18', '2026-01-19', '2026-01-20', '2026-01-21', '2026-03-02', '2026-03-03', '2026-03-04', '2026-03-05', '2026-03-06', '2026-03-07', '2026-03-08', '2026-03-09'],
+  'Adhe Setiawan': ['2026-01-23', '2026-01-24', '2026-01-25', '2026-01-26', '2026-01-27', '2026-01-28', '2026-01-29', '2026-01-30', '2026-03-19', '2026-03-20', '2026-03-21', '2026-03-22', '2026-03-23', '2026-03-24', '2026-03-25', '2026-03-26'],
+};
+const SCHEDULE_IMPORT_VERSION = 'maint-v1';
+
+/* ==================== STATE (persisted via window.storage) ==================== */
+const PALETTE_COLORS = ['#2E5FA3','#1E8E7E','#E07A3F','#7A5FBF','#C2547A','#3F9142','#C99A2E','#C0392B','#566573','#0E7C86'];
+let colorCursor = 0;
+function nextColor(){ const c = PALETTE_COLORS[colorCursor % PALETTE_COLORS.length]; colorCursor++; return c; }
+function uid(){ return 'm' + Date.now().toString(36) + Math.floor(Math.random()*1000); }
+function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function todayISO(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function firstOfThisMonth(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+}
+function parseISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate(); }
+const WEEKDAYS = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+
+function buildDefaultState(){
+  colorCursor = 0;
+  const team = [];
+  const divisions = DIVISIONS_CONFIG.map(dc => {
+    const memberIds = dc.memberNames.map(name => {
+      const m = { id: uid(), name, color: nextColor(), divisionId: dc.id };
+      team.push(m);
+      return m.id;
+    });
+    return {
+      id: dc.id,
+      rotation: { order: memberIds.slice(), cycleDays: 7, startDate: firstOfThisMonth(), startPersonId: memberIds[0] },
+      overrides: {}
+    };
+  });
+  return {
+    team,
+    divisions,
+    criticalLeave: {},
+    criticalTeamIds: team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id)
+  };
+}
+
+// Migrasi dari state versi lama (single rotation, tanpa divisi)
+function migrateOldState(old){
+  const nameToDivision = {};
+  DIVISIONS_CONFIG.forEach(dc => dc.memberNames.forEach(n => nameToDivision[n] = dc.id));
+  old.team.forEach(m => {
+    if(!m.divisionId) m.divisionId = nameToDivision[m.name] || DIVISIONS_CONFIG[0].id;
+  });
+  const oldRot = old.rotation || {};
+  const oldOverrides = old.overrides || {};
+  old.divisions = DIVISIONS_CONFIG.map(dc => {
+    const memberIds = old.team.filter(m => m.divisionId === dc.id).map(m => m.id);
+    return {
+      id: dc.id,
+      rotation: {
+        order: memberIds,
+        cycleDays: oldRot.cycleDays || 7,
+        startDate: oldRot.startDate || firstOfThisMonth(),
+        startPersonId: memberIds.includes(oldRot.startPersonId) ? oldRot.startPersonId : memberIds[0]
+      },
+      overrides: {}
+    };
+  });
+  Object.keys(oldOverrides).forEach(dateISO => {
+    const personId = oldOverrides[dateISO];
+    const person = old.team.find(m => m.id === personId);
+    if(person){
+      const div = old.divisions.find(d => d.id === person.divisionId);
+      if(div) div.overrides[dateISO] = personId;
+    }
+  });
+  delete old.rotation;
+  delete old.overrides;
+  return old;
+}
+
+let state = null;
+let currentMonth = firstOfThisMonth();
+let dirty = false;
+let saveTimer = null;
+let activeTab = 'overview';
+let overviewMode = 'today';
+let currentDetailDate = null;
+let currentDetailDiv = null;
+
+function initials(name){
+  const parts = String(name || '?').trim().split(/\s+/);
+  if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+}
+function avatarHTML(person, size){
+  size = size || 44;
+  const fs = Math.round(size * 0.36);
+  if(!person) return `<div class="rs-avatar rs-avatar-empty" style="width:${size}px;height:${size}px;font-size:${fs}px;">–</div>`;
+  return `<div class="rs-avatar" style="width:${size}px;height:${size}px;background:${person.color};border-color:${person.color};font-size:${fs}px;">${initials(person.name)}</div>`;
+}
+
+/* ==================== PERSISTENCE (window.storage) ==================== */
+async function loadState(){
+  try{
+    const res = await sheetStore.get(STORAGE_KEY);
+    if(res && res.value){
+      let parsed = JSON.parse(res.value);
+      if(parsed && parsed.team){
+        parsed.team.forEach(m => { if(m.name === 'Wawan') m.name = 'Lukman Gunawan'; });
+        if(!parsed.divisions) parsed = migrateOldState(parsed);
+        if(!parsed.criticalLeave) parsed.criticalLeave = {};
+        if(!parsed.criticalTeamIds) parsed.criticalTeamIds = parsed.team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id);
+        state = parsed;
+        colorCursor = state.team.length;
+        return;
+      }
+    }
+    state = buildDefaultState();
+  }catch(err){
+    state = buildDefaultState();
   }
 }
 
-/* ---- Auto-backup: sebelum sebuah key ditimpa nilai baru, nilai lama otomatis
-   disimpan dulu ke key cadangan "<key>::backup" di backend yang sama (Google Sheets).
-   Ini memakai cache di memori (terisi otomatis tiap kali data di-load lewat gsGet)
-   supaya proses backup tidak perlu request GET tambahan dan tidak memperlambat
-   penyimpanan utama (dikirim fire-and-forget). ---- */
-const _lastKnownValues = {};
-
-async function gsGet(key){
-  requireStorageConfig();
-  // cache: 'no-store' + parameter timestamp (_t) supaya browser TIDAK pernah menyajikan
-  // response GET dari cache lama. Tanpa ini, saat pindah tab (mis. Follow Up -> Rekap)
-  // browser bisa menampilkan data "followup:list" versi sebelum item terbaru disimpan,
-  // sehingga item yang baru saja ditambahkan tampak hilang di Rekap padahal sudah tersimpan.
-  const res = await fetch(`${APPS_SCRIPT_URL}?action=get&key=${encodeURIComponent(key)}&_t=${Date.now()}`, { cache: 'no-store' });
-  if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
-  const data = await res.json();
-  if(data.error === 'not_found') throw new Error('not found');
-  if(data.error) throw new Error(data.message || data.error);
-  _lastKnownValues[key] = data.value;
-  return { key: data.key, value: data.value, shared: true };
-}
-async function gsSet(key, value){
-  requireStorageConfig();
-  // Backup otomatis: kirim nilai LAMA (sebelum ditimpa) ke "<key>::backup" terlebih
-  // dahulu, tanpa menunggu hasilnya, supaya data sebelumnya tidak pernah hilang
-  // walau ada perubahan/update pada HTML atau kesalahan input berikutnya.
+async function persistState(){
   try{
-    const prevValue = _lastKnownValues[key];
-    if(prevValue !== undefined && prevValue !== null && prevValue !== value){
-      const backupUrl = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key + '::backup')}&value=${encodeURIComponent(prevValue)}&_t=${Date.now()}`;
-      fetch(backupUrl, { cache: 'no-store' }).catch(()=>{ /* backup gagal tidak boleh menghambat simpan utama */ });
-    }
-  }catch(e){ /* abaikan, backup bersifat best-effort */ }
+    const res = await sheetStore.set(STORAGE_KEY, JSON.stringify(state));
+    if(!res) throw new Error('empty result');
+    dirty = false;
+    renderSaveStatus('clean');
+  }catch(err){
+    renderSaveStatus('error');
+    showToast('⚠️ Gagal menyimpan otomatis. Periksa koneksi lalu coba lagi.', 'error');
+  }
+}
 
-  // Catatan: pakai GET (bukan POST) karena Apps Script Web App melakukan redirect internal
-  // (script.google.com -> script.googleusercontent.com) yang sering menghapus body POST di
-  // tengah jalan saat di-fetch dari domain lain (cross-origin), menyebabkan "Failed to fetch".
-  // GET tidak kena masalah ini karena parameter ikut di URL, bukan di body.
-  const url = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}&_t=${Date.now()}`;
-  const res = await fetch(url, { cache: 'no-store' });
-  if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
-  const data = await res.json();
-  if(data.error) throw new Error(data.message || data.error);
-  _lastKnownValues[key] = value;
-  return { key: data.key, value: data.value, shared: true };
+/* ==================== IMPORT SEKALI-JALAN: Jadwal OFF/HO/Leave dari Rooster BIB.xlsx ==================== */
+function applyScheduleImport(){
+  if(!state.scheduleImportApplied) state.scheduleImportApplied = {};
+  if(state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION]) return; // sudah pernah diterapkan, jangan duplikat
+  let count = 0;
+  Object.keys(SCHEDULE_IMPORT_MAINT).forEach(name => {
+    const member = state.team.find(m => m.name === name && m.divisionId === 'maint');
+    if(!member) return;
+    SCHEDULE_IMPORT_MAINT[name].forEach(iso => {
+      if(!isOnLeave(iso, member.id)){ addLeave(iso, member.id); count++; }
+    });
+  });
+  state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION] = true;
+  if(count > 0) markDirty();
 }
-async function gsDelete(key){
-  requireStorageConfig();
-  const url = `${APPS_SCRIPT_URL}?action=delete&key=${encodeURIComponent(key)}&_t=${Date.now()}`;
-  const res = await fetch(url, { cache: 'no-store' });
-  if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
-  const data = await res.json();
-  if(data.error) throw new Error(data.message || data.error);
-  return { key: data.key, deleted: data.deleted, shared: true };
+function markDirty(){
+  dirty = true;
+  renderSaveStatus('dirty');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persistState, 500);
 }
-async function gsList(prefix=''){
-  requireStorageConfig();
-  const res = await fetch(`${APPS_SCRIPT_URL}?action=list&prefix=${encodeURIComponent(prefix)}&_t=${Date.now()}`, { cache: 'no-store' });
-  if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
-  const data = await res.json();
-  if(data.error) throw new Error(data.message || data.error);
-  return { keys: data.keys || [], prefix, shared: true };
-}
-const store = { get: gsGet, set: gsSet, delete: gsDelete, list: gsList };
+function renderSaveStatus(mode){
+  const el = document.getElementById('saveStatus');
+  if(mode === 'dirty'){ el.textContent = '💾 Menyimpan...'; el.className = 'save-status dirty'; }
+  else if(mode === 'error'){ el.textContent = '⚠️ Gagal tersimpan — cek koneksi'; el.className = 'save-status error'; }
+  else { el.textContent = '☁️ Tersimpan otomatis'; el.className = 'save-status clean'; }
 
-/* Banner peringatan kalau backend belum dikonfigurasi */
-function checkStorageConfigBanner(){
-  if (APPS_SCRIPT_URL) return;
-  const b = document.createElement('div');
-  b.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#B3261E;color:#fff;padding:10px 16px;font-size:13px;font-weight:bold;text-align:center;font-family:Arial;';
-  b.textContent = '⚠️ Backend belum dikonfigurasi: isi APPS_SCRIPT_URL di script agar data bisa tersimpan.';
-  document.body.prepend(b);
+  const banner = document.getElementById('rsSyncBanner');
+  if(banner){
+    if(mode === 'dirty'){ banner.textContent = '⏳ Menyimpan perubahan...'; banner.className = 'rs-sync-banner dirty'; }
+    else if(mode === 'error'){ banner.textContent = '⚠️ Gagal menyimpan otomatis — periksa koneksi'; banner.className = 'rs-sync-banner error'; }
+    else { banner.textContent = '✓ Tersimpan otomatis · Google Sheets'; banner.className = 'rs-sync-banner'; }
+  }
 }
-checkStorageConfigBanner();
-
-/* ---------------- TOAST NOTIFIKASI ---------------- */
 function showToast(message, type){
   const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
@@ -638,1798 +536,652 @@ function showToast(message, type){
   el.textContent = message;
   wrap.appendChild(el);
   requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => el.remove(), 300);
-  }, 2800);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3200);
+}
+window.addEventListener('beforeunload', (e) => { if(dirty){ e.preventDefault(); e.returnValue = ''; } });
+
+/* ==================== HELPERS ==================== */
+function memberById(id){ return state.team.find(m => m.id === id); }
+function divisionState(divId){ return state.divisions.find(d => d.id === divId); }
+function divisionConfig(divId){ return DIVISIONS_CONFIG.find(d => d.id === divId); }
+
+/* ==================== ROTATION ENGINE (per divisi) ==================== */
+function autoAssignFor(divId, dateISO){
+  const div = divisionState(divId);
+  if(!div || !div.rotation.order.length) return null;
+  const cfg = div.rotation;
+  const start = parseISO(cfg.startDate);
+  const d = parseISO(dateISO);
+  if(d < start) return null;
+  const diffDays = Math.round((d - start) / 86400000);
+  const cycleIndex = Math.floor(diffDays / cfg.cycleDays);
+  const startIdx = Math.max(0, cfg.order.indexOf(cfg.startPersonId));
+  const idx = ((startIdx + cycleIndex) % cfg.order.length + cfg.order.length) % cfg.order.length;
+  return cfg.order[idx];
+}
+function assignedFor(divId, dateISO){
+  const div = divisionState(divId);
+  if(div.overrides[dateISO]) return { personId: div.overrides[dateISO], locked: true };
+  const auto = autoAssignFor(divId, dateISO);
+  return auto ? { personId: auto, locked: false } : null;
+}
+function setOverride(divId, dateISO, personId){ divisionState(divId).overrides[dateISO] = personId; markDirty(); }
+function clearOverride(divId, dateISO){ delete divisionState(divId).overrides[dateISO]; markDirty(); }
+function swapCells(divId, dateA, dateB){
+  const a = assignedFor(divId, dateA);
+  const b = assignedFor(divId, dateB);
+  if(a) setOverride(divId, dateB, a.personId); else clearOverride(divId, dateB);
+  if(b) setOverride(divId, dateA, b.personId); else clearOverride(divId, dateA);
 }
 
-document.getElementById('storageBadge').textContent = 'Site Reliability Engineer';
-
-/* ---------------- HEADER EDITABLE ---------------- */
-const HEADER_KEY = 'app:headerConfig';
-const headerFields = {
-  headerTitle: document.getElementById('headerTitle'),
-  headerSubtitle: document.getElementById('headerSubtitle'),
-  storageBadge: document.getElementById('storageBadge')
-};
-let headerSaveTimer = null;
-function scheduleHeaderSave(){ clearTimeout(headerSaveTimer); headerSaveTimer = setTimeout(saveHeaderConfig, 500); }
-async function saveHeaderConfig(){
-  const data = {
-    title: headerFields.headerTitle.textContent,
-    subtitle: headerFields.headerSubtitle.textContent,
-    badge: headerFields.storageBadge.textContent
-  };
-  try{ await store.set(HEADER_KEY, JSON.stringify(data)); }
-  catch(e){ console.error('Gagal menyimpan header', e); }
+/* ==================== CUTI (checkbox tandai cuti per tanggal) ==================== */
+function toggleCriticalLeave(dateISO, personId){
+  const arr = state.criticalLeave[dateISO] ? state.criticalLeave[dateISO].slice() : [];
+  const idx = arr.indexOf(personId);
+  if(idx >= 0) arr.splice(idx, 1); else arr.push(personId);
+  if(arr.length) state.criticalLeave[dateISO] = arr; else delete state.criticalLeave[dateISO];
+  markDirty();
 }
-async function loadHeaderConfig(){
-  try{
-    const res = await store.get(HEADER_KEY);
-    if(res && res.value){
-      const data = JSON.parse(res.value);
-      if(data.title) headerFields.headerTitle.textContent = data.title;
-      if(data.subtitle) headerFields.headerSubtitle.textContent = data.subtitle;
-      if(data.badge) headerFields.storageBadge.textContent = data.badge;
-    }
-  }catch(e){ /* belum ada data tersimpan, gunakan default */ }
-}
-Object.values(headerFields).forEach(el => {
-  el.addEventListener('input', scheduleHeaderSave);
-  el.addEventListener('blur', scheduleHeaderSave);
-  el.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); el.blur(); } });
-});
-loadHeaderConfig();
 
-/* ---------------- ROSTER: LABEL YANG BISA DIEDIT ---------------- */
-const ROSTER_LABELS_KEY = 'app:rosterLabels';
-let rosterLabelOverrides = {};
-function rosterLabelText(key, defaultText){
-  const v = rosterLabelOverrides[key];
-  return (v !== undefined && v !== null && v !== '') ? v : defaultText;
-}
-let rosterLabelSaveTimer = null;
-function scheduleRosterLabelSave(){ clearTimeout(rosterLabelSaveTimer); rosterLabelSaveTimer = setTimeout(saveRosterLabels, 500); }
-async function saveRosterLabels(){
-  try{ await store.set(ROSTER_LABELS_KEY, JSON.stringify(rosterLabelOverrides)); }
-  catch(e){ console.error('Gagal menyimpan label roster', e); }
-}
-async function loadRosterLabels(){
-  try{
-    const res = await store.get(ROSTER_LABELS_KEY);
-    if(res && res.value) rosterLabelOverrides = JSON.parse(res.value) || {};
-  } catch(e){ /* belum ada data tersimpan, pakai default */ }
-}
-loadRosterLabels();
-// Delegasi event: elemen shift-card dirender ulang tiap sync, jadi listener dipasang di document
-document.addEventListener('focusout', (e) => {
-  const el = e.target.closest && e.target.closest('.roster-editable-label');
-  if(!el) return;
-  const key = el.dataset.rkey;
-  if(!key) return;
-  rosterLabelOverrides[key] = el.textContent;
-  scheduleRosterLabelSave();
-});
-document.addEventListener('keydown', (e) => {
-  const el = e.target.closest && e.target.closest('.roster-editable-label');
-  if(!el) return;
-  if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
-});
-
-/* ---------------- STRUCTURE ---------------- */
-const STATUS_OPTIONS = ["Checked","Follow up","Continue","Not yet","Information","n/a"];
-
-const STRUCTURE = [
-  { name: "Daily Report", tasks: [
-    "Upload data report tonase Under/Over ke WAG DSO",
-    "Mengupload data report Redzone dari shift sebelumnya ke WAG DSO",
-    "Daily report monitoring",
-    "Report RedZone",
-    "Report Monitoring Server",
-    "Report Monitoring CHP",
-  ]},
-  { name: "Raport Penilaian DTFE", tasks: [
-    "Raport Penilaian Kinerja (Daily)",
-  ]},
-  { name: "Check Report Harian Helper", tasks: [
-    "Check report harian Helper di Web Log Book WIM",
-    "Check Log Book WIM",
-    "Check Temuan Helper di Grup VGT atau WIM",
-  ]},
-  { name: "Check Report Harian Team VISI", tasks: [
-    "Check Daily Report VISI di Web Report Team VISI",
-    "Check Weekly Report VISI di Web Report Team VISI",
-    "Check Monthly Report VISI di Web Report Team VISI",
-    "Check Analisis RFID Pending di Web Report Monitoring Team VISI",
-    "Check Report Pengukuran Sensor di Web Report Team VISI",
-  ]},
-  { name: "Checking Monitoring Tools Grafana & PRTG", tasks: [
-    "Check HTTP Status Code di Prometheus Blackbox Exporter",
-    "Check SSL Expiry di Prometheus Blackbox Exporter",
-    "Checking device status di Node Exporter Full (CPU, RAM, Disk)",
-    "Checking device status di Node Exporter Full IP siCantik",
-    "Checking device status di PRTG",
-    "Checking status monitoring di PingPulse",
-    "Checking status aplikasi WIM",
-    "Checking status aplikasi UCan",
-    "Checking status aplikasi Famous",
-    "Checking status aplikasi USea",
-    "Checking status aplikasi Synova",
-  ]},
-  { name: "Request RFID", tasks: [
-    "Check request RFID di web Order Form",
-  ]},
-  { name: "Standby Monitoring", tasks: [
-    "Cek akses WIM, UCan, FMS, USea (bisa dibuka & tidak delay)",
-    "Monitoring area WIM (CCTV)",
-    "Flow traffic WIM",
-    "Monitoring PRTG, Grafana WIM, COP, USea, FAMOUS",
-    "Other",
-  ]},
-  { name: "VISIT", tasks: [
-    "Kunjungan ke lapangan",
-  ]},
-  { name: "Remark", tasks: [
-    "Catatan / kejadian khusus (jika ada)",
-  ]},
-];
-
-let taskIds = [];
-let taskTextMap = {};
-function rebuildTaskIndex(){
-  taskIds = [];
-  taskTextMap = {};
-  STRUCTURE.forEach((cat, ci) => {
-    if(hiddenCategories[ci]) return;
-    const catName = structureLabels.categories[ci] || cat.name;
-    cat.tasks.forEach((t, ti) => {
-      const id = `c${ci}_t${ti}`;
-      const taskLabel = structureLabels.tasks[id] || t;
-      taskIds.push(id);
-      taskTextMap[id] = `${catName} — ${taskLabel}`;
-    });
-    (customTasks[ci] || []).forEach((t, xi) => {
-      const id = `c${ci}_x${xi}`;
-      const taskLabel = structureLabels.tasks[id] || t.text;
-      taskIds.push(id);
-      taskTextMap[id] = `${catName} — ${taskLabel}`;
-    });
+/* ==================== TABS ==================== */
+function renderTabsBar(){
+  const bar = document.getElementById('tabsBar');
+  let html = `<div class="tab${activeTab === 'overview' ? ' active' : ''}" data-view="overview">🏠 Overview</div>`;
+  DIVISIONS_CONFIG.forEach(dc => {
+    html += `<div class="tab${activeTab === dc.id ? ' active' : ''}" data-view="${dc.id}">${dc.icon} ${dc.name}</div>`;
   });
-  (customCategories || []).forEach(cat => {
-    const catName = cat.name;
-    (customTasks[cat.id] || []).forEach((t, xi) => {
-      const id = `c${cat.id}_x${xi}`;
-      const taskLabel = structureLabels.tasks[id] || t.text;
-      taskIds.push(id);
-      taskTextMap[id] = `${catName} — ${taskLabel}`;
-    });
-  });
+  bar.innerHTML = html;
+  bar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
+
+  const utilBar = document.getElementById('utilTabsBar');
+  let utilHtml = `<div class="tab${activeTab === 'data' ? ' active' : ''}" data-view="data">💾 Data</div>`;
+  utilBar.innerHTML = utilHtml;
+  utilBar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
+}
+function switchTab(view){
+  activeTab = view;
+  renderTabsBar();
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + view);
+  if(el) el.classList.add('active');
+  closeDetailPanel();
 }
 
-/* ---------------- EDITABLE STRUCTURE LABELS ---------------- */
-const STRUCT_LABELS_KEY = 'app:structureLabels';
-let structureLabels = { categories: {}, tasks: {} };
-let structLabelSaveTimer = null;
-function scheduleStructLabelSave(){ clearTimeout(structLabelSaveTimer); structLabelSaveTimer = setTimeout(saveStructureLabels, 500); }
-async function saveStructureLabels(){
-  try{ await store.set(STRUCT_LABELS_KEY, JSON.stringify(structureLabels)); }
-  catch(e){ console.error('Gagal menyimpan label menu', e); }
-}
-async function loadStructureLabels(){
-  try{
-    const res = await store.get(STRUCT_LABELS_KEY);
-    if(res && res.value) structureLabels = JSON.parse(res.value);
-  }catch(e){ /* belum ada, gunakan default */ }
-  if(!structureLabels.categories) structureLabels.categories = {};
-  if(!structureLabels.tasks) structureLabels.tasks = {};
-}
-
-/* ---------------- CUSTOM (USER-ADDED) CHECKLIST ITEMS ---------------- */
-const CUSTOM_TASKS_KEY = 'app:customTasks';
-let customTasks = {}; // { [categoryIndex]: [{text}, ...] }
-async function loadCustomTasks(){
-  try{
-    const res = await store.get(CUSTOM_TASKS_KEY);
-    customTasks = (res && res.value) ? JSON.parse(res.value) : {};
-  }catch(e){ customTasks = {}; }
-}
-async function saveCustomTasks(){
-  try{ await store.set(CUSTOM_TASKS_KEY, JSON.stringify(customTasks)); }
-  catch(e){ console.error('Gagal menyimpan checklist baru', e); }
-}
-async function addCustomTask(ci, text){
-  if(!text || !text.trim()) return;
-  if(!customTasks[ci]) customTasks[ci] = [];
-  customTasks[ci].push({ text: text.trim() });
-  await saveCustomTasks();
-  rebuildTaskIndex();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-async function deleteCustomTask(ci, xi){
-  if(!customTasks[ci]) return;
-  customTasks[ci].splice(xi, 1);
-  await saveCustomTasks();
-  rebuildTaskIndex();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-
-/* ---------------- HIDE/HAPUS DEFAULT TASKS ---------------- */
-const HIDDEN_TASKS_KEY = 'app:hiddenTasks';
-let hiddenTasks = {};   // { taskId: true }
-async function loadHiddenState(){
-  try{
-    const res = await store.get(HIDDEN_TASKS_KEY);
-    hiddenTasks = (res && res.value) ? JSON.parse(res.value) : {};
-  }catch(e){ hiddenTasks = {}; }
-}
-async function saveHiddenTasks(){
-  try{ await store.set(HIDDEN_TASKS_KEY, JSON.stringify(hiddenTasks)); }
-  catch(e){ console.error('Gagal menyimpan status hapus checklist', e); }
-}
-async function hideDefaultTask(id){
-  hiddenTasks[id] = true;
-  await saveHiddenTasks();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-async function restoreCategoryHiddenTasks(ci){
-  Object.keys(hiddenTasks).forEach(id => { if(id.startsWith(`c${ci}_t`)) delete hiddenTasks[id]; });
-  await saveHiddenTasks();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-
-/* ---------------- CUSTOM (USER-ADDED) CATEGORIES ---------------- */
-const CUSTOM_CATEGORIES_KEY = 'app:customCategories';
-let customCategories = []; // [{id, name}]
-async function loadCustomCategories(){
-  try{
-    const res = await store.get(CUSTOM_CATEGORIES_KEY);
-    customCategories = (res && res.value) ? JSON.parse(res.value) : [];
-  }catch(e){ customCategories = []; }
-}
-async function saveCustomCategories(){
-  try{ await store.set(CUSTOM_CATEGORIES_KEY, JSON.stringify(customCategories)); }
-  catch(e){ console.error('Gagal menyimpan kategori baru', e); }
-}
-async function addCustomCategory(name){
-  if(!name || !name.trim()) return;
-  const id = 'cc' + Date.now() + Math.floor(Math.random()*1000);
-  customCategories.push({ id, name: name.trim() });
-  await saveCustomCategories();
-  rebuildTaskIndex();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-async function deleteCustomCategory(id){
-  customCategories = customCategories.filter(c => c.id !== id);
-  delete customTasks[id];
-  delete structureLabels.categories[id];
-  await saveCustomCategories();
-  await saveCustomTasks();
-  await saveStructureLabels();
-  rebuildTaskIndex();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-
-/* ---------------- HIDE/HAPUS DEFAULT CATEGORIES ---------------- */
-const HIDDEN_CATEGORIES_KEY = 'app:hiddenCategories';
-let hiddenCategories = {}; // { ci: true }
-async function loadHiddenCategories(){
-  try{
-    const res = await store.get(HIDDEN_CATEGORIES_KEY);
-    hiddenCategories = (res && res.value) ? JSON.parse(res.value) : {};
-  }catch(e){ hiddenCategories = {}; }
-}
-async function saveHiddenCategories(){
-  try{ await store.set(HIDDEN_CATEGORIES_KEY, JSON.stringify(hiddenCategories)); }
-  catch(e){ console.error('Gagal menyimpan status hapus kategori', e); }
-}
-async function hideDefaultCategory(ci){
-  hiddenCategories[ci] = true;
-  await saveHiddenCategories();
-  rebuildTaskIndex();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-async function restoreHiddenCategories(){
-  hiddenCategories = {};
-  await saveHiddenCategories();
-  rebuildTaskIndex();
-  buildUI();
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-}
-
-rebuildTaskIndex();
-
-let currentData = { status: {}, notes: {}, shift: "Shift 1", pic: "Harris" };
-let saveTimer = null;
-
-function todayStr(){
-  const d = new Date();
-  const tz = d.getTimezoneOffset() * 60000;
-  return new Date(d - tz).toISOString().slice(0,10);
-}
-function keyFor(dateStr){ return `checklist:${dateStr}`; }
-
-function computeDayStats(data){
-  const counts = {}; STATUS_OPTIONS.forEach(s => counts[s] = 0);
-  taskIds.forEach(id => { const s = data.status && data.status[id]; if(s) counts[s]++; });
-  const total = taskIds.length;
-  const applicable = total - counts["Information"] - counts["n/a"];
-  const pct = applicable > 0 ? Math.round((counts["Checked"] / applicable) * 100) : 0;
-  return { counts, total, applicable, pct };
-}
-
-const ROSTER_PHOTO_NFS = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCADIAMgDASIAAhEBAxEB/8QAHAAAAQUBAQEAAAAAAAAAAAAAAwACBAUGAQcI/8QAQRAAAQMCAggEAwgABAQHAAAAAQACAwQRBSEGEiIxQWFxgRMjMlEHkbEUM0JSocHR8BUkcqIIQ2LSJSYnNYKy4f/EABsBAAIDAQEBAAAAAAAAAAAAAAECAAMEBQYH/8QALhEAAgIBAwIDBwUBAQAAAAAAAAECAxEEITESQQUyURMUImFxscGBkaHR8CMG/9oADAMBAAIRAxEAPwD2JjgaVnNoStrOCbDnTM5CyezgshoCsGVuSDq7ZUhrbDshuyfYIgBau66a9tj8/ojWyBTHjO/M/RAgMjy0B+8KTa8ZQZBtN6IMKOS+hvRRiPMPT9lKkGwOijf8w9EJBiPjyLVyT1u6p7PU1Ml+8d1SvgK5B/m7fVO4rjeK7+LskCd/Cf7wQnb8/ZFPod1Q3/siyCafN7JwOyEwDbKeBkoiA5jeyTN3dKTf80mjhzQ7kYpdzUUDNMkHp7IwGaZIQC0fVOjHlm/sntbkkxvlnoiQDKNkJIkrbgJJWgosYB5A5E/UpzN4XIR5Xd31K7GLPBVwCQzdZCd6z1RGJjhtnqnFODIBMk3dz9ETgE2Qb/7wQICA8tyFMM29Edg8tyFNvb0Qa2ChjxdoUYC5vyUtw2GqM0fskaCgjBm1Dl+9cjMG5ClHmuQfAVyDakfUei60e6RbtHolCdI2T1Qne/JGcNnuhO3HoFGRCb6inAZBJovcroGQRSACd+xToxcjqmkZHonxi7ggluFnXi7h2Rw1DcPMaOiMAbJhWMtkU9rfLKQGRRWt2bIpCtkaVtrcgkjStzy9kkMBySoB5PcpAZcwn0+cJ/1H6BIEW5q0g9osU13qRGjP5prhtIi9wdslx4RLDV7prwoEGwbDhyQph6eiPENlx5IUo9KD4IuQZ9LUBoy3eykOGwEBgyPZKxkEaQmSjbeitb6kOUea4IPgiAtGaThmU9rV1wzPZKQ48ZfJCcMipEgzQnjepgiY1gXfZOjbmkRuUIAAyciRja6Jtt6JGNrsgkFi3ytupDRsoAzlCMAbBMhTthZyI22ohX2SiD0jqigMT7X7JJkhIe4JIEJkDdhw/wCr9gniMHNNpzbxBwuPoEVuQKtIOa3PJMkFnIkebrXTZczdEUGRYd0x+5EcPqmOQYUMi9B6FDlHpRIhsnoUOTeEHwHuMP3YQo93dFz1AhxjflldKxkFaMnIcv3rlGxTGcMwKidVYpXQUcPAyvDdbkBvPZeY4t8f8CpK1zKXDairiv8AeCZoBHTgjhvgXOD1QDIrh3HssVgXxe0Qx4NjirX0tS63kVDNVxPI3s7sb8lrqPEKPEqYzUVTHUR3sSx17H2I4JWmuSZJTxdwQnC4PRGcPMshncf9KDIjkYzPRIDILsY2T0S9lAgre/uiM3lDI3dUVm8oBZwfe/NFG4DohNG2e6LxCKAxrjslO1tkIbjl8kibloCKAckkAe5JRZHkudbMpJcjYL6ls7WcNxDXfonjMHkFGwyTxKdkgBs+JjxfndHG88MlaKFh33XJMylHkFyQ57uCYVjX7j1QjuRXEG/VCfvsEAo5HuPQoMnBFj9PzQZjuQfAVyN1tgLK/ELSl2iOg1diUD4m1mUdMJNxkcfbjYXNuS0c00dPTulleGRxtL3uduaALklfNGkGKVvxc09lbBNJDgdDcRX3NZu1rfnfbsOiC9XwhsNvC5ZhsWx/FtIK11XiFXPXVJ9U0h1i0ew4AdFAqoagyEmCVreAIuvc6PQjDoqfwaeFojAta1/1QavRFoeHSWF9wAyS+8rsjUtC3yzwkh7RmCBzCvsB02x3RytbVUFfKyRpBuTrBw9nA5OHI/ovQK/RKNtvLaRbPJUFfolA+JwbGGu4EZEIrUxlyhJaOUeGe96AfESi07wcVEbW0+IQ2bVU1/SeDm+7Tw9ty12tkei+PdFMUr9C9OKSoY57LSBkrRukjJzH79l9bRVLJWXDwbi+SM0lujMs8Mmx+knkl7dEKN+yeiKCCOyrCM/E1FbuchjNzU8HYKiIzg9R6JxdnkhtN3HonuIDT3RRAbv4+iTjtgD2TXm7rc04+px5KEIzW31ikntGy4pJQk7R2TxcCw9/5qOI/orDc8gqn0SdfRbCzvH2No+RAVs47e/3VwHyPbwCUhC4DYJkpIsiLg64iyG/Jy6TkmPO5QJxh2UCZ2yOqJGdlR5Ts90r4GRhfi9pJDgPw/qoSXfaMTBpIQ3fmNo9m3+YWK0QweDB8Dgp2MAklAllIHqcRu7DJE/4gnmWq0XomkkvkldbqWNQ5KnEG1n2XD2gGNoaZHDK/t2Cpuy4pI16VJScmjX0tM9w2SG+98kaSAyHVLmm3NYCrbpZQ1mtNixDXHW1GtFrfJXtPilSaEOedZ9tp1rXWaWI9zpQzPtgl4lhthdrgeizdXSGK923HRRamnxDHq1zG1Usbd2TrAIFXo1X4bG4DE55DydrD9UVGPqVznLtEzumNHE/C3VLAGywuDmuG8K8+E+m1VJjVPhmJVE8kIu2NziXWcfS03/QqsxKCeowWpimLXSBpzaLB2V9yqPhK7/1FoIy4hsgeDbk0n9ltrXwNPsci/zprufVUbrDsitfdvZQ437+iOCkEDtzLUUZMQIjtBHJ8vsoQYLAlcOYPRIX13Lh9JUIcteTunvFg/omx5uF/e6I8bLkUECB5bkk63lOPJJAhzQ4/wDlfDh+WFzfk4q4eNu91T6JC2BUrfbxB+pVzIM1YR8ibm1Nl9ISYd65L6Aj2ANBBBQ3bgU73Ca4bIQIMjOSBJ6Edgso8npKD4GSPJvi9QsqtMtDdZ5+8lcWndZtnX+YUDEv8XhaJcOpoXax2nyPtqj3tx+YVz8T6eSTTXRWffFCye+XE5fwp2HSh7NV2rYixust73R09JB9LPM/F0rrcVeyrqad4B8oMYLEX/Fq5jLmtzRU4gwqoIAIyAJVpiEdJBB4dLG0VEztUWyJ/gKOZ6KkwySCok88uz1cwFTN9TNlVfSu7MjVUs73t8KaWFgdrSeCzWcR14DsVTNw/SKWVwOPGrF9kS05yHPctRTSmjroZ5JWOgmdqtI3gHdfktLWajYxbVGsOCZTcUI6lN5eTz+SjkjhHjajjazrZC6ynwxjbT/FSFosGxGdrb/6XWC3eLyNLsuORCxeh1E5ul9PWRDzm15bb/pINz9VppliLyc3UV5kkj6Mgk1wSDwU1jrtBVPRy2JHBW0TrxhMYwrHbQUo5s7KI3epQN41AnBvcuHceqTMw7quHj1UIOiG0Oic/NpHNNjFj2Ce/IFEgNw8kpLk7tWmeRwBKSVvAULRb/2qMDhI4foriTMgql0XP/hw5TfsFdSekK1g7jRuK5Kbx9Fxp3rkp8klAIMHPmk70JrSkTdtkMhwcZx6oEnpRo/V3QXjIoPgZLcxPxDphJJhdSCLxF7SOIBIz+az9NOY3nPK69FxnDIcTwySGSNr5AHGIkZtdbIheWCQskLXZEZEHeD7LJdnOTq6OSa6Synmp5PE15bTFto9XeD7hY6XCKeCGQy1UUksj9aUvmN3DnnbsjVuGVNXUzVDayWFpytE0FxHdCgiwCggBkM0kxzc+fVJJ7jdyTQw1yXSy3uiFRCioZA5krXwMdrCKN9w3mGrUU+MsxDD9eJ2sG3asbNhVJilc2SGCRkbfxa2qLdGgLQUlPBhmGvjZkXuJuhbgrqck2uxFqpjIS5wzR9CMLacW+12aI2a0oINy5xy7byhRRCrroYBY67s+Q4rawlrDsNDQTfIWTx4MN0t2X0Ds1cUz7xgFUFNJl81b0z7NVpjwWMZue6ktOw5QoH3UoOPhlRcEY9h2T1TTuSb6CeZXDu/vsoQLHv+Se/0OTI/V3Tj92eZTCkeudq4dO7g2Nx/QpIOOP8ACwGrf7QP+hSRjFSEnLpH6Lu/ycg9pmn9Ar2bddZ/RY/5acez2FaCb0Hkiy3uCbxsuTHyik02v0TZD5ZS9hsA2ekdEgcykwjVHRc3EpcjYEz1HqgvuGlEa6zj1UeZ9mnipnYPDOPcNS1+K8w05pmYfjbZo3NAqwZNUHc4GzuxyW8xDFKWiYRNO1rvyjN3yXjvxAxX7ZpXQ1LHFsD4HQM1ve9/1IWOd0HNV53OlpaLel3YfSu/6lnQ1cTgHbJtzUmePCp26zoGE5G9uPuvO6mqqKSQhjjA92/L1fz2TRjmIvi1Gz0/feEVB8pml2Lho2VZVUbH2j1QN1gqStxJk2YdsDLqstLPK6Vz6iqLnO/CzinCcvsAb23NHBWdBlc2azRnGaM48+jmdq1csd4va1zcdcrrbxuzHVeIYY+SbTOKojJ8hzRce4/pXr9BiVPUuHhytcfbcfkmk4xkomaVM3X7XG2X/Bp6V+Q7q5hdZndZ+mfuAV3C+zB1T5MZY07sjb3UwHy+6rYHZX5qcHWjb1R7A7hmnZXXbihsdsojjs/33URAjMr8inX8sdUxp2CeqV9gJgFbpZJqaL1luMQHzISQtNX6mjFSPzFjf9wSV9a2Zlue6DaJu1o6oe2ofqtNKdl3dZPQ993VY92NP6laqQ7J7qpm3uBafouPPlm/uuA2HYpj3eUc0nYfG5xrhqN6IckrYw5z3BrWi5LjYBV+KYzT4PRtklOvI4eXEDm7+BzXnWL43WYtOftEhDL7MTcmN7cepXN1OuhR8PLOxofDLNX8XEfX+jeHSWkkmeyjP2ktNi8ZMHfj2R8Rc6HCXTyVZ135MaxuqP5yWJwgj7BqN9T3m/zt+ytKyWQxPa+Ty4Y75nIErpaTM6I2T5e5ytdFVamVNfC2/wB+pjsZmMkx1SRrGwBJsP7cqqx7CWYjgrI9Yh0YBa4bxzVjLLHrOlke0NzzJFlnsY0uip6c0uGsbUzXI1yNhv8AK8mnbdf11rfOT6TCFdGmjVPhLH12Kekmq9Z1FWQMnezKzsr8xdMqsNgOZo6iA8gSP3VtRVlNiccMzmNbWNykjJseo9wtDSiGeOwBBGRB4Fduu7OzWGeZ1WidL6o7xfD/AA/mYCOipwbiColPsQR/Ci4jI+nhLWRti9mtzK9DrqaONhOqFR/4bQwSivxCRkMQzaHceyeV6gsyM1WjnfLpjt6v0KnR/Bn0FEKicWmeC8g7wTuv2VrTx+HURBjjvAv3QoMcpMWrJoIGuYGOvHrf8xoG/ryVhGzUmjdlYOByHNYJzm7M2LdnqK6avduil7JYNLhs9XG8MZKXBo3P2h/KvP8AHxRBoroTE0n7xh1m9xwUVmHvNGapgyaB6eI91GxktmwdxPqaRkQvQaiPRXKa7I+caNK2+FcuG0v3NjQ1kdRA2WCRskbjk5puFY+MNRq8coMSqsKqPEpZSzPNpza7qF6Bg+kMGLU4A8udo24yd3Me4XO0+rjb8L2Z1/EPCbNJ8cd4/b6mqifcBGvkP7xVbBLzU1slwOy3I4rJLXeSutN7BDafIC7GbyNHMIgKTT9+ro+R+edg+p/ZJRfiLLbCqZt/VPf5NKS018GO3zEzQ196uYDjAD/uH8rXyZtWD+H05lqTff4BH6tW4kOzfks8jeCvkoWIV0OH0EtRKQGtGQv6jwAUhzjdefaV4o6sxx9G13k0lm293nMntkFg1mo93qclz2Or4fpHqrlDst39CnxGvmra/wAWd2s95vyAG4DkqyrnFNTvmPqcbNCI+QPxV7b2DGZlVVRUsxKajEdxG6Ys62XlYRc5dUvqz6JCtQioxWxvtG6J8GEQyyZvkaHZ8L5/upFfE2TDqwyNDhbMEXG4lWEXhxU0cOs1oaA3f7ZKrxDEKUYfURCVrpZCQGjPLcvd2ThRpsSaWF+D5XXGeq1nXBN5lnb6nl2L0BrMRLGM2QA0AZBMpNHA120A0LTRxsc90gaBcmxsuhoAXi/epqPQj6rtnONzL4pgTY5Gy0+zccPdMw7EqyCfz3OkA2XB28c1p5mB7C2ygmmh8Rz3R523D3V1WqeMS3aH9nCxOM1lMg4ljYFD4kDHxyOfqN8QA7t5AWYqmz4hPeZ7pHHMl2atKgCtr3agtFHsM5D3U6PDmxtFmuFxe5G9dCV6i+p8mSnRQqq9mt19zOx4S9rvEhu17MwRvBV7Q4scocQhLHbvEA2T/CsKal1ATa1/fijmmY9jg5jTl7LLZqVPaSyWxpjDybHp2Ghs2ExPaPLewHda6odIKUR0lQGX1NQn2GVlKw/SqjZhkED7xPYwMItkPdFxCtoK7R+qZBUte/Ue7UvnxsvU2XVW1SUZJvD7/I+XVaa/TamEpwaSkuz9fU89kYHNI4ptNPLTuEsT3RzQm4I3o0gLYZXjeGkj5KGCPBbKDfLVK8bB+h9TsgpLc9J0dx5mJw6klmVLAC5o3OH5h/HBaNslhv8A7ZeQYdUy0roKmF1pI7OH8L03DcRjxDD4aqPJsgva/pNsx2Xf0ep9qnGXKPBeMeGrSTVlfkl/D9P6L6N/lN5osJvMORUSJ12M6o9O7zz1XQOAZT4kyWiw9nu97v0H8pKJ8S5b1mHsHCN7v1A/ZJaq18Jis8zIfwdx9+KVzo6mlNJKYyY2knzGWB1hcBeqvJ8Mf3gvnf4EaVVlbp1TYbVNjkHgSeHLuc0Nbe3P/wDF9DPJ8Pus9qwzfW8gJHtjBe7INGsey8aiqzWVs07jnLM8n53/AGXqWk1SaXR2skabOMeoP/kQP3XjdLIYmyW9Qldbre4XnfE31NQ/257f/wA7T/zss9Wl/v3CVMpZW4meLYhb5KLgdI+TD8PeQAyxlLjzJ/ZPqNupqZBe08BI7BPw+eSiweipozrvMTbD2uFzd1XiPO32PTy6k1j0/odidRIa/wAGKpexkbATqHIHn2RMJnllw93iuc4teWhzsyR1XH4RHVYhJLJJJcNGsGkC+SnCBkELWxtDWjIAJbLIezUFzsRuPSoo60WYAuHILpNghvdYb1lW4g17siFWYhO6OKRzL65bqtHM5BTyb5qK9zBUBz2h1jfotFWzyWwAUGHCnp264AtmSfdT5C3MNN+CDLUiYAgERNIHUpwka52TSBdNJyk8yJLOAltwSt+q4XjNziGtAzJ4JxIBa3PWczXALSLt9x7hJh8lecAzkE1zdbPinuNmZhcaLOsingK3GVLw3D5nezD9FVYa8zUb2H2CnYs7Uw6fkw/RVWEyGKhdIBcucAFqqj/yb+YU1lplnFI2KiL3nVEYNz0Wg+HFfPUjEGPcfBu18bD+Hgfnl8licSqzLGKOL8RDpD+y2Pw+b4E87N14h/8AZbtJHomm+WcfxiKnop57Y/fKPTqc3jjHNHpTrSnqVGpfSzkEakO0T3XePm5hPiHLrY3Ss/LT3+bj/CSBp04v0ltv1YGD6n90lrh5UYZv4mea/BaL7B8Y8Hbr38aKa2VjnG7+F9SPya4exP1SSVWpWJtI2aZtwTZl9OK6mptFayJ8jftTxG6GM/iAeNYjpl815DFJ40Ejhk5xueRSSXl9Y+qx57YR9M8BrUdHld3n8fgjRVn+dDJX6rLG4PA2z+Yz7KXhVTTCKOo81+q0BmrE8tItkQQEkkkqYyh+35NmrvlVNRj3z+CxhxWnbG7KfXkcST9nk/7UnYpBcAsqdUZk/ZpP+1JJUe6Qz3Od77ZnhDDilK57W672l51W68TmAk7hmBvTnu4hJJU3UxrawdDTWytT6iPI55bkojI3vleCeI+iSSkXhM3xDSMlY1ga0aoN1IE2s6z2AFJJLyiS3Rx51w5rQ3MZXGXdPx2V+NsZHJrQRtbc6krnvLrgnaO4ZWsB+qSSsrvnWnGL2ZlsphZvNZ5/nkq24HFE9kkNZWxm4dYS3BseYUV9JW07SRjNU13DxGhwO7eQL7rpJK2F85PEnn9Eyj3OnhLH0bX2ZHxCOuloJXsxMStDLvjMY2rDOx/u5R2YhFFQxQRHXlaMxwuUklvqSnFp9itx9jPpi3vjlt/cJSwiNpmmdzJPErUaK4i0Y5TNALGztdHY+4Fx9Ekkte9il8yzXwT0dkfkesUbwY2336qNTH1dCkku8z5Yjz7S/b0nqSPwtY3/AGhJJJa4+VHOn5mf/9k=';
-const ROSTER_PHOTO_LG = 'data:image/jpeg;base64,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';
-
-/* ================= ROSTER TEAM MONITORING (live-sync Google Sheets) ================= */
-const ROSTER_SHEET_ID = '1GO4bxREj-BN45e5XFll-mrov23hSTFokKjtby1LiwJg';
-const ROSTER_PERSONNEL = [
-  { code:'NFS', name:'Nico Fahryan Sandy', color:'#1F4E79', photo: ROSTER_PHOTO_NFS },
-  { code:'LG',  name:'Lukman Gunawan',     color:'#1E7A34', photo: ROSTER_PHOTO_LG },
-  { code:'TW',  name:'Taufik Wirayudha',   color:'#7F6000', photo: null },
-  { code:'AS',  name:'Adhe Setiawan',      color:'#9C0006', photo: null }
-];
-/* Jam shift aktual (dikonfirmasi Harris) - dipakai untuk deteksi "sedang bertugas sekarang".
-   Shift saling overlap by design (buffer serah-terima), jadi bisa lebih dari 1 shift aktif bersamaan. */
-const ROSTER_SHIFT_DEFS = [
-  { key:'shift1', label:'Shift 1', start:'07:00', end:'19:00' },
-  { key:'shift2', label:'Shift 2', start:'13:00', end:'01:00' },
-  { key:'shift3', label:'Shift 3', start:'20:00', end:'08:00' }
-];
-const ROSTER_MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-const ROSTER_MONTHS_EN = {Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-
-let rosterDays = [];        // flat list of {date, weekday, shift1, shift2, shift3, backup, cuti}
-let rosterLastSync = null;
-let rosterMode = 'today';   // today | week | month
-let rosterLoaded = false;
-
-function rosterPersonName(code){
-  const p = ROSTER_PERSONNEL.find(p => p.code === code);
-  return p ? p.name : code;
-}
-function rosterPersonColor(code){
-  const p = ROSTER_PERSONNEL.find(p => p.code === code);
-  return p ? p.color : '#888';
-}
-function rosterPersonPhoto(code){
-  const p = ROSTER_PERSONNEL.find(p => p.code === code);
-  return p ? p.photo : null;
-}
-function rosterPersonInitial(code){
-  return (code || '?').slice(0,1);
-}
-function rosterAvatarHTML(code, size){
-  const photo = rosterPersonPhoto(code);
-  const color = rosterPersonColor(code);
-  const s = size || 44;
-  if(code === '-' || !code){
-    return `<div class="roster-avatar roster-avatar-empty" style="width:${s}px;height:${s}px;">–</div>`;
-  }
-  if(photo){
-    return `<div class="roster-avatar" style="width:${s}px;height:${s}px;border-color:${color}"><img src="${photo}" alt="${code}"></div>`;
-  }
-  return `<div class="roster-avatar roster-avatar-initial" style="width:${s}px;height:${s}px;background:${color};border-color:${color}">${rosterPersonInitial(rosterPersonName(code))}</div>`;
-}
-function timeStrToMinutes(t){
-  const [h,m] = t.split(':').map(Number);
-  return h*60+m;
-}
-function isShiftActiveNow(shiftKey, now){
-  const def = ROSTER_SHIFT_DEFS.find(s => s.key === shiftKey);
-  if(!def) return false;
-  const cur = now.getHours()*60 + now.getMinutes();
-  const start = timeStrToMinutes(def.start);
-  const end = timeStrToMinutes(def.end);
-  if(start < end) return cur >= start && cur < end;
-  return cur >= start || cur < end; // wrap tengah malam
-}
-/* Parser tanggal dari SATU CELL gviz. Coba beberapa cara (urutan dari paling andal):
-   1) cell.v hasil normalisasi "Date(y,m,d...)" -> paling akurat, tidak tergantung format tampilan
-   2) cell.f (teks yang tampil di sheet) dengan pola umum "1-May-26" / "1/5/2026" / "2026-05-01" */
-function parseGvizCellDate(cell){
-  if(!cell) return null;
-  if(cell.v instanceof Date){
-    return new Date(cell.v.getFullYear(), cell.v.getMonth(), cell.v.getDate());
-  }
-  const vRaw = cell.v !== undefined && cell.v !== null ? String(cell.v) : '';
-  const mDate = vRaw.match(/^Date\((\d+),(\d+),(\d+)/); // bulan di sini 0-indexed (gaya JS Date)
-  if(mDate){
-    return new Date(parseInt(mDate[1],10), parseInt(mDate[2],10), parseInt(mDate[3],10));
-  }
-  const fRaw = (cell.f !== undefined && cell.f !== null ? String(cell.f) : '').trim();
-  let m = fRaw.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/); // 1-May-26
-  if(m){
-    const mon = ROSTER_MONTHS_EN[m[2]];
-    if(mon !== undefined){
-      let year = parseInt(m[3],10); if(year < 100) year += 2000;
-      return new Date(year, mon, parseInt(m[1],10));
-    }
-  }
-  m = fRaw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); // 5/1/2026 (M/D/YYYY ala gviz default)
-  if(m){
-    return new Date(parseInt(m[3],10), parseInt(m[1],10)-1, parseInt(m[2],10));
-  }
-  m = fRaw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); // 2026-05-01
-  if(m){
-    return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
-  }
-  return null;
-}
-/* Ambil teks tampilan sebuah cell (untuk label/kode, bukan tanggal) */
-function gvizCellText(cell){
-  if(!cell) return '';
-  if(cell.f !== undefined && cell.f !== null && cell.f !== '') return String(cell.f);
-  if(cell.v !== undefined && cell.v !== null) return String(cell.v);
-  return '';
-}
-function parseGvizText(text){
-  const m = text.match(/setResponse\(([\s\S]*)\);?\s*$/);
-  if(!m) throw new Error('Format respons Google Sheets tidak dikenali');
-  /* Respons gviz BUKAN JSON murni - nilai bertipe tanggal ditulis literal seperti
-     new Date(2026,6,14) yang membuat JSON.parse gagal. Kita bungkus jadi string dulu. */
-  const safe = m[1].replace(/new Date\(([^)]*)\)/g, (_, args) => `"Date(${args})"`);
-  const json = JSON.parse(safe);
-  if(!json.table || !json.table.rows) return [];
-  return json.table.rows.map(r => (r.c || []).map(cell => cell || null));
-}
-function parseRosterBlocks(rows){
-  const days = [];
-  for(let i=0;i<rows.length;i++){
-    const row = rows[i] || [];
-    if(gvizCellText(row[0]).trim() === 'Shift'){
-      const dateRow = rows[i+1] || [];
-      const cols = [];
-      for(let c=1;c<row.length;c++){
-        const weekday = gvizCellText(row[c]);
-        if(weekday) cols.push({ weekday, dateCell: dateRow[c] || null });
-      }
-      if(cols.length === 0) continue;
-      const rec = { shift1:[], shift2:[], shift3:[], backup:[], cuti:[] };
-      let r = i+2;
-      while(r < rows.length){
-        const label = gvizCellText((rows[r]||[])[0]).trim();
-        if(!label || label === 'Shift') break;
-        const values = cols.map((_, idx) => gvizCellText(rows[r][idx+1]) || '-');
-        if(/shift\s*1/i.test(label)) rec.shift1 = values;
-        else if(/shift\s*2/i.test(label)) rec.shift2 = values;
-        else if(/shift\s*3/i.test(label)) rec.shift3 = values;
-        else if(/backup/i.test(label)) rec.backup = values;
-        else if(/cuti/i.test(label)) rec.cuti = values;
-        r++;
-      }
-      cols.forEach((col, idx) => {
-        const date = parseGvizCellDate(col.dateCell);
-        if(!date) return;
-        days.push({
-          date, weekday: col.weekday,
-          shift1: rec.shift1[idx] || '-', shift2: rec.shift2[idx] || '-',
-          shift3: rec.shift3[idx] || '-', backup: rec.backup[idx] || '-', cuti: rec.cuti[idx] || '-'
-        });
-      });
-      i = r-1;
-    }
-  }
-  return days;
-}
-/* Nama tab di sheet mengikuti pola "MonthName-Year" (contoh: "May-2026", "June-2026", "July-2026")
-   sesuai struktur asli file Harris. gid TIDAK dipakai lagi karena gid bukan angka urut per tab -
-   hanya tab pertama yang gid-nya pasti 0, tab lain dapat ID acak sehingga tebakan gid 1..7 salah sasaran. */
-const ROSTER_MONTH_NAMES_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-function rosterCandidateSheetNames(){
-  const now = new Date();
-  const names = [];
-  for(let offset=-2; offset<=6; offset++){
-    const d = new Date(now.getFullYear(), now.getMonth()+offset, 1);
-    names.push(`${ROSTER_MONTH_NAMES_EN[d.getMonth()]}-${d.getFullYear()}`);
-  }
-  return names;
-}
-/* Google TIDAK mengirim header Access-Control-Allow-Origin di endpoint gviz/tq, sehingga
-   fetch()/XHR biasa dari domain lain (mis. GitHub Pages) selalu diblokir CORS oleh browser -
-   meski sheet-nya sudah public. JSONP manual (rakit sendiri parameter tqx/responseHandler)
-   ternyata rawan salah format. Solusi paling andal: pakai library RESMI Google Charts
-   (google.visualization.Query) yang menangani sendiri detail JSONP/callback/escaping-nya -
-   kita tinggal kirim query dan baca hasilnya. */
-let rosterGChartsPromise = null;
-function loadGoogleChartsOnce(){
-  if(rosterGChartsPromise) return rosterGChartsPromise;
-  rosterGChartsPromise = new Promise((resolve, reject) => {
-    if(window.google && window.google.visualization && window.google.visualization.Query){
-      resolve();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://www.gstatic.com/charts/loader.js';
-    script.onerror = () => {
-      rosterGChartsPromise = null;
-      const e = new Error('gagal memuat pustaka Google Charts (cek koneksi internet)');
-      e.rosterErrorType = 'network';
-      reject(e);
-    };
-    script.onload = () => {
-      try{
-        google.charts.load('current', { packages: ['table'] });
-        google.charts.setOnLoadCallback(() => resolve());
-      }catch(err){
-        rosterGChartsPromise = null;
-        reject(err);
-      }
-    };
-    document.head.appendChild(script);
-  });
-  return rosterGChartsPromise;
-}
-async function fetchRosterSheetByName(sheetName){
-  await loadGoogleChartsOnce();
-  const url = `https://docs.google.com/spreadsheets/d/${ROSTER_SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    const timer = setTimeout(() => {
-      if(settled) return;
-      settled = true;
-      const e = new Error('timeout memuat tab "' + sheetName + '"');
-      e.rosterErrorType = 'network';
-      reject(e);
-    }, 15000);
-    try{
-      const query = new google.visualization.Query(url);
-      query.send(response => {
-        if(settled) return;
-        settled = true;
-        clearTimeout(timer);
-        if(response.isError()){
-          const e = new Error('tab "' + sheetName + '" tidak ditemukan (' + response.getMessage() + (response.getDetailedMessage() ? ': ' + response.getDetailedMessage() : '') + ')');
-          e.rosterErrorType = 'notfound';
-          reject(e);
-          return;
-        }
-        const dt = response.getDataTable();
-        const numRows = dt.getNumberOfRows();
-        const numCols = dt.getNumberOfColumns();
-        const rows = [];
-        for(let r=0;r<numRows;r++){
-          const row = [];
-          for(let c=0;c<numCols;c++){
-            const v = dt.getValue(r,c);
-            const f = dt.getFormattedValue(r,c);
-            row.push(v===null && !f ? null : { v: v, f: f });
-          }
-          rows.push(row);
-        }
-        resolve(parseRosterBlocks(rows));
-      });
-    }catch(err){
-      if(settled) return;
-      settled = true;
-      clearTimeout(timer);
-      err.rosterErrorType = err.rosterErrorType || 'notfound';
-      reject(err);
-    }
-  });
-}
-async function loadRoster(){
-  const banner = document.getElementById('rosterSyncBanner');
-  banner.textContent = 'Menyinkronkan data roster dari Google Sheets...';
-  banner.className = 'roster-sync-banner syncing';
-  try{
-    const candidates = rosterCandidateSheetNames();
-    const errorTypes = [];
-    const attempts = candidates.map(name => fetchRosterSheetByName(name).catch(err => {
-      errorTypes.push(err && err.rosterErrorType || 'unknown');
-      return [];
-    }));
-    const results = await Promise.all(attempts);
-    const merged = [];
-    const seen = new Set();
-    results.flat().forEach(d => {
-      const key = d.date.toDateString();
-      if(!seen.has(key)){ seen.add(key); merged.push(d); }
-    });
-    merged.sort((a,b) => a.date - b.date);
-    if(merged.length === 0){
-      // Semua percobaan gagal - diagnosa penyebab paling mungkin dari jenis error yang terkumpul
-      const allTimeout = errorTypes.length > 0 && errorTypes.every(t => t === 'network');
-      const allNotfound = errorTypes.length > 0 && errorTypes.every(t => t === 'notfound');
-      let msg;
-      if(allTimeout){
-        msg = '⚠️ Semua tab timeout saat dimuat. Ini biasanya tanda sheet BELUM di-share publik. Buka sheet roster → Share → ubah ke "Anyone with the link – Viewer", lalu klik "Sinkron Ulang". Bisa juga karena koneksi internet lambat/terputus.';
-      } else if(allNotfound){
-        msg = '⚠️ Tidak ada tab roster yang cocok di sheet (dicoba: ' + candidates.join(', ') + '). Pastikan nama tab persis mengikuti format "NamaBulan-Tahun" (contoh: July-2026), dan sheet sudah di-share "Anyone with the link – Viewer".';
-      } else {
-        msg = '⚠️ Gagal sinkron roster (dicoba: ' + candidates.join(', ') + '). Cek apakah sheet sudah di-share "Anyone with the link – Viewer" dan nama tab sesuai format "NamaBulan-Tahun".';
-      }
-      const e = new Error(msg);
-      throw e;
-    }
-    rosterDays = merged;
-    rosterLastSync = new Date();
-    rosterLoaded = true;
-    banner.textContent = '✓ Live-sync dari Google Sheets · terakhir sinkron ' + rosterLastSync.toLocaleTimeString('id-ID');
-    banner.className = 'roster-sync-banner ok';
-  }catch(e){
-    banner.textContent = e.message;
-    banner.className = 'roster-sync-banner error';
-    showToast('✗ Gagal sinkron roster', 'error');
-    if(!rosterLoaded) return;
-  }
-  renderRoster();
-}
-function sameDay(a,b){ return a.toDateString() === b.toDateString(); }
-function startOfWeekBlockFor(date){
-  // cari blok 8-hari (sesuai struktur sheet) yang memuat tanggal ini
-  // fallback: pakai 7 hari sebelum s/d sesudah bila tidak ada match blok eksplisit
-  return rosterDays.filter(d => {
-    const diff = Math.round((d.date - date) / 86400000);
-    return diff >= -3 && diff <= 3;
-  });
-}
-function renderRoster(){
-  document.querySelectorAll('.roster-modeselect button').forEach(b => b.classList.toggle('active', b.dataset.mode === rosterMode));
-  const today = new Date(); today.setHours(0,0,0,0);
-  const todayRec = rosterDays.find(d => sameDay(d.date, today));
-  const box = document.getElementById('rosterContent');
-
-  if(rosterMode === 'today'){
-    const now = new Date();
-    const dateLabel = today.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    let html = `<div class="roster-daycard-date" style="margin-bottom:10px;">${dateLabel}</div>`;
-    html += renderShiftNowGrid(todayRec, now);
-    if(todayRec && ((todayRec.backup && todayRec.backup !== '-') || (todayRec.cuti && todayRec.cuti !== '-'))){
-      html += `<div class="roster-daycard">
-        <div class="roster-daycard-date roster-editable-label" contenteditable="true" data-rkey="label_infoTambahan">${rosterLabelText('label_infoTambahan','Info tambahan hari ini')}</div>
-        <div class="roster-daycard-shifts">
-          ${todayRec.backup && todayRec.backup !== '-' ? `<div class="roster-shift-row muted">${rosterAvatarHTML(todayRec.backup, 32)}<span class="roster-shift-label roster-editable-label" contenteditable="true" data-rkey="label_backup" style="flex:0 0 90px;">${rosterLabelText('label_backup','Backup')}</span><span class="roster-shift-name">${rosterPersonName(todayRec.backup)}</span></div>` : ''}
-          ${todayRec.cuti && todayRec.cuti !== '-' ? `<div class="roster-shift-row muted">${rosterAvatarHTML(todayRec.cuti, 32)}<span class="roster-shift-label roster-editable-label" contenteditable="true" data-rkey="label_cuti" style="flex:0 0 90px;">${rosterLabelText('label_cuti','Cuti')}</span><span class="roster-shift-name">${rosterPersonName(todayRec.cuti)}</span></div>` : ''}
-        </div>
-      </div>`;
-    }
-    if(!todayRec){
-      html += `<div class="roster-empty roster-editable-label" contenteditable="true" data-rkey="label_emptyToday">${rosterLabelText('label_emptyToday','Tidak ada data penugasan personil untuk hari ini di sheet (jam shift tetap ditampilkan di atas).')}</div>`;
-    }
-    box.innerHTML = html;
-    return;
-  }
-
-  if(rosterMode === 'week'){
-    const days = startOfWeekBlockFor(today);
-    if(days.length === 0){ box.innerHTML = `<div class="roster-empty">Tidak ada data jadwal minggu ini.</div>`; return; }
-    box.innerHTML = `<div class="roster-week-cards">${days.map(d => rosterTodayCard(d, sameDay(d.date, today))).join('')}</div>`;
-    return;
-  }
-
-  if(rosterMode === 'month'){
-    const days = rosterDays.filter(d => d.date.getFullYear()===today.getFullYear() && d.date.getMonth()===today.getMonth());
-    if(days.length === 0){ box.innerHTML = `<div class="roster-empty">Tidak ada data jadwal untuk bulan ini.</div>`; return; }
-    const rows = days.map(d => `
-      <tr class="${sameDay(d.date, today) ? 'is-today' : ''}">
-        <td class="rowlabel">${d.date.getDate()} ${ROSTER_MONTHS_ID[d.date.getMonth()].slice(0,3)}<br><span style="font-weight:normal">${d.weekday}</span></td>
-        <td><span class="roster-cell-badge" style="background:${rosterPersonColor(d.shift1)}">${d.shift1}</span></td>
-        <td><span class="roster-cell-badge" style="background:${rosterPersonColor(d.shift2)}">${d.shift2}</span></td>
-        <td><span class="roster-cell-badge" style="background:${rosterPersonColor(d.shift3)}">${d.shift3}</span></td>
-      </tr>`).join('');
-    box.innerHTML = `
-      <div class="roster-week">
-        <div class="roster-week-title">${ROSTER_MONTHS_ID[today.getMonth()]} ${today.getFullYear()}</div>
-        <div class="roster-table-wrap">
-          <table class="roster-table">
-            <thead><tr><th class="rowlabel-th">Tanggal</th><th>Shift 1</th><th>Shift 2</th><th>Shift 3</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </div>`;
-  }
-}
-function renderShiftNowGrid(rec, now){
-  const cards = ROSTER_SHIFT_DEFS.map(def => {
-    const code = rec ? rec[def.key] : '-';
-    const hasPerson = code && code !== '-';
-    const isLive = isShiftActiveNow(def.key, now);
-    const titleKey = 'shiftTitle_' + def.key;
-    const defaultTitle = `${def.label} — ${def.start}\u2013${def.end}`;
-    const titleText = rosterLabelText(titleKey, defaultTitle);
-    return `
-      <div class="roster-shiftnow-card ${isLive ? 'is-live' : ''}">
-        <div class="roster-shiftnow-top">
-          <div>
-            <div class="roster-shiftnow-label roster-editable-label" contenteditable="true" data-rkey="${titleKey}">${titleText}</div>
-          </div>
-          <span class="roster-live-badge"><span class="roster-live-dot"></span>ONDUTY</span>
-        </div>
-        <div class="roster-shiftnow-person">
-          ${rosterAvatarHTML(code, isLive ? 56 : 44)}
-          <div>
-            <div class="roster-shiftnow-name">${hasPerson ? rosterPersonName(code) : '–'}</div>
-            <div class="roster-shiftnow-code">${hasPerson ? code : 'Belum ada data'}</div>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-  return `<div class="roster-shiftnow-grid">${cards}</div>`;
-}
-function rosterTodayCard(rec, highlight){
+/* ==================== BUILD DIVISION VIEW SHELL ==================== */
+function buildDivisionViewShell(dc){
   return `
-    <div class="roster-daycard ${highlight ? 'highlight' : ''}">
-      <div class="roster-daycard-date">${rec.weekday}, ${rec.date.getDate()} ${ROSTER_MONTHS_ID[rec.date.getMonth()]} ${rec.date.getFullYear()}</div>
-      <div class="roster-daycard-shifts">
-        <div class="roster-shift-row"><span class="roster-shift-label">Shift 1 (07:00–19:00)</span><span class="roster-cell-badge" style="background:${rosterPersonColor(rec.shift1)}">${rec.shift1}</span><span class="roster-shift-name">${rosterPersonName(rec.shift1)}</span></div>
-        <div class="roster-shift-row"><span class="roster-shift-label">Shift 2 (13:00–01:00)</span><span class="roster-cell-badge" style="background:${rosterPersonColor(rec.shift2)}">${rec.shift2}</span><span class="roster-shift-name">${rosterPersonName(rec.shift2)}</span></div>
-        <div class="roster-shift-row"><span class="roster-shift-label">Shift 3 (20:00–08:00)</span><span class="roster-cell-badge" style="background:${rosterPersonColor(rec.shift3)}">${rec.shift3}</span><span class="roster-shift-name">${rosterPersonName(rec.shift3)}</span></div>
-        ${rec.backup && rec.backup !== '-' ? `<div class="roster-shift-row muted"><span class="roster-shift-label">Backup</span><span class="roster-cell-badge" style="background:${rosterPersonColor(rec.backup)}">${rec.backup}</span><span class="roster-shift-name">${rosterPersonName(rec.backup)}</span></div>` : ''}
-        ${rec.cuti && rec.cuti !== '-' ? `<div class="roster-shift-row muted"><span class="roster-shift-label">Cuti</span><span class="roster-cell-badge" style="background:${rosterPersonColor(rec.cuti)}">${rec.cuti}</span><span class="roster-shift-name">${rosterPersonName(rec.cuti)}</span></div>` : ''}
+  <div class="view" id="view-${dc.id}">
+    <div class="card-box">
+      <div class="division-banner" style="background:${dc.color}">${dc.icon} ${dc.name}</div>
+      <div class="rs-unified-card">
+        <div class="onduty-panel" id="onduty-${dc.id}"></div>
+        <div class="month-nav">
+          <button class="btn btn-ghost" data-act="prev" data-div="${dc.id}">◀</button>
+          <div class="label" id="monthLabel-${dc.id}"></div>
+          <button class="btn btn-ghost" data-act="next" data-div="${dc.id}">▶</button>
+          <button class="btn btn-ghost btn-sm" data-act="today" data-div="${dc.id}" style="margin-left:auto;">Bulan ini</button>
+          <button class="btn btn-ghost btn-sm" data-act="unlock" data-div="${dc.id}">🔓 Reset bulan ini</button>
+        </div>
+        <div class="palette-hint">Klik nama untuk buka/tutup daftar tanggal · klik tanggal untuk buka detail &amp; ubah petugas · klik ✕ pada tanggal cuti untuk menghapus tanda cuti.</div>
+
+        <div class="ondoff-section">
+          <h4 class="ondoff-title">📋 Rekap Bulan Ini</h4>
+          <div class="ondoff-list" id="monthSummary-${dc.id}"></div>
+          <div class="ondoff-add-form">
+            <select id="leaveMemberSelect-${dc.id}" data-div="${dc.id}"></select>
+            <input type="date" id="leaveDateInput-${dc.id}" data-div="${dc.id}">
+            <button class="btn btn-primary btn-sm" data-act="addleave" data-div="${dc.id}">+ Tandai Cuti</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-box">
+      <h3>👥 Anggota &amp; Rotasi — ${dc.name}</h3>
+      <div class="order-list" id="orderList-${dc.id}"></div>
+      <div class="team-add-form">
+        <input type="text" id="newMemberName-${dc.id}" placeholder="Nama anggota baru...">
+        <button class="btn btn-primary btn-sm" data-act="add" data-div="${dc.id}">+ Tambah</button>
+      </div>
+      <div class="controls" style="margin-top:12px;">
+        <div>
+          <label>Siklus pergantian</label>
+          <select id="cycleSelect-${dc.id}" data-div="${dc.id}">
+            <option value="1">Setiap 1 hari</option>
+            <option value="2">Setiap 2 hari</option>
+            <option value="3">Setiap 3 hari</option>
+            <option value="7">Mingguan (7 hari)</option>
+            <option value="14">Dua mingguan (14 hari)</option>
+          </select>
+        </div>
+        <div>
+          <label>Tanggal mulai rotasi</label>
+          <input type="date" id="startDateInput-${dc.id}" data-div="${dc.id}">
+        </div>
+        <div>
+          <label>Mulai dengan</label>
+          <select id="startPersonSelect-${dc.id}" data-div="${dc.id}"></select>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ==================== DELEGATED EVENTS UNTUK VIEW DIVISI ==================== */
+const mountEl = document.getElementById('divisionViewsMount');
+mountEl.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-act]');
+  if(!btn) return;
+  const divId = btn.dataset.div;
+  if(btn.dataset.act === 'prev') shiftMonth(-1);
+  else if(btn.dataset.act === 'next') shiftMonth(1);
+  else if(btn.dataset.act === 'today'){ currentMonth = firstOfThisMonth(); renderAllDivisions(); }
+  else if(btn.dataset.act === 'add') addMemberToDivision(divId);
+  else if(btn.dataset.act === 'unlock') resetMonthOverrides(divId);
+  else if(btn.dataset.act === 'addleave') addLeaveFromForm(divId);
+});
+mountEl.addEventListener('change', (e) => {
+  const el = e.target;
+  const divId = el.dataset.div;
+  if(!divId) return;
+  const div = divisionState(divId);
+  if(el.id.startsWith('cycleSelect-')){ div.rotation.cycleDays = Number(el.value); markDirty(); renderDivision(divId); }
+  else if(el.id.startsWith('startDateInput-')){ div.rotation.startDate = el.value; markDirty(); renderDivision(divId); }
+  else if(el.id.startsWith('startPersonSelect-')){ div.rotation.startPersonId = el.value; markDirty(); renderDivision(divId); }
+});
+mountEl.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && e.target.id && e.target.id.startsWith('newMemberName-')){
+    addMemberToDivision(e.target.id.replace('newMemberName-',''));
+  }
+});
+function addLeaveFromForm(divId){
+  const memberSel = document.getElementById('leaveMemberSelect-' + divId);
+  const dateInput = document.getElementById('leaveDateInput-' + divId);
+  if(!memberSel || !memberSel.value){ showToast('Pilih anggota terlebih dahulu.', 'error'); return; }
+  if(!dateInput || !dateInput.value){ showToast('Pilih tanggal cuti terlebih dahulu.', 'error'); return; }
+  const personId = memberSel.value;
+  const iso = dateInput.value;
+  const m = memberById(personId);
+  addLeave(iso, personId);
+  dateInput.value = '';
+  renderDivision(divId);
+  renderOverview();
+  showToast(`Cuti ${m ? m.name : ''} pada ${iso} ditandai.`, 'success');
+}
+function shiftMonth(delta){
+  const d = parseISO(currentMonth);
+  d.setMonth(d.getMonth() + delta);
+  currentMonth = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+  renderAllDivisions();
+}
+function resetMonthOverrides(divId){
+  const div = divisionState(divId);
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const total = daysInMonth(y,m);
+  let count = 0;
+  for(let day=1; day<=total; day++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    if(div.overrides[iso]){ delete div.overrides[iso]; count++; }
+  }
+  if(count){ markDirty(); renderDivision(divId); showToast(`${count} tanggal dikembalikan ke rotasi otomatis.`, 'success'); }
+  else showToast('Tidak ada override manual di bulan ini.', 'error');
+}
+function addMemberToDivision(divId){
+  const input = document.getElementById('newMemberName-' + divId);
+  const name = input.value.trim();
+  if(!name){ showToast('Nama tidak boleh kosong.', 'error'); return; }
+  const m = { id: uid(), name, color: nextColor(), divisionId: divId };
+  state.team.push(m);
+  divisionState(divId).rotation.order.push(m.id);
+  input.value = '';
+  markDirty();
+  renderDivision(divId);
+  showToast(`${name} ditambahkan ke ${divisionConfig(divId).name}.`, 'success');
+}
+
+/* ==================== RENDER: ORDER LIST, ROTATION CONFIG ==================== */
+function renderOrderList(divId){
+  const div = divisionState(divId);
+  const el = document.getElementById('orderList-' + divId);
+  el.innerHTML = div.rotation.order.map((id, idx) => {
+    const m = memberById(id);
+    if(!m) return '';
+    return `<div class="order-item" data-id="${id}">
+      <span class="dot" style="background:${m.color}"></span>
+      <span class="name">${idx+1}. ${m.name}</span>
+      <button class="mv" data-act="up" ${idx===0?'disabled':''}>▲</button>
+      <button class="mv" data-act="down" ${idx===div.rotation.order.length-1?'disabled':''}>▼</button>
+      <button class="mv" data-act="del" title="Hapus dari divisi">✕</button>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.mv').forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.closest('.order-item').dataset.id;
+      const idx = div.rotation.order.indexOf(id);
+      if(btn.dataset.act === 'up' && idx > 0){
+        [div.rotation.order[idx-1], div.rotation.order[idx]] = [div.rotation.order[idx], div.rotation.order[idx-1]];
+      } else if(btn.dataset.act === 'down' && idx < div.rotation.order.length-1){
+        [div.rotation.order[idx+1], div.rotation.order[idx]] = [div.rotation.order[idx], div.rotation.order[idx+1]];
+      } else if(btn.dataset.act === 'del'){
+        if(div.rotation.order.length <= 1){ showToast('Minimal harus ada 1 anggota di divisi ini.', 'error'); return; }
+        if(!confirm(`Hapus anggota ini dari ${divisionConfig(divId).name}?`)) return;
+        state.team = state.team.filter(m => m.id !== id);
+        div.rotation.order = div.rotation.order.filter(x => x !== id);
+        state.criticalTeamIds = state.criticalTeamIds.filter(x => x !== id);
+        if(div.rotation.startPersonId === id) div.rotation.startPersonId = div.rotation.order[0];
+      }
+      markDirty();
+      renderDivision(divId);
+    };
+  });
+}
+function renderRotationConfig(divId){
+  const div = divisionState(divId);
+  document.getElementById('cycleSelect-' + divId).value = String(div.rotation.cycleDays);
+  document.getElementById('startDateInput-' + divId).value = div.rotation.startDate;
+  const sel = document.getElementById('startPersonSelect-' + divId);
+  sel.innerHTML = div.rotation.order.map(id => { const m = memberById(id); return m ? `<option value="${id}">${m.name}</option>` : ''; }).join('');
+  sel.value = div.rotation.startPersonId;
+}
+
+/* ==================== RENDER: ONDUTY PANEL (hari ini) ==================== */
+function todayLabel(){
+  return capitalize(parseISO(todayISO()).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'}));
+}
+function renderOnDuty(divId){
+  const el = document.getElementById('onduty-' + divId);
+  const iso = todayISO();
+  const a = assignedFor(divId, iso);
+  const person = a ? memberById(a.personId) : null;
+  const critArr = state.criticalLeave[iso] || [];
+  const leaveMembersInDiv = critArr.map(id => memberById(id)).filter(m => m && m.divisionId === divId);
+  let cls = 'rs-shiftnow-card';
+  if(person) cls += ' is-live';
+
+  const dayoffHtml = leaveMembersInDiv.length
+    ? leaveMembersInDiv.map(m => `<div class="rs-status-person">${avatarHTML(m,32)}<span>${m.name}</span></div>`).join('')
+    : '<div class="rs-status-empty">Tidak ada yang cuti hari ini</div>';
+
+  el.innerHTML = `
+    <div class="${cls}" id="ondutyClick-${divId}">
+      <div class="rs-shiftnow-top">
+        <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div><div class="rs-shiftnow-time">${a && a.locked ? 'Assign manual' : 'Rotasi otomatis'}</div></div>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
+      </div>
+      <div class="rs-status-grid">
+        <div class="rs-status-block">
+          <div class="rs-status-label">🟢 Day-On</div>
+          <div class="rs-status-person rs-status-person-main">
+            ${avatarHTML(person, 44)}
+            <span>${person ? person.name : 'Belum ada petugas'}</span>
+          </div>
+        </div>
+        <div class="rs-status-block">
+          <div class="rs-status-label">🏖️ Day-off</div>
+          ${dayoffHtml}
+        </div>
       </div>
     </div>`;
-}
-document.querySelectorAll('.roster-modeselect button').forEach(btn => {
-  btn.onclick = () => { rosterMode = btn.dataset.mode; renderRoster(); };
-});
-document.getElementById('rosterRefreshBtn').onclick = () => loadRoster();
-setInterval(() => {
-  if(rosterLoaded && rosterMode === 'today' && document.getElementById('view-roster').classList.contains('active')){
-    renderRoster(); // cukup re-render (tanpa fetch ulang) supaya badge LIVE ikut update jam berjalan
-  }
-}, 60000);
-
-/* ---------------- TAB SWITCHING ---------------- */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + tab.dataset.view).classList.add('active');
-    if(tab.dataset.view === 'rekap') renderRekap();
-    if(tab.dataset.view === 'followup') renderFollowUp();
-    if(tab.dataset.view === 'roster') loadRoster();
-  };
-});
-
-/* ---------------- BUILD DAILY UI ---------------- */
-function renderTaskRow(body, id, taskText, displayNum, opts){
-  opts = opts || {};
-  const taskDiv = document.createElement('div');
-  taskDiv.className = 'task';
-  const title = document.createElement('div');
-  title.className = 'task-title';
-  const numSpan = document.createElement('span');
-  numSpan.textContent = `${displayNum}. `;
-  const textSpan = document.createElement('span');
-  textSpan.contentEditable = 'true';
-  textSpan.className = 'editable-label';
-  textSpan.textContent = structureLabels.tasks[id] || taskText;
-  textSpan.addEventListener('input', () => {
-    structureLabels.tasks[id] = textSpan.textContent;
-    rebuildTaskIndex();
-    scheduleStructLabelSave();
-  });
-  textSpan.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); textSpan.blur(); } });
-  title.appendChild(numSpan);
-  title.appendChild(textSpan);
-
-  const actions = document.createElement('span');
-  actions.className = 'row-actions';
-  const editBtn = document.createElement('button');
-  editBtn.className = 'row-edit-btn';
-  editBtn.type = 'button';
-  editBtn.textContent = '✎ Edit';
-  editBtn.onclick = (e) => { e.stopPropagation(); textSpan.focus(); const r=document.createRange(); r.selectNodeContents(textSpan); const s=window.getSelection(); s.removeAllRanges(); s.addRange(r); };
-  actions.appendChild(editBtn);
-  const hapusBtn = document.createElement('button');
-  hapusBtn.className = 'row-hapus-btn';
-  hapusBtn.type = 'button';
-  hapusBtn.textContent = '🗑 Hapus';
-  hapusBtn.onclick = (e) => {
-    e.stopPropagation();
-    if(!confirm('Hapus checklist ini?')) return;
-    if(opts.custom) deleteCustomTask(opts.ci, opts.customIndex);
-    else hideDefaultTask(id);
-  };
-  actions.appendChild(hapusBtn);
-  title.appendChild(actions);
-  taskDiv.appendChild(title);
-
-  const statusRow = document.createElement('div');
-  statusRow.className = 'status-row';
-  STATUS_OPTIONS.forEach(opt => {
-    const btn = document.createElement('button');
-    btn.className = 'status-btn';
-    btn.dataset.status = opt;
-    btn.dataset.taskId = id;
-    btn.textContent = opt;
-    btn.onclick = () => setStatus(id, opt);
-    statusRow.appendChild(btn);
-  });
-  taskDiv.appendChild(statusRow);
-
-  const note = document.createElement('textarea');
-  note.placeholder = 'Catatan / link / detail...';
-  note.dataset.taskId = id;
-  note.addEventListener('input', () => { currentData.notes[id] = note.value; scheduleSave(); });
-  taskDiv.appendChild(note);
-
-  body.appendChild(taskDiv);
+  document.getElementById('ondutyClick-' + divId).onclick = () => openDetailPanel(divId, iso);
 }
 
-function buildCategoryDiv(catKey, cat, isCustom){
-  const catDiv = document.createElement('div');
-  catDiv.className = 'category';
-  const head = document.createElement('div');
-  head.className = 'category-head';
-  const catNameSpan = document.createElement('span');
-  catNameSpan.contentEditable = 'true';
-  catNameSpan.className = 'editable-label';
-  catNameSpan.textContent = isCustom ? cat.name : (structureLabels.categories[catKey] || cat.name);
-  catNameSpan.addEventListener('click', (e) => e.stopPropagation());
-  catNameSpan.addEventListener('input', () => {
-    if(isCustom){
-      const found = customCategories.find(c => c.id === catKey);
-      if(found) found.name = catNameSpan.textContent;
-      saveCustomCategories();
-    } else {
-      structureLabels.categories[catKey] = catNameSpan.textContent;
-      scheduleStructLabelSave();
-    }
-    rebuildTaskIndex();
+/* ==================== LEAVE (CUTI) — SEMUA ANGGOTA ==================== */
+function isOnLeave(dateISO, personId){ return (state.criticalLeave[dateISO] || []).includes(personId); }
+function addLeave(dateISO, personId){
+  if(isOnLeave(dateISO, personId)) return;
+  const arr = state.criticalLeave[dateISO] ? state.criticalLeave[dateISO].slice() : [];
+  arr.push(personId);
+  state.criticalLeave[dateISO] = arr;
+  markDirty();
+}
+function removeLeave(dateISO, personId){
+  if(!isOnLeave(dateISO, personId)) return;
+  const arr = state.criticalLeave[dateISO].filter(id => id !== personId);
+  if(arr.length) state.criticalLeave[dateISO] = arr; else delete state.criticalLeave[dateISO];
+  markDirty();
+}
+function monthDatesList(y, m){
+  const total = daysInMonth(y, m);
+  const list = [];
+  for(let day=1; day<=total; day++) list.push(`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`);
+  return list;
+}
+function dayNumOf(iso){ return Number(iso.split('-')[2]); }
+
+/* ==================== EXPAND/COLLAPSE STATE (UI-only, tidak disimpan) ==================== */
+let expandedOnDuty = {};
+let expandedDayOff = {};
+
+/* ==================== RENDER: REKAP GABUNGAN (DAY-ON + DAY-OFF) BULAN INI ==================== */
+function renderMonthSummary(divId){
+  const div = divisionState(divId);
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  document.getElementById('monthLabel-' + divId).textContent = capitalize(d.toLocaleDateString('id-ID', {month:'long', year:'numeric'}));
+  const dates = monthDatesList(y, m);
+  const members = state.team.filter(mm => mm.divisionId === divId);
+
+  const el = document.getElementById('monthSummary-' + divId);
+  el.innerHTML = members.map(mem => {
+    const id = mem.id;
+    const onDates = dates.filter(iso => { const a = assignedFor(divId, iso); return a && a.personId === id; });
+    const offDates = dates.filter(iso => isOnLeave(iso, id));
+    const key = divId + '|' + id;
+    const open = !!expandedOnDuty[key];
+    const onChips = onDates.length
+      ? onDates.map(iso => `<span class="date-chip" data-date="${iso}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}</span>`).join('')
+      : '<span class="empty">— tidak ada jadwal day-on bulan ini —</span>';
+    const offChips = offDates.length
+      ? offDates.map(iso => `<span class="date-chip leave-chip" data-date="${iso}" data-member="${id}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}<span class="rm" data-rmleave="1" data-date="${iso}" data-member="${id}" title="Hapus tanda cuti">✕</span></span>`).join('')
+      : '<span class="empty">— tidak ada cuti bulan ini —</span>';
+    const useAvatar = (divId === 'maint');
+    const nameIconHtml = useAvatar
+      ? avatarHTML(mem, 32)
+      : `<span class="dot" style="background:${mem.color}"></span>`;
+    return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
+      <div class="ondoff-head" data-toggle="month" data-key="${key}">
+        ${nameIconHtml}
+        <span class="name">${mem.name}</span>
+        <span class="count">🟢 ${onDates.length} hari · 🏖️ ${offDates.length} hari</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="ondoff-body">
+        <div class="ondoff-subtitle">🟢 Day-On</div>
+        ${onChips}
+        <div class="ondoff-subtitle" style="margin-top:8px;">🏖️ Day-off</div>
+        ${offChips}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.ondoff-head[data-toggle="month"]').forEach(head => {
+    head.onclick = () => {
+      const key = head.dataset.key;
+      expandedOnDuty[key] = !expandedOnDuty[key];
+      renderMonthSummary(divId);
+    };
   });
-  catNameSpan.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); catNameSpan.blur(); } });
-  head.appendChild(catNameSpan);
+  el.querySelectorAll('.rm[data-rmleave]').forEach(rm => {
+    rm.onclick = (e) => {
+      e.stopPropagation();
+      removeLeave(rm.dataset.date, rm.dataset.member);
+      renderDivision(divId);
+      renderOverview();
+      showToast('Tanda cuti dihapus.', 'success');
+    };
+  });
+  el.querySelectorAll('.date-chip[data-date]').forEach(chip => {
+    chip.onclick = (e) => {
+      if(e.target.closest('[data-rmleave]')) return;
+      openDetailPanel(divId, chip.dataset.date);
+    };
+  });
 
-  const headActions = document.createElement('span');
-  headActions.className = 'category-head-actions';
-  const delCatBtn = document.createElement('button');
-  delCatBtn.className = 'category-del-btn';
-  delCatBtn.type = 'button';
-  delCatBtn.title = 'Hapus kategori ini';
-  delCatBtn.textContent = '🗑';
-  delCatBtn.onclick = (e) => {
-    e.stopPropagation();
-    const label = isCustom ? cat.name : (structureLabels.categories[catKey] || cat.name);
-    if(!confirm(`Hapus kategori "${label}" beserta seluruh checklist di dalamnya?`)) return;
-    if(isCustom) deleteCustomCategory(catKey);
-    else hideDefaultCategory(catKey);
+  const sel = document.getElementById('leaveMemberSelect-' + divId);
+  if(sel) sel.innerHTML = members.map(mem => `<option value="${mem.id}">${mem.name}</option>`).join('');
+}
+
+/* ==================== DETAIL PANEL (geser) ==================== */
+function openDetailPanel(divId, dateISO){
+  currentDetailDate = dateISO;
+  currentDetailDiv = divId;
+  const panel = document.getElementById('detailPanel');
+  const backdrop = document.getElementById('detailBackdrop');
+  const dc = divisionConfig(divId);
+  const dLabel = parseISO(dateISO).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('detailDate').innerHTML = `<div style="font-size:10px;opacity:.8;margin-bottom:2px;">${dc.icon} ${dc.name}</div>${dLabel}`;
+  renderDetailBody(divId, dateISO);
+  panel.classList.add('show');
+  backdrop.classList.add('show');
+}
+function closeDetailPanel(){
+  document.getElementById('detailPanel').classList.remove('show');
+  document.getElementById('detailBackdrop').classList.remove('show');
+  currentDetailDate = null;
+  currentDetailDiv = null;
+}
+function renderDetailBody(divId, dateISO){
+  const div = divisionState(divId);
+  const body = document.getElementById('detailBody');
+  const a = assignedFor(divId, dateISO);
+  const critArr = state.criticalLeave[dateISO] || [];
+
+  let html = '<div class="detail-section-title">👤 Petugas Standby</div>';
+  html += div.rotation.order.map(id => {
+    const m = memberById(id);
+    if(!m) return '';
+    const sel = a && a.personId === m.id ? ' selected' : '';
+    return `<div class="detail-opt${sel}" data-id="${m.id}">${avatarHTML(m,26)}${m.name}${a && a.personId===m.id && a.locked ? ' 📌' : ''}</div>`;
+  }).join('');
+  html += `<div class="detail-opt detail-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
+
+  html += '<div class="detail-section-title">🏖️ Tandai Cuti</div>';
+  DIVISIONS_CONFIG.forEach(dc => {
+    const members = state.team.filter(mm => mm.divisionId === dc.id);
+    if(!members.length) return;
+    html += `<div class="detail-group-label">${dc.icon} ${dc.name}</div>`;
+    html += members.map(m => {
+      const checked = critArr.includes(m.id) ? 'checked' : '';
+      return `<label class="detail-crit-row"><input type="checkbox" data-crit="${m.id}" ${checked}>${avatarHTML(m,24)}${m.name}</label>`;
+    }).join('');
+  });
+  body.innerHTML = html;
+
+  body.querySelectorAll('.detail-opt[data-id]').forEach(opt => {
+    opt.onclick = () => {
+      setOverride(divId, dateISO, opt.dataset.id);
+      showToast('Jadwal diperbarui.', 'success');
+      renderDivision(divId);
+      renderOverview();
+      renderDetailBody(divId, dateISO);
+    };
+  });
+  body.querySelector('.detail-clear').onclick = () => {
+    clearOverride(divId, dateISO);
+    showToast('Dikembalikan ke rotasi otomatis.', 'success');
+    renderDivision(divId);
+    renderOverview();
+    renderDetailBody(divId, dateISO);
   };
-  headActions.appendChild(delCatBtn);
-
-  const chevSpan = document.createElement('span');
-  chevSpan.className = 'chev';
-  chevSpan.textContent = '▼';
-  headActions.appendChild(chevSpan);
-  head.appendChild(headActions);
-  head.onclick = () => { head.classList.toggle('collapsed'); body.classList.toggle('hidden'); };
-  catDiv.appendChild(head);
-
-  const body = document.createElement('div');
-  body.className = 'category-body';
-
-  let displayNum = 0;
-  let hiddenCount = 0;
-  if(!isCustom){
-    cat.tasks.forEach((taskText, ti) => {
-      const id = `c${catKey}_t${ti}`;
-      if(hiddenTasks[id]){ hiddenCount++; return; }
-      displayNum++;
-      renderTaskRow(body, id, taskText, displayNum);
+  body.querySelectorAll('[data-crit]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      toggleCriticalLeave(dateISO, cb.dataset.crit);
+      renderAllDivisions();
+      renderDetailBody(divId, dateISO);
     });
-  }
-  (customTasks[catKey] || []).forEach((t, xi) => {
-    displayNum++;
-    const id = `c${catKey}_x${xi}`;
-    renderTaskRow(body, id, t.text, displayNum, { custom: true, ci: catKey, customIndex: xi });
-  });
-
-  if(hiddenCount > 0){
-    const hiddenBar = document.createElement('div');
-    hiddenBar.className = 'hidden-chip-bar';
-    const link = document.createElement('span');
-    link.className = 'restore-link';
-    link.textContent = `↺ Pulihkan ${hiddenCount} checklist yang dihapus di menu ini`;
-    link.onclick = () => restoreCategoryHiddenTasks(catKey);
-    hiddenBar.appendChild(link);
-    body.appendChild(hiddenBar);
-  }
-
-  const addWrap = document.createElement('div');
-  addWrap.className = 'add-task-wrap';
-  const addBtn = document.createElement('button');
-  addBtn.className = 'add-task-btn';
-  addBtn.textContent = '+ Tambah Checklist';
-  const addForm = document.createElement('div');
-  addForm.className = 'add-task-form hidden';
-  const addInput = document.createElement('input');
-  addInput.type = 'text';
-  addInput.placeholder = 'Tulis checklist baru...';
-  const addSubmit = document.createElement('button');
-  addSubmit.className = 'btn btn-primary';
-  addSubmit.textContent = 'Tambah';
-  addSubmit.onclick = () => { addCustomTask(catKey, addInput.value); addInput.value=''; };
-  addInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); addCustomTask(catKey, addInput.value); addInput.value=''; } });
-  addBtn.onclick = () => { addForm.classList.toggle('hidden'); if(!addForm.classList.contains('hidden')) addInput.focus(); };
-  addForm.appendChild(addInput);
-  addForm.appendChild(addSubmit);
-  addWrap.appendChild(addBtn);
-  addWrap.appendChild(addForm);
-  body.appendChild(addWrap);
-
-  catDiv.appendChild(body);
-  return catDiv;
-}
-
-function buildUI(){
-  const container = document.getElementById('categories');
-  container.innerHTML = '';
-
-  STRUCTURE.forEach((cat, ci) => {
-    if(hiddenCategories[ci]) return;
-    container.appendChild(buildCategoryDiv(ci, cat, false));
-  });
-
-  const hiddenCatCount = Object.keys(hiddenCategories).length;
-  if(hiddenCatCount > 0){
-    const restoreBar = document.createElement('div');
-    restoreBar.className = 'hidden-chip-bar';
-    restoreBar.style.padding = '0 2px 12px';
-    const link = document.createElement('span');
-    link.className = 'restore-link';
-    link.textContent = `↺ Pulihkan ${hiddenCatCount} kategori yang dihapus`;
-    link.onclick = () => restoreHiddenCategories();
-    restoreBar.appendChild(link);
-    container.appendChild(restoreBar);
-  }
-
-  customCategories.forEach(cat => {
-    container.appendChild(buildCategoryDiv(cat.id, cat, true));
-  });
-
-  const addCatWrap = document.createElement('div');
-  addCatWrap.className = 'add-category-wrap';
-  const addCatBtn = document.createElement('button');
-  addCatBtn.className = 'add-category-btn';
-  addCatBtn.type = 'button';
-  addCatBtn.textContent = '+ Tambah Kategori Baru';
-  const addCatForm = document.createElement('div');
-  addCatForm.className = 'add-task-form hidden';
-  const addCatInput = document.createElement('input');
-  addCatInput.type = 'text';
-  addCatInput.placeholder = 'Nama kategori baru...';
-  const addCatSubmit = document.createElement('button');
-  addCatSubmit.className = 'btn btn-primary';
-  addCatSubmit.textContent = 'Tambah';
-  addCatSubmit.onclick = () => { addCustomCategory(addCatInput.value); addCatInput.value=''; };
-  addCatInput.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); addCustomCategory(addCatInput.value); addCatInput.value=''; } });
-  addCatBtn.onclick = () => { addCatForm.classList.toggle('hidden'); if(!addCatForm.classList.contains('hidden')) addCatInput.focus(); };
-  addCatForm.appendChild(addCatInput);
-  addCatForm.appendChild(addCatSubmit);
-  addCatWrap.appendChild(addCatBtn);
-  addCatWrap.appendChild(addCatForm);
-  container.appendChild(addCatWrap);
-}
-
-function setStatus(id, status){
-  if(currentData.status[id] === status) delete currentData.status[id];
-  else currentData.status[id] = status;
-  refreshStatusButtons(); refreshSummary(); scheduleSave();
-}
-function refreshStatusButtons(){
-  document.querySelectorAll('.status-btn').forEach(btn => {
-    const id = btn.dataset.taskId;
-    btn.classList.toggle('active', currentData.status[id] === btn.dataset.status);
   });
 }
-function refreshNotes(){
-  document.querySelectorAll('textarea[data-task-id]').forEach(ta => {
-    ta.value = currentData.notes[ta.dataset.taskId] || '';
+document.getElementById('detailClose').onclick = closeDetailPanel;
+document.getElementById('detailBackdrop').onclick = closeDetailPanel;
+
+/* ==================== RENDER: OVERVIEW ==================== */
+document.getElementById('overviewModeSelect').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-mode]');
+  if(!btn) return;
+  overviewMode = btn.dataset.mode;
+  renderOverview();
+});
+
+function renderOverview(){
+  document.querySelectorAll('#overviewModeSelect button').forEach(b => b.classList.toggle('active', b.dataset.mode === overviewMode));
+  const iso = todayISO();
+  document.getElementById('overviewDateHeading').textContent = capitalize(parseISO(iso).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'}));
+  if(overviewMode === 'week') renderOverviewWeek();
+  else if(overviewMode === 'month') renderOverviewMonth();
+  else renderOverviewToday();
+}
+
+function renderOverviewToday(){
+  const iso = todayISO();
+  let html = '<div class="rs-shiftnow-grid">';
+  DIVISIONS_CONFIG.forEach(dc => {
+    const div = divisionState(dc.id);
+    const a = assignedFor(dc.id, iso);
+    const person = a ? memberById(a.personId) : null;
+    let cls = 'rs-shiftnow-card';
+    if(person) cls += ' is-live';
+    html += `<div class="${cls}" data-div="${dc.id}">
+      <div class="rs-shiftnow-top">
+        <div><div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div><div class="rs-shiftnow-time">${div.rotation.order.length} anggota</div></div>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
+      </div>
+      <div class="rs-shiftnow-person">
+        ${avatarHTML(person, 44)}
+        <div><div class="rs-shiftnow-name">${person ? person.name : 'Belum ada petugas'}</div><div class="rs-shiftnow-code">${person ? (a.locked ? 'Assign manual' : 'Rotasi otomatis') : ''}</div></div>
+      </div>
+    </div>`;
   });
-}
-function refreshSummary(){
-  const { counts, total, pct } = computeDayStats(currentData);
-  const cardsHtml = STATUS_OPTIONS.map(s => `<div class="card"><div class="num">${counts[s]}</div><div class="lab">${s}</div></div>`).join('')
-    + `<div class="card"><div class="num">${total}</div><div class="lab">Total Task</div></div>`;
-  document.getElementById('summaryCards').innerHTML = cardsHtml;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressPct').textContent = pct + '%';
-}
+  html += '</div>';
 
-function scheduleSave(){
-  const statusEl = document.getElementById('saveStatus');
-  statusEl.textContent = 'Menyimpan...';
-  statusEl.classList.remove('saved','error');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveCurrent, 600);
-}
-async function saveCurrent(){
-  const dateStr = document.getElementById('dateInput').value || todayStr();
-  currentData.shift = document.getElementById('shiftInput').value;
-  currentData.pic = document.getElementById('picInput').value;
-  const statusEl = document.getElementById('saveStatus');
-  try{
-    await store.set(keyFor(dateStr), JSON.stringify(currentData));
-    statusEl.textContent = '✓ Tersimpan · ' + new Date().toLocaleTimeString('id-ID');
-    statusEl.classList.remove('error'); statusEl.classList.add('saved');
-    loadHistory();
-  }catch(e){
-    statusEl.textContent = 'Gagal menyimpan: ' + (e && e.message ? e.message : 'unknown error');
-    statusEl.classList.add('error'); statusEl.classList.remove('saved');
-    console.error(e);
-  }
-}
-async function loadForDate(dateStr){
-  try{
-    const res = await store.get(keyFor(dateStr));
-    currentData = (res && res.value) ? JSON.parse(res.value) : { status:{}, notes:{}, shift:"Shift 1", pic:"Harris" };
-  }catch(e){
-    currentData = { status:{}, notes:{}, shift:"Shift 1", pic:"Harris" };
-  }
-  document.getElementById('shiftInput').value = currentData.shift || "Shift 1";
-  document.getElementById('picInput').value = currentData.pic || "Harris";
-  refreshStatusButtons(); refreshNotes(); refreshSummary();
-  document.getElementById('saveStatus').textContent = 'Data dimuat';
-  document.getElementById('saveStatus').classList.remove('saved','error');
-}
-async function loadHistory(){
-  const list = document.getElementById('historyList');
-  try{
-    const res = await store.list('checklist:');
-    if(!res || !res.keys || res.keys.length === 0){
-      list.innerHTML = '<span style="font-size:11px;color:#999;">Belum ada riwayat tersimpan.</span>';
-      return;
-    }
-    const dates = res.keys.map(k => k.replace('checklist:','')).sort().reverse().slice(0,30);
-    list.innerHTML = dates.map(d => `<span class="history-chip" data-d="${d}">${d}</span>`).join('');
-    list.querySelectorAll('.history-chip').forEach(chip => {
-      chip.onclick = () => { document.getElementById('dateInput').value = chip.dataset.d; loadForDate(chip.dataset.d); };
-    });
-  }catch(e){
-    list.innerHTML = '<span style="font-size:11px;color:#999;">Belum ada riwayat tersimpan.</span>';
-  }
-}
-
-document.getElementById('resetBtn').onclick = () => {
-  if(confirm('Reset semua status & catatan untuk tanggal ini?')){
-    currentData = { status:{}, notes:{}, shift: currentData.shift, pic: currentData.pic };
-    refreshStatusButtons(); refreshNotes(); refreshSummary(); scheduleSave();
-  }
-};
-document.getElementById('saveBtn').onclick = async () => {
-  await saveCurrent();
-  const ok = !document.getElementById('saveStatus').classList.contains('error');
-  if(ok){
-    showToast('✓ Checklist berhasil disimpan', 'success');
-    // Kembalikan tampilan tombol status (Checked/Follow up/Continue/Not yet/Information/n-a)
-    // ke kondisi normal seperti sebelum diklik. PENTING: data yang baru saja tersimpan
-    // untuk tanggal ini TIDAK dihapus dari penyimpanan (history tetap aman) — kita hanya
-    // mengosongkan currentData di memori & merefresh tampilan, TANPA memanggil scheduleSave()/
-    // saveCurrent() lagi supaya tidak menimpa data yang barusan berhasil disimpan.
-    currentData = { status:{}, notes:{}, shift: currentData.shift, pic: currentData.pic };
-    refreshStatusButtons();
-    refreshNotes();
-    refreshSummary();
+  const critArr = state.criticalLeave[iso] || [];
+  html += '<div class="rs-extra-panel"><div class="rs-extra-title">Info tambahan hari ini</div>';
+  if(!critArr.length){
+    html += '<div style="font-size:12px;color:#889;">Tidak ada catatan tambahan.</div>';
   } else {
-    showToast('✗ Gagal menyimpan checklist', 'error');
+    html += critArr.map(id => {
+      const m = memberById(id);
+      if(!m) return '';
+      return `<div class="rs-extra-row">${avatarHTML(m,32)}<span class="rs-extra-label">Cuti</span><span class="rs-extra-name">${m.name}</span></div>`;
+    }).join('');
   }
-};
-document.getElementById('dateInput').onchange = (e) => loadForDate(e.target.value);
-document.getElementById('shiftInput').onchange = scheduleSave;
-document.getElementById('picInput').oninput = scheduleSave;
-document.getElementById('picInput').onchange = scheduleSave;
+  html += '</div>';
 
-/* ================= REKAP ENGINE ================= */
-let rekapMode = 'week';
-let allEntriesCache = null; // { dateStr: data }
-
-async function fetchAllEntries(){
-  const res = await store.list('checklist:');
-  const map = {};
-  if(res && res.keys){
-    for(const k of res.keys){
-      const dateStr = k.replace('checklist:','');
-      try{
-        const r = await store.get(k);
-        if(r && r.value) map[dateStr] = JSON.parse(r.value);
-      }catch(e){ /* skip */ }
-    }
-  }
-  return map;
+  document.getElementById('overviewBody').innerHTML = html;
+  document.querySelectorAll('#overviewBody .rs-shiftnow-card').forEach(card => {
+    card.onclick = () => { switchTab(card.dataset.div); openDetailPanel(card.dataset.div, todayISO()); };
+  });
 }
 
-function isoWeekRange(dateStr){
-  const d = new Date(dateStr + 'T00:00:00');
-  const day = (d.getDay() + 6) % 7; // Mon=0
-  const monday = new Date(d); monday.setDate(d.getDate() - day);
-  const days = [];
+function isoOf(y,m,day){ return `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
+
+function renderOverviewWeek(){
+  const d0 = parseISO(todayISO());
+  const dow = (d0.getDay() + 6) % 7; // Senin = 0
+  const start = new Date(d0); start.setDate(d0.getDate() - dow);
+  let rows = '';
   for(let i=0;i<7;i++){
-    const dd = new Date(monday); dd.setDate(monday.getDate()+i);
-    const tz = dd.getTimezoneOffset()*60000;
-    days.push(new Date(dd-tz).toISOString().slice(0,10));
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const iso = isoOf(d.getFullYear(), d.getMonth(), d.getDate());
+    const isToday = iso === todayISO();
+    rows += `<tr class="${isToday ? 'is-today' : ''}">
+      <td class="rowlabel">${capitalize(d.toLocaleDateString('id-ID', {weekday:'short'}))}, ${d.getDate()}/${d.getMonth()+1}</td>
+      ${DIVISIONS_CONFIG.map(dc => {
+        const a = assignedFor(dc.id, iso);
+        const person = a ? memberById(a.personId) : null;
+        return `<td>${person ? `<div class="rs-table-person">${avatarHTML(person,26)}<span>${person.name.split(' ')[0]}</span></div>` : '—'}</td>`;
+      }).join('')}
+    </tr>`;
   }
-  return days;
+  document.getElementById('overviewBody').innerHTML = `<div class="rs-week-table-wrap"><table class="rs-table">
+    <thead><tr><th>Tanggal</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 
-document.querySelectorAll('.rekap-modeselect button').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.rekap-modeselect button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    rekapMode = btn.dataset.mode;
-    buildRekapControls();
-    renderRekap();
-  };
-});
-
-function buildRekapControls(){
-  const c = document.getElementById('rekapControls');
-  if(rekapMode === 'week'){
-    c.innerHTML = `<div><label>Pilih tanggal (dalam minggu tsb)</label><input type="date" id="rekapWeekDate" value="${todayStr()}"></div>`;
-    document.getElementById('rekapWeekDate').onchange = renderRekap;
-  } else if(rekapMode === 'month'){
-    c.innerHTML = `<div><label>Pilih bulan</label><input type="month" id="rekapMonth" value="${todayStr().slice(0,7)}"></div>`;
-    document.getElementById('rekapMonth').onchange = renderRekap;
-  } else {
-    const y = new Date().getFullYear();
-    c.innerHTML = `<div><label>Pilih tahun</label><input type="number" id="rekapYear" value="${y}" style="width:100px;"></div>`;
-    document.getElementById('rekapYear').onchange = renderRekap;
+function renderOverviewMonth(){
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const total = daysInMonth(y,m);
+  let rows = '';
+  for(let day=1; day<=total; day++){
+    const iso = isoOf(y,m,day);
+    const isToday = iso === todayISO();
+    rows += `<tr class="${isToday ? 'is-today' : ''}">
+      <td class="rowlabel">${day}</td>
+      ${DIVISIONS_CONFIG.map(dc => {
+        const a = assignedFor(dc.id, iso);
+        const person = a ? memberById(a.personId) : null;
+        return `<td>${person ? `<div class="rs-table-person">${avatarHTML(person,22)}<span style="font-size:10px;">${person.name.split(' ')[0]}</span></div>` : '—'}</td>`;
+      }).join('')}
+    </tr>`;
   }
+  document.getElementById('overviewBody').innerHTML = `<div class="rs-week-table-wrap" style="max-height:520px;overflow-y:auto;"><table class="rs-table">
+    <thead><tr><th>Tgl</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 
-async function renderRekap(){
-  allEntriesCache = await fetchAllEntries();
-  buildRekapControls();
-  let periodDates = [];
-
-  if(rekapMode === 'week'){
-    const base = document.getElementById('rekapWeekDate') ? document.getElementById('rekapWeekDate').value : todayStr();
-    periodDates = isoWeekRange(base);
-    renderWeekDetail(periodDates);
-  } else if(rekapMode === 'month'){
-    const ym = document.getElementById('rekapMonth') ? document.getElementById('rekapMonth').value : todayStr().slice(0,7);
-    const [y,m] = ym.split('-').map(Number);
-    const daysInMonth = new Date(y, m, 0).getDate();
-    for(let d=1; d<=daysInMonth; d++){
-      periodDates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
-    }
-    renderMonthDetail(periodDates, ym);
-  } else {
-    const y = document.getElementById('rekapYear') ? Number(document.getElementById('rekapYear').value) : new Date().getFullYear();
-    const monthBuckets = [];
-    for(let m=1;m<=12;m++){
-      const daysInMonth = new Date(y, m, 0).getDate();
-      const dates = [];
-      for(let d=1; d<=daysInMonth; d++) dates.push(`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
-      monthBuckets.push({ m, dates });
-    }
-    periodDates = monthBuckets.flatMap(b=>b.dates);
-    renderYearDetail(monthBuckets, y);
-  }
-
-  currentRekapPeriodDates = periodDates;
-  renderAggregateSummary(periodDates);
-  await renderFollowList(periodDates);
+/* ==================== EXPORT / IMPORT (backup opsional) ==================== */
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
 }
-
-let currentRekapPeriodDates = [];
-
-function renderAggregateSummary(periodDates){
-  const counts = {}; STATUS_OPTIONS.forEach(s=>counts[s]=0);
-  let sumChecked=0, sumApplicable=0, daysWithData=0;
-  periodDates.forEach(d => {
-    const entry = allEntriesCache[d];
-    if(!entry) return;
-    daysWithData++;
-    const { counts: c, applicable } = computeDayStats(entry);
-    STATUS_OPTIONS.forEach(s => counts[s]+=c[s]);
-    sumChecked += c["Checked"];
-    sumApplicable += applicable;
-  });
-  const avgPct = sumApplicable > 0 ? Math.round((sumChecked/sumApplicable)*100) : 0;
-  document.getElementById('rekapAvgPct').textContent = avgPct + '%';
-  document.getElementById('rekapAvgFill').style.width = avgPct + '%';
-  document.getElementById('rekapAvgLabel').textContent = `Rata-rata penyelesaian (${daysWithData} hari terisi)`;
-
-  const cardsHtml = STATUS_OPTIONS.map(s => `<div class="card clickable" data-status="${s}" title="Klik untuk lihat detail"><div class="num">${counts[s]}</div><div class="lab">${s}</div></div>`).join('')
-    + `<div class="card clickable" data-status="__hariterisi" title="Klik untuk lihat detail"><div class="num">${daysWithData}</div><div class="lab">Hari Terisi</div></div>`;
-  document.getElementById('rekapSummaryCards').innerHTML = cardsHtml;
-
-  document.querySelectorAll('#rekapSummaryCards .card.clickable').forEach(card => {
-    card.onclick = () => openRekapStatusModal(card.dataset.status);
-  });
-}
-
-/* ---- Modal detail: klik card ringkasan (Checked/Follow up/Continue/Not yet/Information/n-a/Hari Terisi) ---- */
-function openRekapStatusModal(status){
-  const titleEl = document.getElementById('rekapStatusModalTitle');
-  const subEl = document.getElementById('rekapStatusModalSub');
-  const listEl = document.getElementById('rekapStatusModalList');
-  const periodDates = currentRekapPeriodDates || [];
-
-  if(status === '__hariterisi'){
-    const daysWithData = periodDates.filter(d => allEntriesCache[d]);
-    titleEl.textContent = '📅 Hari Terisi';
-    subEl.textContent = `${daysWithData.length} hari memiliki data checklist pada periode ini · klik untuk buka laporan harian`;
-    listEl.innerHTML = daysWithData.length === 0
-      ? '<div class="rekap-status-empty">Belum ada hari terisi pada periode ini.</div>'
-      : daysWithData.map(d => {
-          const { pct } = computeDayStats(allEntriesCache[d]);
-          return `<div class="rekap-status-item" data-date="${d}"><div class="rsi-date">${d}</div><div class="rsi-task">Penyelesaian: ${pct}%</div></div>`;
-        }).join('');
-  } else {
-    titleEl.textContent = `📋 Detail Status: ${status}`;
-    const items = [];
-    periodDates.forEach(d => {
-      const entry = allEntriesCache[d];
-      if(!entry || !entry.status) return;
-      taskIds.forEach(id => {
-        if(entry.status[id] === status){
-          items.push({ date: d, task: taskTextMap[id] || id, note: (entry.notes && entry.notes[id]) || '' });
-        }
-      });
-    });
-    subEl.textContent = `${items.length} item dengan status "${status}" pada periode ini · klik untuk buka laporan harian`;
-    listEl.innerHTML = items.length === 0
-      ? '<div class="rekap-status-empty">Tidak ada item dengan status ini pada periode ini.</div>'
-      : items.map(it => `<div class="rekap-status-item" data-date="${it.date}">
-          <div class="rsi-date">${dayLabel(it.date)} · ${it.date}</div>
-          <div class="rsi-task">${it.task}</div>
-          ${it.note ? `<div class="rsi-note">📝 ${it.note}</div>` : ''}
-        </div>`).join('');
-  }
-
-  listEl.querySelectorAll('.rekap-status-item[data-date]').forEach(row => {
-    row.onclick = () => {
-      closeRekapStatusModal();
-      const d = row.dataset.date;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelector('.tab[data-view="harian"]').classList.add('active');
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById('view-harian').classList.add('active');
-      document.getElementById('dateInput').value = d;
-      loadForDate(d);
-    };
-  });
-
-  document.getElementById('rekapStatusModalOverlay').classList.add('active');
-}
-function closeRekapStatusModal(){
-  document.getElementById('rekapStatusModalOverlay').classList.remove('active');
-}
-document.getElementById('rekapStatusModalCloseBtn').onclick = closeRekapStatusModal;
-document.getElementById('rekapStatusModalDoneBtn').onclick = closeRekapStatusModal;
-document.getElementById('rekapStatusModalOverlay').addEventListener('click', (e) => {
-  if(e.target.id === 'rekapStatusModalOverlay') closeRekapStatusModal();
-});
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape' && document.getElementById('rekapStatusModalOverlay').classList.contains('active')) closeRekapStatusModal();
-});
-
-function dayLabel(dateStr){
-  const d = new Date(dateStr+'T00:00:00');
-  const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-  return `${days[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
-}
-
-function attachDayRowClicks(container){
-  container.querySelectorAll('.day-row[data-date]').forEach(row => {
-    row.onclick = () => {
-      const d = row.dataset.date;
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelector('.tab[data-view="harian"]').classList.add('active');
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById('view-harian').classList.add('active');
-      document.getElementById('dateInput').value = d;
-      loadForDate(d);
-    };
-  });
-}
-
-function renderWeekDetail(periodDates){
-  const el = document.getElementById('rekapDetail');
-  el.innerHTML = '<div class="section-title">Detail Harian (Senin–Minggu) · klik untuk lihat laporan lengkap</div>' + periodDates.map(d => {
-    const entry = allEntriesCache[d];
-    if(!entry) return `<div class="day-row empty"><div class="d-date">${dayLabel(d)}</div><div class="d-bar"></div><div class="d-pct">-</div></div>`;
-    const { pct } = computeDayStats(entry);
-    return `<div class="day-row" data-date="${d}" style="cursor:pointer;"><div class="d-date">${dayLabel(d)}</div><div class="d-bar"><div class="d-fill" style="width:${pct}%"></div></div><div class="d-pct">${pct}%</div></div>`;
-  }).join('');
-  attachDayRowClicks(el);
-}
-
-function renderMonthDetail(periodDates, ym){
-  const el = document.getElementById('rekapDetail');
-  const withData = periodDates.filter(d => allEntriesCache[d]);
-  if(withData.length === 0){
-    el.innerHTML = `<div class="section-title">Detail Harian — ${ym}</div><div class="empty-note">Belum ada data tersimpan di bulan ini.</div>`;
-    return;
-  }
-  el.innerHTML = `<div class="section-title">Detail Harian — ${ym} · klik untuk lihat laporan lengkap</div>` + withData.map(d => {
-    const entry = allEntriesCache[d];
-    const { pct } = computeDayStats(entry);
-    return `<div class="day-row" data-date="${d}" style="cursor:pointer;"><div class="d-date">${d}</div><div class="d-bar"><div class="d-fill" style="width:${pct}%"></div></div><div class="d-pct">${pct}%</div></div>`;
-  }).join('');
-  attachDayRowClicks(el);
-}
-
-function renderYearDetail(monthBuckets, year){
-  const el = document.getElementById('rekapDetail');
-  const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-  el.innerHTML = `<div class="section-title">Breakdown per Bulan — ${year}</div>` + monthBuckets.map(({m, dates}) => {
-    let sumChecked=0, sumApplicable=0, daysWithData=0;
-    dates.forEach(d => {
-      const entry = allEntriesCache[d];
-      if(!entry) return;
-      daysWithData++;
-      const { counts, applicable } = computeDayStats(entry);
-      sumChecked += counts["Checked"]; sumApplicable += applicable;
-    });
-    const pct = sumApplicable>0 ? Math.round((sumChecked/sumApplicable)*100) : 0;
-    const rowClass = daysWithData===0 ? 'month-row empty-note-row' : 'month-row';
-    return `<div class="${daysWithData===0?'day-row empty':'day-row'}"><div class="d-date">${monthNames[m-1]}</div><div class="d-bar"><div class="d-fill" style="width:${pct}%"></div></div><div class="d-pct">${daysWithData>0?pct+'%':'-'}</div></div>`;
-  }).join('');
-}
-
-/* ---- Rekap Follow-up tracking status (Open/Onprogress/Hold/Close) ---- */
-const REKAP_FU_KEY = 'rekapfollow:status';
-const REKAP_FU_DISMISS_KEY = 'rekapfollow:dismissed';
-let rekapFuStatusMap = {};
-let rekapFuDismissed = {};
-let rekapFuFilter = 'Semua';
-let rekapFuItemsCache = [];
-
-function rekapFuKey(date, taskId){ return date + '__' + taskId; }
-
-async function loadRekapFuStatus(){
-  try{
-    const res = await store.get(REKAP_FU_KEY);
-    rekapFuStatusMap = (res && res.value) ? JSON.parse(res.value) : {};
-  }catch(e){ rekapFuStatusMap = {}; }
-  try{
-    const res2 = await store.get(REKAP_FU_DISMISS_KEY);
-    rekapFuDismissed = (res2 && res2.value) ? JSON.parse(res2.value) : {};
-  }catch(e){ rekapFuDismissed = {}; }
-}
-async function saveRekapFuStatus(){
-  try{ await store.set(REKAP_FU_KEY, JSON.stringify(rekapFuStatusMap)); }
-  catch(e){ console.error('Gagal menyimpan status follow up', e); }
-}
-async function saveRekapFuDismissed(){
-  try{ await store.set(REKAP_FU_DISMISS_KEY, JSON.stringify(rekapFuDismissed)); }
-  catch(e){ console.error('Gagal menyimpan hapus follow up', e); }
-}
-
-function renderRekapFuSummary(){
-  const counts = { Open:0, Onprogress:0, Hold:0, Close:0 };
-  rekapFuItemsCache.forEach(it => { if(counts[it.trackStatus] !== undefined) counts[it.trackStatus]++; });
-  const el = document.getElementById('rekapFuSummaryCards');
-  el.innerHTML = FOLLOWUP_STATUS.map(s => `<div class="card"><div class="num">${counts[s]}</div><div class="lab">${s}</div></div>`).join('')
-    + `<div class="card"><div class="num">${rekapFuItemsCache.length}</div><div class="lab">Total</div></div>`;
-}
-
-function renderRekapFuFilterBar(){
-  const bar = document.getElementById('rekapFuFilterBar');
-  const opts = ['Semua', ...FOLLOWUP_STATUS];
-  bar.innerHTML = opts.map(o => `<button class="fu-filter ${rekapFuFilter===o?'active':''}" data-f="${o}">${o === 'Semua' ? 'Semua Status' : o}</button>`).join('');
-  bar.querySelectorAll('.fu-filter').forEach(btn => {
-    btn.onclick = () => { rekapFuFilter = btn.dataset.f; renderFollowListBody(); };
-  });
-}
-
-function renderFollowListBody(){
-  const el = document.getElementById('rekapFollowList');
-  // Item yang sudah "Close" otomatis tersimpan tapi tidak ditampilkan di daftar utama
-  // (filter "Semua Status"). Data tetap utuh dan tetap bisa dibuka kapan saja lewat
-  // filter "Close" -- baik di mode Mingguan, Bulanan, maupun Tahunan.
-  const items = rekapFuFilter === 'Semua'
-    ? rekapFuItemsCache.filter(it => it.trackStatus !== 'Close')
-    : rekapFuItemsCache.filter(it => it.trackStatus === rekapFuFilter);
-  if(items.length === 0){
-    el.innerHTML = '<div class="empty-note">Tidak ada item Follow up / Belum Selesai pada filter ini. 🎉</div>';
-    return;
-  }
-  el.innerHTML = items.map(it => {
-    const isManual = it.source === 'manual';
-    const descHtml = isManual
-      ? `<span class="fi-date">${it.date}</span>${it.desc}`
-      : `<span class="fi-date">${it.date}</span>${taskTextMap[it.taskId] || it.taskId}`;
-    const metaHtml = isManual
-      ? `<span class="fi-status fu">Follow Up (manual)</span>${it.vendor ? ' · ' + it.vendor : ''}${it.pic ? ' · PIC: ' + it.pic : ''}${it.due ? ' · Due: ' + it.due : ''}`
-      : `<span class="fi-status ${it.status==='Not yet'?'ny':'fu'}">${it.status}</span>`;
-    return `
-    <div class="fu-card status-${it.trackStatus}" data-key="${it.key}">
-      <div class="fu-top">
-        <div>
-          <div class="fu-desc">${descHtml}</div>
-          <div class="fu-meta">${metaHtml}</div>
-        </div>
-        <span class="fu-badge ${it.trackStatus}">${it.trackStatus}</span>
-      </div>
-      ${it.note ? `<div class="fu-note">${it.note}</div>` : ''}
-      <div class="fu-actions">
-        <select data-key="${it.key}" data-source="${it.source}" class="rekap-fu-status-select">
-          ${FOLLOWUP_STATUS.map(s => `<option value="${s}" ${s===it.trackStatus?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <button class="fu-del" data-key="${it.key}" data-source="${it.source}">Hapus</button>
-      </div>
-    </div>
-  `;}).join('');
-
-  el.querySelectorAll('.rekap-fu-status-select').forEach(sel => {
-    sel.onchange = async () => {
-      const item = rekapFuItemsCache.find(i => i.key === sel.dataset.key);
-      if(sel.dataset.source === 'manual'){
-        // Item Follow Up manual: status disimpan langsung di data followUpItems
-        // (satu sumber data yang sama dengan tab Follow Up), supaya perubahan di Rekap
-        // langsung tersinkron ke tab Follow Up juga, begitu pula sebaliknya.
-        const fuItem = followUpItems.find(i => i.id === item.manualId);
-        if(fuItem){ fuItem.status = sel.value; await saveFollowUp(); }
-      } else {
-        rekapFuStatusMap[sel.dataset.key] = sel.value;
-        await saveRekapFuStatus();
-      }
-      if(item) item.trackStatus = sel.value;
-      renderRekapFuSummary();
-      renderFollowListBody();
-    };
-  });
-  el.querySelectorAll('.fu-del').forEach(btn => {
-    btn.onclick = async () => {
-      if(!confirm('Hapus item follow up ini dari daftar?')) return;
-      if(btn.dataset.source === 'manual'){
-        const item = rekapFuItemsCache.find(i => i.key === btn.dataset.key);
-        // Hapus dari data utama Follow Up (bukan cuma disembunyikan) karena ini satu
-        // sumber data yang sama dengan tab Follow Up.
-        followUpItems = followUpItems.filter(i => i.id !== item.manualId);
-        await saveFollowUp();
-      } else {
-        rekapFuDismissed[btn.dataset.key] = true;
-        await saveRekapFuDismissed();
-      }
-      rekapFuItemsCache = rekapFuItemsCache.filter(i => i.key !== btn.dataset.key);
-      renderRekapFuSummary();
-      renderFollowListBody();
-    };
-  });
-}
-
-async function renderFollowList(periodDates){
-  const items = [];
-  periodDates.forEach(d => {
-    const entry = allEntriesCache[d];
-    if(!entry || !entry.status) return;
-    Object.keys(entry.status).forEach(taskId => {
-      const s = entry.status[taskId];
-      if(s === 'Follow up' || s === 'Not yet'){
-        const key = rekapFuKey(d, taskId);
-        items.push({ key, source:'checklist', date:d, taskId, status:s, note: (entry.notes && entry.notes[taskId]) || '', trackStatus: rekapFuStatusMap[key] || 'Open' });
-      }
-    });
-  });
-
-  // Sertakan juga item dari Menu Follow Up (manual) yang tanggalnya masuk dalam periode
-  // yang sedang dilihat, supaya tercatat dan bisa dikelola juga dari Rekap.
-  await loadFollowUp();
-  const periodSet = new Set(periodDates);
-  followUpItems.forEach(it => {
-    if(!periodSet.has(it.date)) return;
-    items.push({
-      key: 'manualfu__' + it.id, source:'manual', manualId: it.id,
-      date: it.date, desc: it.desc, vendor: it.vendor, pic: it.pic, due: it.due,
-      note: it.note || '', trackStatus: it.status
-    });
-  });
-
-  items.sort((a,b) => a.date.localeCompare(b.date));
-  await loadRekapFuStatus();
-  items.forEach(it => { if(it.source === 'checklist') it.trackStatus = rekapFuStatusMap[it.key] || 'Open'; });
-  rekapFuItemsCache = items.filter(it => it.source === 'manual' || !rekapFuDismissed[it.key]);
-
-  if(rekapFuItemsCache.length === 0){
-    document.getElementById('rekapFuSummaryCards').innerHTML = '';
-    document.getElementById('rekapFuFilterBar').innerHTML = '';
-    document.getElementById('rekapFollowList').innerHTML = '<div class="empty-note">Tidak ada item Follow up / Belum Selesai pada periode ini. 🎉</div>';
-    return;
-  }
-  renderRekapFuSummary();
-  renderRekapFuFilterBar();
-  renderFollowListBody();
-  renderRekapFuDebug(periodDates);
-}
-
-function renderRekapFuDebug(periodDates){
-  const box = document.getElementById('rekapFuDebugBox');
-  if(!box) return;
-  const debugData = {
-    waktu_cek: new Date().toString(),
-    periode_tanggal_yang_dipakai: periodDates,
-    followUpItems_mentah_dari_backend: followUpItems,
-    rekapFuItemsCache_setelah_filter: rekapFuItemsCache
-  };
-  box.textContent = JSON.stringify(debugData, null, 2);
-}
-
-/* ================= FOLLOW UP ENGINE ================= */
-const FOLLOWUP_STATUS = ["Open","Onprogress","Hold","Close"];
-const FOLLOWUP_KEY = 'followup:list';
-let followUpItems = [];
-let followUpFilter = 'All';
-
-/* ---- Daftar terkelola (dropdown + modal tambah/hapus) untuk Vendor & PIC ---- */
-function createManagedList(opts){
-  const { storageKey, defaults, selectId, manageBtnId, modalOverlayId, modalInputId, modalAddBtnId,
-          modalCloseBtnId, modalDoneBtnId, modalListId, modalMsgId, itemLabel } = opts;
-  let list = [...defaults];
-
-  async function load(){
-    try{
-      const res = await store.get(storageKey);
-      const parsed = (res && res.value) ? JSON.parse(res.value) : null;
-      list = (Array.isArray(parsed) && parsed.length > 0) ? parsed : [...defaults];
-    }catch(e){ list = [...defaults]; }
-  }
-  async function save(){
-    try{ await store.set(storageKey, JSON.stringify(list)); }
-    catch(e){ console.error('Gagal menyimpan daftar ' + itemLabel, e); }
-  }
-  function renderOptions(selectedValue){
-    const sel = document.getElementById(selectId);
-    const current = selectedValue !== undefined ? selectedValue : sel.value;
-    sel.innerHTML = '<option value="">-</option>' + list.map(v =>
-      `<option ${v === current ? 'selected' : ''}>${v}</option>`
-    ).join('');
-  }
-  function showMsg(text){
-    const msg = document.getElementById(modalMsgId);
-    msg.textContent = text;
-    msg.style.display = 'block';
-    clearTimeout(showMsg._t);
-    showMsg._t = setTimeout(() => { msg.style.display = 'none'; }, 3500);
-  }
-  function renderModalList(){
-    const el = document.getElementById(modalListId);
-    if(list.length === 0){
-      el.innerHTML = `<div class="vendor-empty-note">Belum ada ${itemLabel}. Tambahkan lewat kolom di atas.</div>`;
-      return;
-    }
-    el.innerHTML = list.map(v => `
-      <div class="vendor-item" data-v="${v}">
-        <span>${v}</span>
-        <button type="button" class="vendor-item-del" data-v="${v}">Hapus</button>
-      </div>
-    `).join('');
-    el.querySelectorAll('.vendor-item-del').forEach(btn => {
-      btn.onclick = async () => {
-        if(!btn.classList.contains('confirming')){
-          el.querySelectorAll('.vendor-item-del.confirming').forEach(b => { b.classList.remove('confirming'); b.textContent = 'Hapus'; });
-          btn.classList.add('confirming');
-          btn.textContent = 'Yakin?';
-          clearTimeout(btn._resetT);
-          btn._resetT = setTimeout(() => { btn.classList.remove('confirming'); btn.textContent = 'Hapus'; }, 2500);
-          return;
-        }
-        const name = btn.dataset.v;
-        list = list.filter(v => v !== name);
-        await save();
-        renderOptions('');
-        renderModalList();
-      };
-    });
-  }
-  async function submitNew(){
-    const input = document.getElementById(modalInputId);
-    const trimmed = input.value.trim();
-    if(!trimmed){ input.focus(); return; }
-    if(list.some(v => v.toLowerCase() === trimmed.toLowerCase())){
-      showMsg(`${itemLabel.charAt(0).toUpperCase() + itemLabel.slice(1)} "${trimmed}" sudah ada di daftar.`);
-      input.value = '';
-      input.focus();
-      return;
-    }
-    list.push(trimmed);
-    await save();
-    renderOptions(trimmed);
-    renderModalList();
-    input.value = '';
-    input.focus();
-  }
-  function openModal(){
-    document.getElementById(modalOverlayId).classList.add('active');
-    renderModalList();
-    document.getElementById(modalInputId).value = '';
-    document.getElementById(modalMsgId).style.display = 'none';
-    setTimeout(() => document.getElementById(modalInputId).focus(), 50);
-  }
-  function closeModal(){
-    document.getElementById(modalOverlayId).classList.remove('active');
-  }
-
-  document.getElementById(manageBtnId).onclick = openModal;
-  document.getElementById(modalCloseBtnId).onclick = closeModal;
-  document.getElementById(modalDoneBtnId).onclick = closeModal;
-  document.getElementById(modalAddBtnId).onclick = submitNew;
-  document.getElementById(modalInputId).addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){ e.preventDefault(); submitNew(); }
-  });
-  document.getElementById(modalOverlayId).addEventListener('click', (e) => {
-    if(e.target.id === modalOverlayId) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && document.getElementById(modalOverlayId).classList.contains('active')) closeModal();
-  });
-
-  return { load, renderOptions };
-}
-
-const vendorManager = createManagedList({
-  storageKey: 'followup:vendors',
-  defaults: ['MVM','VGT','Vixmo','BGS','Internal'],
-  selectId: 'fuVendor',
-  manageBtnId: 'fuVendorManageBtn',
-  modalOverlayId: 'vendorModalOverlay',
-  modalInputId: 'vendorModalInput',
-  modalAddBtnId: 'vendorModalAddBtn',
-  modalCloseBtnId: 'vendorModalCloseBtn',
-  modalDoneBtnId: 'vendorModalDoneBtn',
-  modalListId: 'vendorModalList',
-  modalMsgId: 'vendorModalMsg',
-  itemLabel: 'vendor'
-});
-async function loadVendorList(){ await vendorManager.load(); }
-function renderVendorOptions(v){ vendorManager.renderOptions(v); }
-
-const picManager = createManagedList({
-  storageKey: 'followup:pics',
-  defaults: ['Harris','Nico Fahryan Sandy','Lukman Gunawan','Taufik Wirayudha','Adhe Setiawan'],
-  selectId: 'fuPic',
-  manageBtnId: 'fuPicManageBtn',
-  modalOverlayId: 'picModalOverlay',
-  modalInputId: 'picModalInput',
-  modalAddBtnId: 'picModalAddBtn',
-  modalCloseBtnId: 'picModalCloseBtn',
-  modalDoneBtnId: 'picModalDoneBtn',
-  modalListId: 'picModalList',
-  modalMsgId: 'picModalMsg',
-  itemLabel: 'PIC'
-});
-async function loadPicList(){ await picManager.load(); }
-function renderPicOptions(v){ picManager.renderOptions(v); }
-
-function fuId(){ return 'fu' + Date.now() + Math.floor(Math.random()*1000); }
-
-async function loadFollowUp(){
-  try{
-    const res = await store.get(FOLLOWUP_KEY);
-    followUpItems = (res && res.value) ? JSON.parse(res.value) : [];
-  }catch(e){ followUpItems = []; }
-}
-async function saveFollowUp(){
-  try{ await store.set(FOLLOWUP_KEY, JSON.stringify(followUpItems)); }
-  catch(e){ console.error('Gagal menyimpan follow up', e); }
-}
-
-document.getElementById('fuAddBtn').onclick = async () => {
-  const desc = document.getElementById('fuDesc').value.trim();
-  if(!desc){ alert('Deskripsi temuan / task wajib diisi.'); return; }
-  const item = {
-    id: fuId(),
-    date: todayStr(),
-    desc,
-    vendor: document.getElementById('fuVendor').value,
-    pic: document.getElementById('fuPic').value.trim(),
-    due: document.getElementById('fuDue').value,
-    status: document.getElementById('fuStatus').value,
-    note: document.getElementById('fuNote').value.trim()
-  };
-  followUpItems.unshift(item);
-  await saveFollowUp();
-  document.getElementById('fuDesc').value = '';
-  document.getElementById('fuPic').value = '';
-  document.getElementById('fuDue').value = '';
-  document.getElementById('fuNote').value = '';
-  document.getElementById('fuVendor').value = '';
-  document.getElementById('fuStatus').value = 'Open';
-  renderFollowUp();
+document.getElementById('exportJsonBtn').onclick = () => {
+  downloadBlob(JSON.stringify(state, null, 2), `roster-digitech-${todayISO()}.json`, 'application/json');
+  showToast('Backup JSON berhasil diunduh.', 'success');
 };
-
-function fuSummaryCounts(){
-  const counts = {}; FOLLOWUP_STATUS.forEach(s=>counts[s]=0);
-  followUpItems.forEach(it => { if(counts[it.status] !== undefined) counts[it.status]++; });
-  return counts;
-}
-
-function renderFuSummary(){
-  const counts = fuSummaryCounts();
-  const html = FOLLOWUP_STATUS.map(s => `<div class="card"><div class="num">${counts[s]}</div><div class="lab">${s}</div></div>`).join('')
-    + `<div class="card"><div class="num">${followUpItems.length}</div><div class="lab">Total</div></div>`;
-  document.getElementById('fuSummaryCards').innerHTML = html;
-}
-
-function renderFuFilterBar(){
-  const bar = document.getElementById('fuFilterBar');
-  const opts = ['All', ...FOLLOWUP_STATUS];
-  bar.innerHTML = opts.map(o => `<button class="fu-filter ${followUpFilter===o?'active':''}" data-f="${o}">${o === 'All' ? 'Semua' : o}</button>`).join('');
-  bar.querySelectorAll('.fu-filter').forEach(btn => {
-    btn.onclick = () => { followUpFilter = btn.dataset.f; renderFollowUp(); };
+document.getElementById('exportCsvBtn').onclick = () => {
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const total = daysInMonth(y,m);
+  let rows = [['Divisi','Tanggal','Hari','Petugas Standby','Status','Cuti Tim Kritikal']];
+  DIVISIONS_CONFIG.forEach(dc => {
+    for(let day=1; day<=total; day++){
+      const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const a = assignedFor(dc.id, iso);
+      const person = a ? memberById(a.personId) : null;
+      const dayName = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long'});
+      const leaveNames = (state.criticalLeave[iso] || []).map(id => memberById(id)).filter(mm => mm && mm.divisionId === dc.id).map(mm => mm.name).join(' & ');
+      rows.push([dc.name, iso, dayName, person ? person.name : '-', a && a.locked ? 'Manual' : 'Otomatis', leaveNames]);
+    }
   });
-}
-
-function renderFuList(){
-  const el = document.getElementById('fuList');
-  // Item berstatus "Close" otomatis tersimpan tapi disembunyikan dari tampilan "Semua"
-  // (tetap ada di data & tetap bisa dibuka lewat filter "Close").
-  const items = followUpFilter === 'All'
-    ? followUpItems.filter(it => it.status !== 'Close')
-    : followUpItems.filter(it => it.status === followUpFilter);
-  if(items.length === 0){
-    el.innerHTML = '<div class="empty-note">Belum ada item follow up pada filter ini.</div>';
-    return;
-  }
-  el.innerHTML = items.map(it => `
-    <div class="fu-card status-${it.status}" data-id="${it.id}">
-      <div class="fu-top">
-        <div>
-          <div class="fu-desc">${it.desc}</div>
-          <div class="fu-meta">${it.date}${it.vendor ? ' · ' + it.vendor : ''}${it.pic ? ' · PIC: ' + it.pic : ''}${it.due ? ' · Due: ' + it.due : ''}</div>
-        </div>
-        <span class="fu-badge ${it.status}">${it.status}</span>
-      </div>
-      ${it.note ? `<div class="fu-note">${it.note}</div>` : ''}
-      <div class="fu-actions">
-        <select data-id="${it.id}" class="fu-status-select">
-          ${FOLLOWUP_STATUS.map(s => `<option value="${s}" ${s===it.status?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <button class="fu-del" data-id="${it.id}">Hapus</button>
-      </div>
-    </div>
-  `).join('');
-
-  el.querySelectorAll('.fu-status-select').forEach(sel => {
-    sel.onchange = async () => {
-      const item = followUpItems.find(i => i.id === sel.dataset.id);
-      if(item){ item.status = sel.value; await saveFollowUp(); renderFollowUp(); }
-    };
-  });
-  el.querySelectorAll('.fu-del').forEach(btn => {
-    btn.onclick = async () => {
-      if(confirm('Hapus item follow up ini?')){
-        followUpItems = followUpItems.filter(i => i.id !== btn.dataset.id);
-        await saveFollowUp(); renderFollowUp();
-      }
-    };
-  });
-}
-
-async function renderFollowUp(){
-  await loadFollowUp();
-  renderFuSummary();
-  renderFuFilterBar();
-  renderFuList();
-}
-
-/* ---------------- INIT ---------------- */
-const rekapFuDebugToggleBtn = document.getElementById('rekapFuDebugToggle');
-if(rekapFuDebugToggleBtn){
-  rekapFuDebugToggleBtn.onclick = () => {
-    const box = document.getElementById('rekapFuDebugBox');
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadBlob(csv, `roster-digitech-${currentMonth}.csv`, 'text/csv');
+  showToast('CSV berhasil di-export.', 'success');
+};
+document.getElementById('importJsonBtn').onclick = () => document.getElementById('importJsonFile').click();
+document.getElementById('importJsonFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      let parsed = JSON.parse(reader.result);
+      if(!parsed.team) throw new Error('Format tidak dikenali');
+      parsed.team.forEach(m => { if(m.name === 'Wawan') m.name = 'Lukman Gunawan'; });
+      if(!parsed.divisions) parsed = migrateOldState(parsed);
+      if(!parsed.criticalLeave) parsed.criticalLeave = {};
+      if(!parsed.criticalTeamIds) parsed.criticalTeamIds = parsed.team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id);
+      state = parsed;
+      markDirty();
+      renderAllDivisions();
+      showToast('Data berhasil di-restore dan disimpan otomatis.', 'success');
+    }catch(err){
+      showToast('Gagal restore: file tidak valid.', 'error');
+    }
   };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ==================== INIT ==================== */
+function renderDivision(divId){
+  renderMonthSummary(divId);
+  renderOrderList(divId);
+  renderRotationConfig(divId);
+  renderOnDuty(divId);
+}
+function renderAllDivisions(){
+  DIVISIONS_CONFIG.forEach(dc => renderDivision(dc.id));
+  renderOverview();
 }
 
-document.getElementById('dateInput').value = todayStr();
-(async () => {
-  await loadStructureLabels();
-  await loadCustomTasks();
-  await loadHiddenState();
-  await loadCustomCategories();
-  await loadHiddenCategories();
-  await loadVendorList();
-  renderVendorOptions('');
-  await loadPicList();
-  renderPicOptions('');
-  rebuildTaskIndex();
-  buildUI();
-  loadForDate(todayStr());
-  loadHistory();
-  buildRekapControls();
+(async function init(){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_DI_SINI'){
+    document.getElementById('modeBadge').textContent = '⚠️ APPS_SCRIPT_URL belum diisi — lihat komentar di bagian atas <script>';
+    alert('APPS_SCRIPT_URL belum diisi. Buka file HTML ini, cari baris "const APPS_SCRIPT_URL", lalu tempel URL Web App Apps Script Anda di situ.');
+  }
+  mountEl.innerHTML = DIVISIONS_CONFIG.map(buildDivisionViewShell).join('');
+  await loadState();
+  applyScheduleImport();
+  renderTabsBar();
+  renderAllDivisions();
+  renderSaveStatus('clean');
+  document.getElementById('modeBadge').textContent = '☁️ Mode: Auto-save (Google Sheets) — tersimpan otomatis, sinkron semua device';
 })();
 </script>
 </body>
