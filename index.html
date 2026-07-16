@@ -559,7 +559,11 @@ const _lastKnownValues = {};
 
 async function gsGet(key){
   requireStorageConfig();
-  const res = await fetch(`${APPS_SCRIPT_URL}?action=get&key=${encodeURIComponent(key)}`);
+  // cache: 'no-store' + parameter timestamp (_t) supaya browser TIDAK pernah menyajikan
+  // response GET dari cache lama. Tanpa ini, saat pindah tab (mis. Follow Up -> Rekap)
+  // browser bisa menampilkan data "followup:list" versi sebelum item terbaru disimpan,
+  // sehingga item yang baru saja ditambahkan tampak hilang di Rekap padahal sudah tersimpan.
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=get&key=${encodeURIComponent(key)}&_t=${Date.now()}`, { cache: 'no-store' });
   if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
   const data = await res.json();
   if(data.error === 'not_found') throw new Error('not found');
@@ -575,8 +579,8 @@ async function gsSet(key, value){
   try{
     const prevValue = _lastKnownValues[key];
     if(prevValue !== undefined && prevValue !== null && prevValue !== value){
-      const backupUrl = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key + '::backup')}&value=${encodeURIComponent(prevValue)}`;
-      fetch(backupUrl).catch(()=>{ /* backup gagal tidak boleh menghambat simpan utama */ });
+      const backupUrl = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key + '::backup')}&value=${encodeURIComponent(prevValue)}&_t=${Date.now()}`;
+      fetch(backupUrl, { cache: 'no-store' }).catch(()=>{ /* backup gagal tidak boleh menghambat simpan utama */ });
     }
   }catch(e){ /* abaikan, backup bersifat best-effort */ }
 
@@ -584,8 +588,8 @@ async function gsSet(key, value){
   // (script.google.com -> script.googleusercontent.com) yang sering menghapus body POST di
   // tengah jalan saat di-fetch dari domain lain (cross-origin), menyebabkan "Failed to fetch".
   // GET tidak kena masalah ini karena parameter ikut di URL, bukan di body.
-  const url = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`;
-  const res = await fetch(url);
+  const url = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}&_t=${Date.now()}`;
+  const res = await fetch(url, { cache: 'no-store' });
   if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
   const data = await res.json();
   if(data.error) throw new Error(data.message || data.error);
@@ -594,8 +598,8 @@ async function gsSet(key, value){
 }
 async function gsDelete(key){
   requireStorageConfig();
-  const url = `${APPS_SCRIPT_URL}?action=delete&key=${encodeURIComponent(key)}`;
-  const res = await fetch(url);
+  const url = `${APPS_SCRIPT_URL}?action=delete&key=${encodeURIComponent(key)}&_t=${Date.now()}`;
+  const res = await fetch(url, { cache: 'no-store' });
   if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
   const data = await res.json();
   if(data.error) throw new Error(data.message || data.error);
@@ -603,7 +607,7 @@ async function gsDelete(key){
 }
 async function gsList(prefix=''){
   requireStorageConfig();
-  const res = await fetch(`${APPS_SCRIPT_URL}?action=list&prefix=${encodeURIComponent(prefix)}`);
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=list&prefix=${encodeURIComponent(prefix)}&_t=${Date.now()}`, { cache: 'no-store' });
   if(!res.ok) throw new Error('Gagal terhubung ke backend (HTTP ' + res.status + ')');
   const data = await res.json();
   if(data.error) throw new Error(data.message || data.error);
