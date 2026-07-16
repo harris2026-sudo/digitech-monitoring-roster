@@ -508,6 +508,11 @@
     <div class="summary" id="rekapFuSummaryCards"></div>
     <div class="fu-toolbar" id="rekapFuFilterBar"></div>
     <div id="rekapFollowList"></div>
+
+    <div style="margin-top:16px;">
+      <button type="button" id="rekapFuDebugToggle" style="font-size:12px;color:#888;background:none;border:1px solid #ddd;border-radius:6px;padding:4px 10px;cursor:pointer;">🔍 Debug Sinkronisasi</button>
+      <pre id="rekapFuDebugBox" style="display:none;margin-top:8px;padding:10px;background:#f7f7f7;border:1px solid #ddd;border-radius:6px;font-size:11px;white-space:pre-wrap;word-break:break-all;max-height:400px;overflow:auto;"></pre>
+    </div>
   </div>
 
   <!-- ================= VIEW: ROSTER ================= -->
@@ -2127,6 +2132,19 @@ async function renderFollowList(periodDates){
   renderRekapFuSummary();
   renderRekapFuFilterBar();
   renderFollowListBody();
+  renderRekapFuDebug(periodDates);
+}
+
+function renderRekapFuDebug(periodDates){
+  const box = document.getElementById('rekapFuDebugBox');
+  if(!box) return;
+  const debugData = {
+    waktu_cek: new Date().toString(),
+    periode_tanggal_yang_dipakai: periodDates,
+    followUpItems_mentah_dari_backend: followUpItems,
+    rekapFuItemsCache_setelah_filter: rekapFuItemsCache
+  };
+  box.textContent = JSON.stringify(debugData, null, 2);
 }
 
 /* ================= FOLLOW UP ENGINE ================= */
@@ -2388,6 +2406,14 @@ async function renderFollowUp(){
 }
 
 /* ---------------- INIT ---------------- */
+const rekapFuDebugToggleBtn = document.getElementById('rekapFuDebugToggle');
+if(rekapFuDebugToggleBtn){
+  rekapFuDebugToggleBtn.onclick = () => {
+    const box = document.getElementById('rekapFuDebugBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  };
+}
+
 document.getElementById('dateInput').value = todayStr();
 (async () => {
   await loadStructureLabels();
