@@ -81,6 +81,9 @@
   .rs-shiftnow-card{position:relative;background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid transparent;transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;cursor:pointer;}
   .rs-shiftnow-card.is-live{border-color:#1E7A34;box-shadow:0 4px 16px rgba(30,122,52,.22);transform:translateY(-2px);}
   .rs-shiftnow-card.is-conflict{border-color:var(--red-fg);box-shadow:0 4px 16px rgba(156,0,6,.22);}
+  .rs-unified-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;border:2px solid #1E7A34;box-shadow:0 4px 16px rgba(30,122,52,.22);}
+  .rs-unified-card .rs-shiftnow-card{background:transparent;border:none;box-shadow:none;padding:0 0 16px;transform:none !important;}
+  .rs-unified-card .month-nav{margin-top:0;}
   .rs-shiftnow-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
   .rs-shiftnow-label{font-weight:bold;color:var(--navy);font-size:13px;}
   .rs-shiftnow-time{font-size:11px;color:#667;}
@@ -142,6 +145,7 @@
 
   .ondoff-section{margin-top:14px;}
   .ondoff-title{margin:0 0 8px;font-size:13px;color:var(--navy);}
+  .ondoff-subtitle{font-size:11px;font-weight:700;color:#667;margin-bottom:6px;letter-spacing:.02em;}
   .ondoff-list{display:flex;flex-direction:column;gap:6px;}
   .ondoff-card{border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;}
   .ondoff-head{display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer;background:#F8FAFC;user-select:none;}
@@ -609,28 +613,25 @@ function buildDivisionViewShell(dc){
   <div class="view" id="view-${dc.id}">
     <div class="card-box">
       <div class="division-banner" style="background:${dc.color}">${dc.icon} ${dc.name}</div>
-      <div class="onduty-panel" id="onduty-${dc.id}"></div>
-      <div class="month-nav">
-        <button class="btn btn-ghost" data-act="prev" data-div="${dc.id}">◀</button>
-        <div class="label" id="monthLabel-${dc.id}"></div>
-        <button class="btn btn-ghost" data-act="next" data-div="${dc.id}">▶</button>
-        <button class="btn btn-ghost btn-sm" data-act="today" data-div="${dc.id}" style="margin-left:auto;">Bulan ini</button>
-        <button class="btn btn-ghost btn-sm" data-act="unlock" data-div="${dc.id}">🔓 Reset bulan ini</button>
-      </div>
-      <div class="palette-hint">Klik nama untuk buka/tutup daftar tanggal · klik tanggal untuk buka detail &amp; ubah petugas · klik ✕ pada tanggal cuti untuk menghapus tanda cuti.</div>
+      <div class="rs-unified-card">
+        <div class="onduty-panel" id="onduty-${dc.id}"></div>
+        <div class="month-nav">
+          <button class="btn btn-ghost" data-act="prev" data-div="${dc.id}">◀</button>
+          <div class="label" id="monthLabel-${dc.id}"></div>
+          <button class="btn btn-ghost" data-act="next" data-div="${dc.id}">▶</button>
+          <button class="btn btn-ghost btn-sm" data-act="today" data-div="${dc.id}" style="margin-left:auto;">Bulan ini</button>
+          <button class="btn btn-ghost btn-sm" data-act="unlock" data-div="${dc.id}">🔓 Reset bulan ini</button>
+        </div>
+        <div class="palette-hint">Klik nama untuk buka/tutup daftar tanggal · klik tanggal untuk buka detail &amp; ubah petugas · klik ✕ pada tanggal cuti untuk menghapus tanda cuti.</div>
 
-      <div class="ondoff-section">
-        <h4 class="ondoff-title">🟢 Day-On Bulan Ini</h4>
-        <div class="ondoff-list" id="ondutySummary-${dc.id}"></div>
-      </div>
-
-      <div class="ondoff-section">
-        <h4 class="ondoff-title">🏖️ Day-off Bulan Ini</h4>
-        <div class="ondoff-list" id="dayoffSummary-${dc.id}"></div>
-        <div class="ondoff-add-form">
-          <select id="leaveMemberSelect-${dc.id}" data-div="${dc.id}"></select>
-          <input type="date" id="leaveDateInput-${dc.id}" data-div="${dc.id}">
-          <button class="btn btn-primary btn-sm" data-act="addleave" data-div="${dc.id}">+ Tandai Cuti</button>
+        <div class="ondoff-section">
+          <h4 class="ondoff-title">📋 Rekap Bulan Ini</h4>
+          <div class="ondoff-list" id="monthSummary-${dc.id}"></div>
+          <div class="ondoff-add-form">
+            <select id="leaveMemberSelect-${dc.id}" data-div="${dc.id}"></select>
+            <input type="date" id="leaveDateInput-${dc.id}" data-div="${dc.id}">
+            <button class="btn btn-primary btn-sm" data-act="addleave" data-div="${dc.id}">+ Tandai Cuti</button>
+          </div>
         </div>
       </div>
     </div>
@@ -851,77 +852,49 @@ function dayNumOf(iso){ return Number(iso.split('-')[2]); }
 let expandedOnDuty = {};
 let expandedDayOff = {};
 
-/* ==================== RENDER: RINGKASAN ONDUTY BULAN INI ==================== */
-function renderOnDutySummary(divId){
+/* ==================== RENDER: REKAP GABUNGAN (DAY-ON + DAY-OFF) BULAN INI ==================== */
+function renderMonthSummary(divId){
   const div = divisionState(divId);
   const d = parseISO(currentMonth);
   const y = d.getFullYear(), m = d.getMonth();
   document.getElementById('monthLabel-' + divId).textContent = capitalize(d.toLocaleDateString('id-ID', {month:'long', year:'numeric'}));
   const dates = monthDatesList(y, m);
+  const members = state.team.filter(mm => mm.divisionId === divId);
 
-  const el = document.getElementById('ondutySummary-' + divId);
-  el.innerHTML = div.rotation.order.map(id => {
-    const mem = memberById(id); if(!mem) return '';
-    const myDates = dates.filter(iso => { const a = assignedFor(divId, iso); return a && a.personId === id; });
+  const el = document.getElementById('monthSummary-' + divId);
+  el.innerHTML = members.map(mem => {
+    const id = mem.id;
+    const onDates = dates.filter(iso => { const a = assignedFor(divId, iso); return a && a.personId === id; });
+    const offDates = dates.filter(iso => isOnLeave(iso, id));
     const key = divId + '|' + id;
     const open = !!expandedOnDuty[key];
-    const chips = myDates.length
-      ? myDates.map(iso => `<span class="date-chip" data-date="${iso}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}</span>`).join('')
+    const onChips = onDates.length
+      ? onDates.map(iso => `<span class="date-chip" data-date="${iso}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}</span>`).join('')
       : '<span class="empty">— tidak ada jadwal day-on bulan ini —</span>';
+    const offChips = offDates.length
+      ? offDates.map(iso => `<span class="date-chip leave-chip" data-date="${iso}" data-member="${id}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}<span class="rm" data-rmleave="1" data-date="${iso}" data-member="${id}" title="Hapus tanda cuti">✕</span></span>`).join('')
+      : '<span class="empty">— tidak ada cuti bulan ini —</span>';
     return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
-      <div class="ondoff-head" data-toggle="onduty" data-key="${key}">
+      <div class="ondoff-head" data-toggle="month" data-key="${key}">
         <span class="dot" style="background:${mem.color}"></span>
         <span class="name">${mem.name}</span>
-        <span class="count">${myDates.length} hari</span>
+        <span class="count">🟢 ${onDates.length} hari · 🏖️ ${offDates.length} hari</span>
         <span class="chev">▾</span>
       </div>
-      <div class="ondoff-body">${chips}</div>
+      <div class="ondoff-body">
+        <div class="ondoff-subtitle">🟢 Day-On</div>
+        ${onChips}
+        <div class="ondoff-subtitle" style="margin-top:8px;">🏖️ Day-off</div>
+        ${offChips}
+      </div>
     </div>`;
   }).join('');
 
-  el.querySelectorAll('.ondoff-head[data-toggle="onduty"]').forEach(head => {
+  el.querySelectorAll('.ondoff-head[data-toggle="month"]').forEach(head => {
     head.onclick = () => {
       const key = head.dataset.key;
       expandedOnDuty[key] = !expandedOnDuty[key];
-      renderOnDutySummary(divId);
-    };
-  });
-  el.querySelectorAll('.date-chip[data-date]').forEach(chip => {
-    chip.onclick = (e) => { e.stopPropagation(); openDetailPanel(divId, chip.dataset.date); };
-  });
-}
-
-/* ==================== RENDER: RINGKASAN DAY-OFF (CUTI) BULAN INI ==================== */
-function renderDayOffSummary(divId){
-  const d = parseISO(currentMonth);
-  const y = d.getFullYear(), m = d.getMonth();
-  const dates = monthDatesList(y, m);
-  const members = state.team.filter(mm => mm.divisionId === divId);
-
-  const el = document.getElementById('dayoffSummary-' + divId);
-  el.innerHTML = members.map(mem => {
-    const myDates = dates.filter(iso => isOnLeave(iso, mem.id));
-    const key = divId + '|' + mem.id;
-    const open = !!expandedDayOff[key];
-    const chips = myDates.length
-      ? myDates.map(iso => `<span class="date-chip leave-chip" data-date="${iso}" data-member="${mem.id}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}<span class="rm" data-rmleave="1" data-date="${iso}" data-member="${mem.id}" title="Hapus tanda cuti">✕</span></span>`).join('')
-      : '<span class="empty">— tidak ada cuti bulan ini —</span>';
-    return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
-      <div class="ondoff-head" data-toggle="dayoff" data-key="${key}">
-        <span class="dot" style="background:${mem.color}"></span>
-        <span class="name">${mem.name}</span>
-        <span class="count">${myDates.length} hari</span>
-        <span class="chev">▾</span>
-      </div>
-      <div class="ondoff-body">${chips}</div>
-    </div>`;
-  }).join('');
-
-  el.querySelectorAll('.ondoff-head[data-toggle="dayoff"]').forEach(head => {
-    head.onclick = () => {
-      const key = head.dataset.key;
-      expandedDayOff[key] = !expandedDayOff[key];
-      renderDayOffSummary(divId);
+      renderMonthSummary(divId);
     };
   });
   el.querySelectorAll('.rm[data-rmleave]').forEach(rm => {
@@ -1183,8 +1156,7 @@ document.getElementById('importJsonFile').addEventListener('change', (e) => {
 
 /* ==================== INIT ==================== */
 function renderDivision(divId){
-  renderOnDutySummary(divId);
-  renderDayOffSummary(divId);
+  renderMonthSummary(divId);
   renderOrderList(divId);
   renderRotationConfig(divId);
   renderOnDuty(divId);
