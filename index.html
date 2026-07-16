@@ -267,19 +267,6 @@
   <!-- ===================== VIEW: DIVISI (di-generate JS) ===================== -->
   <div id="divisionViewsMount"></div>
 
-  <!-- ===================== VIEW: KONFLIK ===================== -->
-  <div class="view" id="view-konflik">
-    <div class="card-box">
-      <h3>⚠️ Deteksi Konflik Cuti Bersamaan</h3>
-      <p style="font-size:12px;color:#556;">
-        Sistem otomatis menandai <b>konflik</b> jika ketiga nama berikut tercatat cuti pada tanggal yang sama (lintas divisi):
-        <b id="critNamesLabel">Harris, Sony Salubongga, Nyco</b> — memastikan minimal 1 dari mereka tetap standby.
-        Tandai status cuti lewat panel detail tanggal di masing-masing tab divisi.
-      </p>
-      <div id="conflictList"></div>
-    </div>
-  </div>
-
   <!-- ===================== VIEW: DATA ===================== -->
   <div class="view" id="view-data">
     <div class="card-box">
@@ -309,7 +296,7 @@
 /* ==================== KONFIGURASI DIVISI ==================== */
 const DIVISIONS_CONFIG = [
   { id:'maint', name:'Maintenance & Support', icon:'🔧', color:'#2E5FA3',
-    memberNames:['Harris','Nyco','Taufik','Adhe Setiawan','Lukman Gunawan'] },
+    memberNames:['Harris','Nyco','Taufik','Lukman Gunawan','Adhe Setiawan'] },
   { id:'proj', name:'Project & Acceleration', icon:'🚀', color:'#1E8E7E',
     memberNames:['Sony Salubongga','Abdillah','Ishaq Arifin'] },
   { id:'dev', name:'Development', icon:'💻', color:'#C99A2E',
@@ -318,6 +305,19 @@ const DIVISIONS_CONFIG = [
 // Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
 const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
 const STORAGE_KEY = 'roster:state';
+
+/* ==================== IMPORT JADWAL DARI "Rooster BIB.xlsx" (Google Sheets) ====================
+   Sumber: tab "Rooster 2026", periode 29-Des-2025 s/d 2-Apr-2026.
+   Legend sumber: ON(1)=standby, OFF(2)=libur, HO(3)=home office, Leave(4)=cuti.
+   Tanggal di bawah ini adalah status NON-ON (OFF/HO/Leave) → ditandai sebagai "Cuti" (Day-off) di tool ini. */
+const SCHEDULE_IMPORT_MAINT = {
+  'Harris': ['2026-01-26', '2026-01-27', '2026-01-28', '2026-01-29', '2026-01-30', '2026-01-31', '2026-02-01', '2026-02-02', '2026-02-03', '2026-02-04', '2026-02-05', '2026-03-19', '2026-03-20', '2026-03-21', '2026-03-22', '2026-03-23', '2026-03-24', '2026-03-25', '2026-03-26', '2026-03-27', '2026-03-28'],
+  'Lukman Gunawan': ['2026-01-05', '2026-01-06', '2026-01-07', '2026-01-08', '2026-01-09', '2026-01-10', '2026-01-11', '2026-01-12', '2026-02-21', '2026-02-22', '2026-02-23', '2026-02-24', '2026-02-25', '2026-02-26', '2026-02-27', '2026-02-28', '2026-03-28', '2026-03-29', '2026-03-30', '2026-03-31', '2026-04-01', '2026-04-02'],
+  'Nyco': ['2025-12-29', '2025-12-30', '2025-12-31', '2026-01-01', '2026-02-13', '2026-02-14', '2026-02-15', '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19', '2026-02-20', '2026-03-11', '2026-03-12', '2026-03-13', '2026-03-14', '2026-03-15', '2026-03-16', '2026-03-17', '2026-03-18'],
+  'Taufik': ['2026-01-14', '2026-01-15', '2026-01-16', '2026-01-17', '2026-01-18', '2026-01-19', '2026-01-20', '2026-01-21', '2026-03-02', '2026-03-03', '2026-03-04', '2026-03-05', '2026-03-06', '2026-03-07', '2026-03-08', '2026-03-09'],
+  'Adhe Setiawan': ['2026-01-23', '2026-01-24', '2026-01-25', '2026-01-26', '2026-01-27', '2026-01-28', '2026-01-29', '2026-01-30', '2026-03-19', '2026-03-20', '2026-03-21', '2026-03-22', '2026-03-23', '2026-03-24', '2026-03-25', '2026-03-26'],
+};
+const SCHEDULE_IMPORT_VERSION = 'maint-v1';
 
 /* ==================== STATE (persisted via window.storage) ==================== */
 const PALETTE_COLORS = ['#2E5FA3','#1E8E7E','#E07A3F','#7A5FBF','#C2547A','#3F9142','#C99A2E','#C0392B','#566573','#0E7C86'];
@@ -450,6 +450,22 @@ async function persistState(){
     showToast('⚠️ Gagal menyimpan otomatis. Periksa koneksi lalu coba lagi.', 'error');
   }
 }
+
+/* ==================== IMPORT SEKALI-JALAN: Jadwal OFF/HO/Leave dari Rooster BIB.xlsx ==================== */
+function applyScheduleImport(){
+  if(!state.scheduleImportApplied) state.scheduleImportApplied = {};
+  if(state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION]) return; // sudah pernah diterapkan, jangan duplikat
+  let count = 0;
+  Object.keys(SCHEDULE_IMPORT_MAINT).forEach(name => {
+    const member = state.team.find(m => m.name === name && m.divisionId === 'maint');
+    if(!member) return;
+    SCHEDULE_IMPORT_MAINT[name].forEach(iso => {
+      if(!isOnLeave(iso, member.id)){ addLeave(iso, member.id); count++; }
+    });
+  });
+  state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION] = true;
+  if(count > 0) markDirty();
+}
 function markDirty(){
   dirty = true;
   renderSaveStatus('dirty');
@@ -514,29 +530,13 @@ function swapCells(divId, dateA, dateB){
   if(b) setOverride(divId, dateA, b.personId); else clearOverride(divId, dateA);
 }
 
-/* ==================== KONFLIK (lintas divisi) ==================== */
+/* ==================== CUTI (checkbox tandai cuti per tanggal) ==================== */
 function toggleCriticalLeave(dateISO, personId){
   const arr = state.criticalLeave[dateISO] ? state.criticalLeave[dateISO].slice() : [];
   const idx = arr.indexOf(personId);
   if(idx >= 0) arr.splice(idx, 1); else arr.push(personId);
   if(arr.length) state.criticalLeave[dateISO] = arr; else delete state.criticalLeave[dateISO];
   markDirty();
-}
-function isConflictDate(dateISO){
-  const arr = state.criticalLeave[dateISO] || [];
-  return state.criticalTeamIds.length > 0 && state.criticalTeamIds.every(id => arr.includes(id));
-}
-function conflictDatesInMonth(y, m){
-  const total = daysInMonth(y, m);
-  const list = [];
-  for(let day = 1; day <= total; day++){
-    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    if(isConflictDate(iso)) list.push(iso);
-  }
-  return list;
-}
-function criticalTrioLabel(){
-  return state.criticalTeamIds.map(id => memberById(id)).filter(Boolean).map(m => m.name).join(', ');
 }
 
 /* ==================== TABS ==================== */
@@ -550,8 +550,7 @@ function renderTabsBar(){
   bar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
 
   const utilBar = document.getElementById('utilTabsBar');
-  let utilHtml = `<div class="tab tab-alert${activeTab === 'konflik' ? ' active' : ''}" data-view="konflik">⚠️ Konflik</div>`;
-  utilHtml += `<div class="tab${activeTab === 'data' ? ' active' : ''}" data-view="data">💾 Data</div>`;
+  let utilHtml = `<div class="tab${activeTab === 'data' ? ' active' : ''}" data-view="data">💾 Data</div>`;
   utilBar.innerHTML = utilHtml;
   utilBar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
 }
@@ -562,7 +561,6 @@ function switchTab(view){
   const el = document.getElementById('view-' + view);
   if(el) el.classList.add('active');
   closeDetailPanel();
-  if(view === 'konflik') renderConflictList();
 }
 
 /* ==================== BUILD DIVISION VIEW SHELL ==================== */
@@ -666,11 +664,7 @@ function addLeaveFromForm(divId){
   dateInput.value = '';
   renderDivision(divId);
   renderOverview();
-  if(activeTab === 'konflik') renderConflictList();
   showToast(`Cuti ${m ? m.name : ''} pada ${iso} ditandai.`, 'success');
-  if(isConflictDate(iso)){
-    showToast(`⚠️ Konflik! ${criticalTrioLabel()} cuti bersamaan. Pastikan ada yang standby.`, 'error');
-  }
 }
 function shiftMonth(delta){
   const d = parseISO(currentMonth);
@@ -711,10 +705,9 @@ function renderOrderList(divId){
   el.innerHTML = div.rotation.order.map((id, idx) => {
     const m = memberById(id);
     if(!m) return '';
-    const isCrit = state.criticalTeamIds.includes(id);
     return `<div class="order-item" data-id="${id}">
       <span class="dot" style="background:${m.color}"></span>
-      <span class="name">${idx+1}. ${m.name}${isCrit ? ' <span title="Tim Kritikal" style="color:var(--red-fg);">⚠️</span>' : ''}</span>
+      <span class="name">${idx+1}. ${m.name}</span>
       <button class="mv" data-act="up" ${idx===0?'disabled':''}>▲</button>
       <button class="mv" data-act="down" ${idx===div.rotation.order.length-1?'disabled':''}>▼</button>
       <button class="mv" data-act="del" title="Hapus dari divisi">✕</button>
@@ -761,9 +754,8 @@ function renderOnDuty(divId){
   const person = a ? memberById(a.personId) : null;
   const critArr = state.criticalLeave[iso] || [];
   const leaveMembersInDiv = critArr.map(id => memberById(id)).filter(m => m && m.divisionId === divId);
-  const conflict = isConflictDate(iso);
   let cls = 'rs-shiftnow-card';
-  if(conflict) cls += ' is-conflict'; else if(person) cls += ' is-live';
+  if(person) cls += ' is-live';
 
   const dayoffHtml = leaveMembersInDiv.length
     ? leaveMembersInDiv.map(m => `<div class="rs-status-person">${avatarHTML(m,32)}<span>${m.name}</span></div>`).join('')
@@ -773,7 +765,7 @@ function renderOnDuty(divId){
     <div class="${cls}" id="ondutyClick-${divId}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div><div class="rs-shiftnow-time">${a && a.locked ? 'Assign manual' : 'Rotasi otomatis'}</div></div>
-        <span class="rs-live-badge"><span class="rs-live-dot"></span>${conflict ? 'KONFLIK' : 'ONDUTY'}</span>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>ONDUTY</span>
       </div>
       <div class="rs-status-grid">
         <div class="rs-status-block">
@@ -936,7 +928,6 @@ function renderDetailBody(divId, dateISO){
   const body = document.getElementById('detailBody');
   const a = assignedFor(divId, dateISO);
   const critArr = state.criticalLeave[dateISO] || [];
-  const conflict = isConflictDate(dateISO);
 
   let html = '<div class="detail-section-title">👤 Petugas Standby</div>';
   html += div.rotation.order.map(id => {
@@ -953,14 +944,10 @@ function renderDetailBody(divId, dateISO){
     if(!members.length) return;
     html += `<div class="detail-group-label">${dc.icon} ${dc.name}</div>`;
     html += members.map(m => {
-      const isCrit = state.criticalTeamIds.includes(m.id);
       const checked = critArr.includes(m.id) ? 'checked' : '';
-      return `<label class="detail-crit-row"><input type="checkbox" data-crit="${m.id}" ${checked}>${avatarHTML(m,24)}${m.name}${isCrit ? ' <span title="Tim Kritikal" style="color:var(--red-fg);">⚠️</span>' : ''}</label>`;
+      return `<label class="detail-crit-row"><input type="checkbox" data-crit="${m.id}" ${checked}>${avatarHTML(m,24)}${m.name}</label>`;
     }).join('');
   });
-  if(conflict){
-    html += `<div class="detail-conflict-note">⚠️ Konflik: ${criticalTrioLabel()} cuti bersamaan pada tanggal ini — pastikan ada yang standby.</div>`;
-  }
   body.innerHTML = html;
 
   body.querySelectorAll('.detail-opt[data-id]').forEach(opt => {
@@ -984,10 +971,6 @@ function renderDetailBody(divId, dateISO){
       toggleCriticalLeave(dateISO, cb.dataset.crit);
       renderAllDivisions();
       renderDetailBody(divId, dateISO);
-      if(activeTab === 'konflik') renderConflictList();
-      if(isConflictDate(dateISO)){
-        showToast(`⚠️ Konflik! ${criticalTrioLabel()} cuti bersamaan. Pastikan ada yang standby.`, 'error');
-      }
     });
   });
 }
@@ -1013,18 +996,17 @@ function renderOverview(){
 
 function renderOverviewToday(){
   const iso = todayISO();
-  const conflict = isConflictDate(iso);
   let html = '<div class="rs-shiftnow-grid">';
   DIVISIONS_CONFIG.forEach(dc => {
     const div = divisionState(dc.id);
     const a = assignedFor(dc.id, iso);
     const person = a ? memberById(a.personId) : null;
     let cls = 'rs-shiftnow-card';
-    if(conflict) cls += ' is-conflict'; else if(person) cls += ' is-live';
+    if(person) cls += ' is-live';
     html += `<div class="${cls}" data-div="${dc.id}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div><div class="rs-shiftnow-time">${div.rotation.order.length} anggota</div></div>
-        <span class="rs-live-badge"><span class="rs-live-dot"></span>${conflict ? 'KONFLIK' : 'ONDUTY'}</span>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>ONDUTY</span>
       </div>
       <div class="rs-shiftnow-person">
         ${avatarHTML(person, 44)}
@@ -1064,7 +1046,6 @@ function renderOverviewWeek(){
     const d = new Date(start); d.setDate(start.getDate() + i);
     const iso = isoOf(d.getFullYear(), d.getMonth(), d.getDate());
     const isToday = iso === todayISO();
-    const conflict = isConflictDate(iso);
     rows += `<tr class="${isToday ? 'is-today' : ''}">
       <td class="rowlabel">${capitalize(d.toLocaleDateString('id-ID', {weekday:'short'}))}, ${d.getDate()}/${d.getMonth()+1}</td>
       ${DIVISIONS_CONFIG.map(dc => {
@@ -1072,11 +1053,10 @@ function renderOverviewWeek(){
         const person = a ? memberById(a.personId) : null;
         return `<td>${person ? `<div class="rs-table-person">${avatarHTML(person,26)}<span>${person.name.split(' ')[0]}</span></div>` : '—'}</td>`;
       }).join('')}
-      <td>${conflict ? '⚠️' : ''}</td>
     </tr>`;
   }
   document.getElementById('overviewBody').innerHTML = `<div class="rs-week-table-wrap"><table class="rs-table">
-    <thead><tr><th>Tanggal</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}<th>Konflik</th></tr></thead>
+    <thead><tr><th>Tanggal</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
@@ -1089,7 +1069,6 @@ function renderOverviewMonth(){
   for(let day=1; day<=total; day++){
     const iso = isoOf(y,m,day);
     const isToday = iso === todayISO();
-    const conflict = isConflictDate(iso);
     rows += `<tr class="${isToday ? 'is-today' : ''}">
       <td class="rowlabel">${day}</td>
       ${DIVISIONS_CONFIG.map(dc => {
@@ -1097,40 +1076,12 @@ function renderOverviewMonth(){
         const person = a ? memberById(a.personId) : null;
         return `<td>${person ? `<div class="rs-table-person">${avatarHTML(person,22)}<span style="font-size:10px;">${person.name.split(' ')[0]}</span></div>` : '—'}</td>`;
       }).join('')}
-      <td>${conflict ? '⚠️' : ''}</td>
     </tr>`;
   }
   document.getElementById('overviewBody').innerHTML = `<div class="rs-week-table-wrap" style="max-height:520px;overflow-y:auto;"><table class="rs-table">
-    <thead><tr><th>Tgl</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}<th>Konflik</th></tr></thead>
+    <thead><tr><th>Tgl</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
-}
-
-/* ==================== RENDER: KONFLIK TAB ==================== */
-function renderConflictList(){
-  const el = document.getElementById('conflictList');
-  document.getElementById('critNamesLabel').textContent = criticalTrioLabel();
-  const dates = Object.keys(state.criticalLeave).filter(isConflictDate).sort();
-  if(!dates.length){
-    el.innerHTML = '<div style="font-size:12.5px;color:var(--green);font-weight:bold;">✅ Tidak ada konflik tercatat saat ini.</div>';
-    return;
-  }
-  el.innerHTML = dates.map(iso => {
-    const label = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-    return `<div class="order-item" style="background:var(--red-bg);align-items:flex-start;">
-      <span style="flex:1;font-size:12.5px;color:var(--red-fg);"><b>${label}</b><br>${criticalTrioLabel()} tercatat cuti bersamaan — tidak ada yang standby.<br><i>Rekomendasi: assign standby manual di tab divisi terkait, atau geser cuti salah satu personel.</i></span>
-      <button class="mv" data-date="${iso}" title="Hapus semua tanda cuti tim kritikal pada tanggal ini">✕</button>
-    </div>`;
-  }).join('');
-  el.querySelectorAll('.mv').forEach(btn => {
-    btn.onclick = () => {
-      delete state.criticalLeave[btn.dataset.date];
-      markDirty();
-      renderAllDivisions();
-      renderConflictList();
-      showToast('Tanda cuti pada tanggal tersebut dihapus.', 'success');
-    };
-  });
 }
 
 /* ==================== EXPORT / IMPORT (backup opsional) ==================== */
@@ -1150,7 +1101,7 @@ document.getElementById('exportCsvBtn').onclick = () => {
   const d = parseISO(currentMonth);
   const y = d.getFullYear(), m = d.getMonth();
   const total = daysInMonth(y,m);
-  let rows = [['Divisi','Tanggal','Hari','Petugas Standby','Status','Cuti Tim Kritikal','Konflik']];
+  let rows = [['Divisi','Tanggal','Hari','Petugas Standby','Status','Cuti Tim Kritikal']];
   DIVISIONS_CONFIG.forEach(dc => {
     for(let day=1; day<=total; day++){
       const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -1158,7 +1109,7 @@ document.getElementById('exportCsvBtn').onclick = () => {
       const person = a ? memberById(a.personId) : null;
       const dayName = parseISO(iso).toLocaleDateString('id-ID', {weekday:'long'});
       const leaveNames = (state.criticalLeave[iso] || []).map(id => memberById(id)).filter(mm => mm && mm.divisionId === dc.id).map(mm => mm.name).join(' & ');
-      rows.push([dc.name, iso, dayName, person ? person.name : '-', a && a.locked ? 'Manual' : 'Otomatis', leaveNames, isConflictDate(iso) ? 'YA' : '']);
+      rows.push([dc.name, iso, dayName, person ? person.name : '-', a && a.locked ? 'Manual' : 'Otomatis', leaveNames]);
     }
   });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -1181,7 +1132,6 @@ document.getElementById('importJsonFile').addEventListener('change', (e) => {
       state = parsed;
       markDirty();
       renderAllDivisions();
-      renderConflictList();
       showToast('Data berhasil di-restore dan disimpan otomatis.', 'success');
     }catch(err){
       showToast('Gagal restore: file tidak valid.', 'error');
@@ -1207,9 +1157,9 @@ function renderAllDivisions(){
 (async function init(){
   mountEl.innerHTML = DIVISIONS_CONFIG.map(buildDivisionViewShell).join('');
   await loadState();
+  applyScheduleImport();
   renderTabsBar();
   renderAllDivisions();
-  renderConflictList();
   renderSaveStatus('clean');
   document.getElementById('modeBadge').textContent = '☁️ Mode: Auto-save (window.storage) — tersimpan otomatis, tanpa localStorage';
 })();
