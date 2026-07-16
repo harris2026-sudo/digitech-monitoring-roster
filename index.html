@@ -244,7 +244,7 @@
   <header>
     <h1>📅 Roster On-Call / Standby — Digitech Monitoring Team</h1>
     <p>Site Reliability Engineer · Digital Sustainability Operation · PT Borneo Indobara</p>
-    <span class="mode-badge" id="modeBadge">☁️ Mode: Auto-save (window.storage) — memuat...</span>
+    <span class="mode-badge" id="modeBadge">☁️ Mode: Auto-save (Google Sheets) — memuat...</span>
   </header>
 
   <div class="tabs" id="tabsBar"></div>
@@ -253,7 +253,7 @@
   <!-- ===================== VIEW: OVERVIEW ===================== -->
   <div class="view active" id="view-overview">
     <div class="card-box">
-      <div class="rs-sync-banner" id="rsSyncBanner">✓ Tersimpan otomatis · window.storage</div>
+      <div class="rs-sync-banner" id="rsSyncBanner">✓ Tersimpan otomatis · Google Sheets</div>
       <div class="rs-modeselect" id="overviewModeSelect">
         <button data-mode="today" class="active">Hari Ini</button>
         <button data-mode="week">Minggu Ini</button>
@@ -271,7 +271,7 @@
   <div class="view" id="view-data">
     <div class="card-box">
       <h3>☁️ Penyimpanan Otomatis</h3>
-      <p style="font-size:12px;color:#556;">Aplikasi ini menyimpan seluruh data (tim, rotasi per divisi, override, tanda cuti) secara <b>otomatis</b> ke penyimpanan server (<code>window.storage</code>) setiap ada perubahan — tidak perlu export/import manual, dan data tetap ada walau tab browser ditutup atau dibuka ulang. Tombol di bawah hanya untuk backup opsional.</p>
+      <p style="font-size:12px;color:#556;">Aplikasi ini menyimpan seluruh data (tim, rotasi per divisi, override, tanda cuti) secara <b>otomatis</b> ke penyimpanan server (<code>Google Sheets</code>) setiap ada perubahan — tidak perlu export/import manual, dan data tetap ada walau tab browser ditutup atau dibuka ulang. Tombol di bawah hanya untuk backup opsional.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary" id="exportJsonBtn">⬇️ Backup JSON (lengkap + setting rotasi)</button>
         <button class="btn btn-ghost" id="exportCsvBtn">⬇️ Export CSV (untuk Excel, semua divisi)</button>
@@ -305,6 +305,40 @@ const DIVISIONS_CONFIG = [
 // Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
 const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
 const STORAGE_KEY = 'roster:state';
+
+/* ==================== KONFIGURASI BACKEND (Google Apps Script) ====================
+   Ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
+   Bentuknya: https://script.google.com/macros/s/XXXXXXXXXXXX/exec */
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLwZFTIVr2T3YhA9nj1713k0kfbU5CNBcOJ5M5X58BG3kpYmo7DraUB9sXMSQSh3k0ng/exec';
+
+/* Store object: meniru interface window.storage (get/set/delete/list),
+   tapi backend-nya Google Sheets via Apps Script Web App.
+   Semua request pakai GET (bukan POST) supaya tidak kena masalah
+   "Failed to fetch" akibat redirect internal Google Apps Script. */
+const sheetStore = {
+  async get(key){
+    const url = `${APPS_SCRIPT_URL}?action=get&key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Gagal mengambil data');
+    if(data.value === null || data.value === undefined || data.value === '') return null;
+    return { key, value: data.value };
+  },
+  async set(key, value){
+    const url = `${APPS_SCRIPT_URL}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(value)}`;
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Gagal menyimpan data');
+    return { key, value };
+  },
+  async delete(key){
+    const url = `${APPS_SCRIPT_URL}?action=delete&key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, { method: 'GET' });
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || 'Gagal menghapus data');
+    return data;
+  }
+};
 
 /* ==================== IMPORT JADWAL DARI "Rooster BIB.xlsx" (Google Sheets) ====================
    Sumber: tab "Rooster 2026", periode 29-Des-2025 s/d 2-Apr-2026.
@@ -420,7 +454,7 @@ function avatarHTML(person, size){
 /* ==================== PERSISTENCE (window.storage) ==================== */
 async function loadState(){
   try{
-    const res = await window.storage.get(STORAGE_KEY, false);
+    const res = await sheetStore.get(STORAGE_KEY);
     if(res && res.value){
       let parsed = JSON.parse(res.value);
       if(parsed && parsed.team){
@@ -441,7 +475,7 @@ async function loadState(){
 
 async function persistState(){
   try{
-    const res = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+    const res = await sheetStore.set(STORAGE_KEY, JSON.stringify(state));
     if(!res) throw new Error('empty result');
     dirty = false;
     renderSaveStatus('clean');
@@ -482,7 +516,7 @@ function renderSaveStatus(mode){
   if(banner){
     if(mode === 'dirty'){ banner.textContent = '⏳ Menyimpan perubahan...'; banner.className = 'rs-sync-banner dirty'; }
     else if(mode === 'error'){ banner.textContent = '⚠️ Gagal menyimpan otomatis — periksa koneksi'; banner.className = 'rs-sync-banner error'; }
-    else { banner.textContent = '✓ Tersimpan otomatis · window.storage'; banner.className = 'rs-sync-banner'; }
+    else { banner.textContent = '✓ Tersimpan otomatis · Google Sheets'; banner.className = 'rs-sync-banner'; }
   }
 }
 function showToast(message, type){
@@ -1155,13 +1189,17 @@ function renderAllDivisions(){
 }
 
 (async function init(){
+  if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'PASTE_URL_APPS_SCRIPT_DI_SINI'){
+    document.getElementById('modeBadge').textContent = '⚠️ APPS_SCRIPT_URL belum diisi — lihat komentar di bagian atas <script>';
+    alert('APPS_SCRIPT_URL belum diisi. Buka file HTML ini, cari baris "const APPS_SCRIPT_URL", lalu tempel URL Web App Apps Script Anda di situ.');
+  }
   mountEl.innerHTML = DIVISIONS_CONFIG.map(buildDivisionViewShell).join('');
   await loadState();
   applyScheduleImport();
   renderTabsBar();
   renderAllDivisions();
   renderSaveStatus('clean');
-  document.getElementById('modeBadge').textContent = '☁️ Mode: Auto-save (window.storage) — tersimpan otomatis, tanpa localStorage';
+  document.getElementById('modeBadge').textContent = '☁️ Mode: Auto-save (Google Sheets) — tersimpan otomatis, sinkron semua device';
 })();
 </script>
 </body>
