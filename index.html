@@ -309,7 +309,7 @@ const STORAGE_KEY = 'roster:state';
 /* ==================== KONFIGURASI BACKEND (Google Apps Script) ====================
    Ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
    Bentuknya: https://script.google.com/macros/s/XXXXXXXXXXXX/exec */
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9ggq0fXN6_X_AZ42oyNgg140WfHzaETS7VyUWDKwlJGIMDCfbu41k5fysQrOe3pZjPw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLwZFTIVr2T3YhA9nj1713k0kfbU5CNBcOJ5M5X58BG3kpYmo7DraUB9sXMSQSh3k0ng/exec';
 
 /* Store object: meniru interface window.storage (get/set/delete/list),
    tapi backend-nya Google Sheets via Apps Script Web App.
@@ -620,7 +620,7 @@ function buildDivisionViewShell(dc){
       <div class="palette-hint">Klik nama untuk buka/tutup daftar tanggal · klik tanggal untuk buka detail &amp; ubah petugas · klik ✕ pada tanggal cuti untuk menghapus tanda cuti.</div>
 
       <div class="ondoff-section">
-        <h4 class="ondoff-title">🟢 Onduty Bulan Ini</h4>
+        <h4 class="ondoff-title">🟢 Day-On Bulan Ini</h4>
         <div class="ondoff-list" id="ondutySummary-${dc.id}"></div>
       </div>
 
@@ -805,11 +805,11 @@ function renderOnDuty(divId){
     <div class="${cls}" id="ondutyClick-${divId}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div><div class="rs-shiftnow-time">${a && a.locked ? 'Assign manual' : 'Rotasi otomatis'}</div></div>
-        <span class="rs-live-badge"><span class="rs-live-dot"></span>ONDUTY</span>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON${person ? ' · ' + person.name.split(' ')[0] : ''}</span>
       </div>
       <div class="rs-status-grid">
         <div class="rs-status-block">
-          <div class="rs-status-label">🟢 Onduty</div>
+          <div class="rs-status-label">🟢 Day-On</div>
           <div class="rs-status-person rs-status-person-main">
             ${avatarHTML(person, 44)}
             <span>${person ? person.name : 'Belum ada petugas'}</span>
@@ -867,7 +867,7 @@ function renderOnDutySummary(divId){
     const open = !!expandedOnDuty[key];
     const chips = myDates.length
       ? myDates.map(iso => `<span class="date-chip" data-date="${iso}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}</span>`).join('')
-      : '<span class="empty">— tidak ada jadwal onduty bulan ini —</span>';
+      : '<span class="empty">— tidak ada jadwal day-on bulan ini —</span>';
     return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
       <div class="ondoff-head" data-toggle="onduty" data-key="${key}">
         <span class="dot" style="background:${mem.color}"></span>
@@ -1046,7 +1046,7 @@ function renderOverviewToday(){
     html += `<div class="${cls}" data-div="${dc.id}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div><div class="rs-shiftnow-time">${div.rotation.order.length} anggota</div></div>
-        <span class="rs-live-badge"><span class="rs-live-dot"></span>ONDUTY</span>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON${person ? ' · ' + person.name.split(' ')[0] : ''}</span>
       </div>
       <div class="rs-shiftnow-person">
         ${avatarHTML(person, 44)}
