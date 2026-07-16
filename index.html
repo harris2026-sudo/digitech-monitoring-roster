@@ -805,7 +805,7 @@ function renderOnDuty(divId){
     <div class="${cls}" id="ondutyClick-${divId}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div><div class="rs-shiftnow-time">${a && a.locked ? 'Assign manual' : 'Rotasi otomatis'}</div></div>
-        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON${person ? ' · ' + person.name.split(' ')[0] : ''}</span>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
       </div>
       <div class="rs-status-grid">
         <div class="rs-status-block">
@@ -1046,7 +1046,7 @@ function renderOverviewToday(){
     html += `<div class="${cls}" data-div="${dc.id}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div><div class="rs-shiftnow-time">${div.rotation.order.length} anggota</div></div>
-        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON${person ? ' · ' + person.name.split(' ')[0] : ''}</span>
+        <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
       </div>
       <div class="rs-shiftnow-person">
         ${avatarHTML(person, 44)}
