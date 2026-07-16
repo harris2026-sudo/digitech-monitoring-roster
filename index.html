@@ -874,9 +874,13 @@ function renderMonthSummary(divId){
     const offChips = offDates.length
       ? offDates.map(iso => `<span class="date-chip leave-chip" data-date="${iso}" data-member="${id}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}<span class="rm" data-rmleave="1" data-date="${iso}" data-member="${id}" title="Hapus tanda cuti">✕</span></span>`).join('')
       : '<span class="empty">— tidak ada cuti bulan ini —</span>';
+    const useAvatar = (divId === 'maint');
+    const nameIconHtml = useAvatar
+      ? avatarHTML(mem, 32)
+      : `<span class="dot" style="background:${mem.color}"></span>`;
     return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
       <div class="ondoff-head" data-toggle="month" data-key="${key}">
-        <span class="dot" style="background:${mem.color}"></span>
+        ${nameIconHtml}
         <span class="name">${mem.name}</span>
         <span class="count">🟢 ${onDates.length} hari · 🏖️ ${offDates.length} hari</span>
         <span class="chev">▾</span>
