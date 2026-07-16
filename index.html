@@ -2017,30 +2017,46 @@ function renderFollowListBody(){
     el.innerHTML = '<div class="empty-note">Tidak ada item Follow up / Belum Selesai pada filter ini. 🎉</div>';
     return;
   }
-  el.innerHTML = items.map(it => `
+  el.innerHTML = items.map(it => {
+    const isManual = it.source === 'manual';
+    const descHtml = isManual
+      ? `<span class="fi-date">${it.date}</span>${it.desc}`
+      : `<span class="fi-date">${it.date}</span>${taskTextMap[it.taskId] || it.taskId}`;
+    const metaHtml = isManual
+      ? `<span class="fi-status fu">Follow Up (manual)</span>${it.vendor ? ' · ' + it.vendor : ''}${it.pic ? ' · PIC: ' + it.pic : ''}${it.due ? ' · Due: ' + it.due : ''}`
+      : `<span class="fi-status ${it.status==='Not yet'?'ny':'fu'}">${it.status}</span>`;
+    return `
     <div class="fu-card status-${it.trackStatus}" data-key="${it.key}">
       <div class="fu-top">
         <div>
-          <div class="fu-desc"><span class="fi-date">${it.date}</span>${taskTextMap[it.taskId] || it.taskId}</div>
-          <div class="fu-meta"><span class="fi-status ${it.status==='Not yet'?'ny':'fu'}">${it.status}</span></div>
+          <div class="fu-desc">${descHtml}</div>
+          <div class="fu-meta">${metaHtml}</div>
         </div>
         <span class="fu-badge ${it.trackStatus}">${it.trackStatus}</span>
       </div>
       ${it.note ? `<div class="fu-note">${it.note}</div>` : ''}
       <div class="fu-actions">
-        <select data-key="${it.key}" class="rekap-fu-status-select">
+        <select data-key="${it.key}" data-source="${it.source}" class="rekap-fu-status-select">
           ${FOLLOWUP_STATUS.map(s => `<option value="${s}" ${s===it.trackStatus?'selected':''}>${s}</option>`).join('')}
         </select>
-        <button class="fu-del" data-key="${it.key}">Hapus</button>
+        <button class="fu-del" data-key="${it.key}" data-source="${it.source}">Hapus</button>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 
   el.querySelectorAll('.rekap-fu-status-select').forEach(sel => {
     sel.onchange = async () => {
-      rekapFuStatusMap[sel.dataset.key] = sel.value;
-      await saveRekapFuStatus();
       const item = rekapFuItemsCache.find(i => i.key === sel.dataset.key);
+      if(sel.dataset.source === 'manual'){
+        // Item Follow Up manual: status disimpan langsung di data followUpItems
+        // (satu sumber data yang sama dengan tab Follow Up), supaya perubahan di Rekap
+        // langsung tersinkron ke tab Follow Up juga, begitu pula sebaliknya.
+        const fuItem = followUpItems.find(i => i.id === item.manualId);
+        if(fuItem){ fuItem.status = sel.value; await saveFollowUp(); }
+      } else {
+        rekapFuStatusMap[sel.dataset.key] = sel.value;
+        await saveRekapFuStatus();
+      }
       if(item) item.trackStatus = sel.value;
       renderRekapFuSummary();
       renderFollowListBody();
@@ -2048,13 +2064,20 @@ function renderFollowListBody(){
   });
   el.querySelectorAll('.fu-del').forEach(btn => {
     btn.onclick = async () => {
-      if(confirm('Hapus item follow up ini dari daftar?')){
+      if(!confirm('Hapus item follow up ini dari daftar?')) return;
+      if(btn.dataset.source === 'manual'){
+        const item = rekapFuItemsCache.find(i => i.key === btn.dataset.key);
+        // Hapus dari data utama Follow Up (bukan cuma disembunyikan) karena ini satu
+        // sumber data yang sama dengan tab Follow Up.
+        followUpItems = followUpItems.filter(i => i.id !== item.manualId);
+        await saveFollowUp();
+      } else {
         rekapFuDismissed[btn.dataset.key] = true;
         await saveRekapFuDismissed();
-        rekapFuItemsCache = rekapFuItemsCache.filter(i => i.key !== btn.dataset.key);
-        renderRekapFuSummary();
-        renderFollowListBody();
       }
+      rekapFuItemsCache = rekapFuItemsCache.filter(i => i.key !== btn.dataset.key);
+      renderRekapFuSummary();
+      renderFollowListBody();
     };
   });
 }
@@ -2068,16 +2091,30 @@ async function renderFollowList(periodDates){
       const s = entry.status[taskId];
       if(s === 'Follow up' || s === 'Not yet'){
         const key = rekapFuKey(d, taskId);
-        items.push({ key, date:d, taskId, status:s, note: (entry.notes && entry.notes[taskId]) || '', trackStatus: rekapFuStatusMap[key] || 'Open' });
+        items.push({ key, source:'checklist', date:d, taskId, status:s, note: (entry.notes && entry.notes[taskId]) || '', trackStatus: rekapFuStatusMap[key] || 'Open' });
       }
     });
   });
+
+  // Sertakan juga item dari Menu Follow Up (manual) yang tanggalnya masuk dalam periode
+  // yang sedang dilihat, supaya tercatat dan bisa dikelola juga dari Rekap.
+  await loadFollowUp();
+  const periodSet = new Set(periodDates);
+  followUpItems.forEach(it => {
+    if(!periodSet.has(it.date)) return;
+    items.push({
+      key: 'manualfu__' + it.id, source:'manual', manualId: it.id,
+      date: it.date, desc: it.desc, vendor: it.vendor, pic: it.pic, due: it.due,
+      note: it.note || '', trackStatus: it.status
+    });
+  });
+
   items.sort((a,b) => a.date.localeCompare(b.date));
   await loadRekapFuStatus();
-  items.forEach(it => { it.trackStatus = rekapFuStatusMap[it.key] || 'Open'; });
-  rekapFuItemsCache = items.filter(it => !rekapFuDismissed[it.key]);
+  items.forEach(it => { if(it.source === 'checklist') it.trackStatus = rekapFuStatusMap[it.key] || 'Open'; });
+  rekapFuItemsCache = items.filter(it => it.source === 'manual' || !rekapFuDismissed[it.key]);
 
-  if(items.length === 0){
+  if(rekapFuItemsCache.length === 0){
     document.getElementById('rekapFuSummaryCards').innerHTML = '';
     document.getElementById('rekapFuFilterBar').innerHTML = '';
     document.getElementById('rekapFollowList').innerHTML = '<div class="empty-note">Tidak ada item Follow up / Belum Selesai pada periode ini. 🎉</div>';
