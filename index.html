@@ -24,7 +24,14 @@
   .mode-badge{display:inline-block;margin-top:8px;font-size:10.5px;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;}
 
   .tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
-  .tab{flex:1;min-width:110px;text-align:center;padding:10px 8px;border-radius:8px;background:#fff;color:var(--navy);font-weight:bold;font-size:12.5px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:2px solid transparent;}
+  .tabs-sub{margin-top:-8px;margin-bottom:14px;}
+  .tabs-sub .tab{font-size:11.5px;padding:8px 8px;background:#F5F8FC;}
+  .tabs-sub .tab.active{background:var(--accent);color:#fff;}
+  .tabs-sub2{margin-top:-8px;margin-bottom:14px;}
+  .tabs-sub2 .tab{font-size:11.5px;padding:8px 8px;background:#F5F8FC;}
+  .tabs-sub2 .tab.active{background:var(--navy);color:#fff;}
+  .tabs-sub2 .tab.tab-alert.active{background:var(--red-fg);color:#fff;}
+  .tab{flex:1;min-width:110px;text-align:center;padding:10px 8px;border-radius:8px;background:#fff;color:var(--navy);font-weight:bold;font-size:12.5px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:2px solid transparent;white-space:nowrap;}
   .tab.active{background:var(--navy);color:#fff;}
   .tab.tab-alert{color:var(--red-fg);}
   .tab.tab-alert.active{background:var(--red-fg);color:#fff;}
@@ -87,6 +94,15 @@
   .rs-shiftnow-card.is-conflict .rs-avatar{box-shadow:0 0 0 3px rgba(156,0,6,.15);}
   .rs-shiftnow-name{font-weight:bold;color:var(--navy);font-size:14px;}
   .rs-shiftnow-code{font-size:11px;color:#667;}
+
+  .rs-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .rs-status-block{background:#F8FAFC;border-radius:10px;padding:10px 12px;}
+  .rs-status-label{font-size:10.5px;font-weight:bold;color:#556;text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;}
+  .rs-status-person{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:bold;color:#222;margin-bottom:6px;}
+  .rs-status-person:last-child{margin-bottom:0;}
+  .rs-status-person-main{font-size:14px;color:var(--navy);}
+  .rs-status-empty{font-size:11.5px;color:#aaa;}
+  @media (max-width:520px){ .rs-status-grid{grid-template-columns:1fr;} }
   .rs-extra-panel{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:16px;}
   .rs-extra-title{font-weight:bold;color:var(--navy);font-size:14px;margin-bottom:10px;}
   .rs-extra-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--zebra);font-size:13px;}
@@ -124,6 +140,28 @@
   .conflict-badge{position:absolute;top:4px;right:4px;font-size:11px;}
   .cal-leave-tags{margin-top:4px;font-size:9px;color:var(--red-fg);font-weight:bold;line-height:1.3;}
 
+  .ondoff-section{margin-top:14px;}
+  .ondoff-title{margin:0 0 8px;font-size:13px;color:var(--navy);}
+  .ondoff-list{display:flex;flex-direction:column;gap:6px;}
+  .ondoff-card{border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;}
+  .ondoff-head{display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer;background:#F8FAFC;user-select:none;}
+  .ondoff-head:hover{background:#EEF3F9;}
+  .ondoff-head .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .ondoff-head .name{flex:1;font-weight:bold;font-size:12.5px;color:#222;}
+  .ondoff-head .count{font-size:11px;color:#556;background:#fff;border-radius:10px;padding:2px 8px;border:1px solid #E2E8F0;}
+  .ondoff-head .chev{font-size:10px;color:#889;transition:transform .15s;}
+  .ondoff-card.open .ondoff-head .chev{transform:rotate(180deg);}
+  .ondoff-body{display:none;padding:8px 10px 10px;flex-wrap:wrap;gap:6px;}
+  .ondoff-card.open .ondoff-body{display:flex;}
+  .ondoff-body .empty{font-size:11px;color:#aaa;}
+  .date-chip{display:inline-flex;align-items:center;gap:4px;background:#fff;border:1px solid #D8E0EA;border-radius:6px;padding:4px 7px;font-size:11px;font-weight:bold;color:var(--navy);cursor:pointer;}
+  .date-chip:hover{background:var(--hilite);}
+  .date-chip.leave-chip{color:var(--red-fg);border-color:#F2C7CC;}
+  .date-chip .rm{margin-left:2px;color:#999;font-weight:normal;cursor:pointer;}
+  .date-chip .rm:hover{color:var(--red-fg);}
+  .ondoff-add-form{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+  .ondoff-add-form select, .ondoff-add-form input{padding:7px 8px;border:1px solid #D8E0EA;border-radius:6px;font-size:12px;font-family:Arial;}
+
   .detail-backdrop{position:fixed;inset:0;background:rgba(15,25,45,.4);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:998;}
   .detail-backdrop.show{opacity:1;pointer-events:auto;}
   .detail-panel{position:fixed;top:0;right:0;height:100%;width:330px;max-width:92vw;background:#fff;box-shadow:-6px 0 24px rgba(0,0,0,.22);z-index:999;transform:translateX(100%);transition:transform .28s ease;display:flex;flex-direction:column;}
@@ -142,6 +180,7 @@
   .detail-clear{color:var(--red-fg);}
   .detail-crit-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;background:var(--zebra);margin-bottom:6px;font-size:12.5px;font-weight:bold;cursor:pointer;}
   .detail-crit-row input{width:16px;height:16px;flex-shrink:0;}
+  .detail-group-label{font-size:11px;font-weight:bold;color:var(--navy);margin:8px 0 4px;}
   .detail-conflict-note{background:var(--red-bg);color:var(--red-fg);border-radius:8px;padding:10px;font-size:11.5px;font-weight:bold;margin-top:12px;line-height:1.5;}
   @media (max-width:640px){
     .detail-panel{width:100%;max-width:100%;top:auto;bottom:0;height:auto;max-height:85vh;border-radius:16px 16px 0 0;transform:translateY(100%);}
@@ -209,6 +248,7 @@
   </header>
 
   <div class="tabs" id="tabsBar"></div>
+  <div class="tabs tabs-sub2" id="utilTabsBar"></div>
 
   <!-- ===================== VIEW: OVERVIEW ===================== -->
   <div class="view active" id="view-overview">
@@ -360,12 +400,10 @@ let state = null;
 let currentMonth = firstOfThisMonth();
 let dirty = false;
 let saveTimer = null;
-let filterPersonId = {};
 let activeTab = 'overview';
 let overviewMode = 'today';
 let currentDetailDate = null;
 let currentDetailDiv = null;
-DIVISIONS_CONFIG.forEach(dc => { filterPersonId[dc.id] = null; });
 
 function initials(name){
   const parts = String(name || '?').trim().split(/\s+/);
@@ -508,10 +546,14 @@ function renderTabsBar(){
   DIVISIONS_CONFIG.forEach(dc => {
     html += `<div class="tab${activeTab === dc.id ? ' active' : ''}" data-view="${dc.id}">${dc.icon} ${dc.name}</div>`;
   });
-  html += `<div class="tab tab-alert${activeTab === 'konflik' ? ' active' : ''}" data-view="konflik">⚠️ Konflik</div>`;
-  html += `<div class="tab${activeTab === 'data' ? ' active' : ''}" data-view="data">💾 Data</div>`;
   bar.innerHTML = html;
   bar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
+
+  const utilBar = document.getElementById('utilTabsBar');
+  let utilHtml = `<div class="tab tab-alert${activeTab === 'konflik' ? ' active' : ''}" data-view="konflik">⚠️ Konflik</div>`;
+  utilHtml += `<div class="tab${activeTab === 'data' ? ' active' : ''}" data-view="data">💾 Data</div>`;
+  utilBar.innerHTML = utilHtml;
+  utilBar.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => switchTab(tab.dataset.view); });
 }
 function switchTab(view){
   activeTab = view;
@@ -537,12 +579,22 @@ function buildDivisionViewShell(dc){
         <button class="btn btn-ghost btn-sm" data-act="today" data-div="${dc.id}" style="margin-left:auto;">Bulan ini</button>
         <button class="btn btn-ghost btn-sm" data-act="unlock" data-div="${dc.id}">🔓 Reset bulan ini</button>
       </div>
-      <div class="palette" id="palette-${dc.id}"></div>
-      <div class="palette-hint">Seret chip ke tanggal untuk assign standby · klik tanggal untuk buka detail &amp; tandai cuti tim kritikal · seret chip di kalender antar tanggal untuk tukar jadwal · klik kartu nama di ringkasan untuk highlight jadwalnya.</div>
-      <div class="filter-status" id="filterStatus-${dc.id}"></div>
-      <div class="cal-grid" id="calWeekdays-${dc.id}"></div>
-      <div class="cal-grid" id="calGrid-${dc.id}" style="margin-top:6px;"></div>
-      <div class="summary" id="summaryCards-${dc.id}"></div>
+      <div class="palette-hint">Klik nama untuk buka/tutup daftar tanggal · klik tanggal untuk buka detail &amp; ubah petugas · klik ✕ pada tanggal cuti untuk menghapus tanda cuti.</div>
+
+      <div class="ondoff-section">
+        <h4 class="ondoff-title">🟢 Onduty Bulan Ini</h4>
+        <div class="ondoff-list" id="ondutySummary-${dc.id}"></div>
+      </div>
+
+      <div class="ondoff-section">
+        <h4 class="ondoff-title">🏖️ Day-off Bulan Ini</h4>
+        <div class="ondoff-list" id="dayoffSummary-${dc.id}"></div>
+        <div class="ondoff-add-form">
+          <select id="leaveMemberSelect-${dc.id}" data-div="${dc.id}"></select>
+          <input type="date" id="leaveDateInput-${dc.id}" data-div="${dc.id}">
+          <button class="btn btn-primary btn-sm" data-act="addleave" data-div="${dc.id}">+ Tandai Cuti</button>
+        </div>
+      </div>
     </div>
     <div class="card-box">
       <h3>👥 Anggota &amp; Rotasi — ${dc.name}</h3>
@@ -586,6 +638,7 @@ mountEl.addEventListener('click', (e) => {
   else if(btn.dataset.act === 'today'){ currentMonth = firstOfThisMonth(); renderAllDivisions(); }
   else if(btn.dataset.act === 'add') addMemberToDivision(divId);
   else if(btn.dataset.act === 'unlock') resetMonthOverrides(divId);
+  else if(btn.dataset.act === 'addleave') addLeaveFromForm(divId);
 });
 mountEl.addEventListener('change', (e) => {
   const el = e.target;
@@ -601,6 +654,24 @@ mountEl.addEventListener('keydown', (e) => {
     addMemberToDivision(e.target.id.replace('newMemberName-',''));
   }
 });
+function addLeaveFromForm(divId){
+  const memberSel = document.getElementById('leaveMemberSelect-' + divId);
+  const dateInput = document.getElementById('leaveDateInput-' + divId);
+  if(!memberSel || !memberSel.value){ showToast('Pilih anggota terlebih dahulu.', 'error'); return; }
+  if(!dateInput || !dateInput.value){ showToast('Pilih tanggal cuti terlebih dahulu.', 'error'); return; }
+  const personId = memberSel.value;
+  const iso = dateInput.value;
+  const m = memberById(personId);
+  addLeave(iso, personId);
+  dateInput.value = '';
+  renderDivision(divId);
+  renderOverview();
+  if(activeTab === 'konflik') renderConflictList();
+  showToast(`Cuti ${m ? m.name : ''} pada ${iso} ditandai.`, 'success');
+  if(isConflictDate(iso)){
+    showToast(`⚠️ Konflik! ${criticalTrioLabel()} cuti bersamaan. Pastikan ada yang standby.`, 'error');
+  }
+}
 function shiftMonth(delta){
   const d = parseISO(currentMonth);
   d.setMonth(d.getMonth() + delta);
@@ -633,20 +704,7 @@ function addMemberToDivision(divId){
   showToast(`${name} ditambahkan ke ${divisionConfig(divId).name}.`, 'success');
 }
 
-/* ==================== RENDER: PALETTE, ORDER LIST, ROTATION CONFIG ==================== */
-function renderPalette(divId){
-  const div = divisionState(divId);
-  const el = document.getElementById('palette-' + divId);
-  el.innerHTML = div.rotation.order.map(id => {
-    const m = memberById(id); if(!m) return '';
-    return `<div class="chip" style="background:${m.color}" draggable="true" data-member="${m.id}"><span class="dot"></span>${m.name}</div>`;
-  }).join('');
-  el.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', JSON.stringify({type:'palette', id: chip.dataset.member, div: divId}));
-    });
-  });
-}
+/* ==================== RENDER: ORDER LIST, ROTATION CONFIG ==================== */
 function renderOrderList(divId){
   const div = divisionState(divId);
   const el = document.getElementById('orderList-' + divId);
@@ -692,7 +750,7 @@ function renderRotationConfig(divId){
   sel.value = div.rotation.startPersonId;
 }
 
-/* ==================== RENDER: ONDUTY PANEL ==================== */
+/* ==================== RENDER: ONDUTY PANEL (hari ini) ==================== */
 function todayLabel(){
   return capitalize(parseISO(todayISO()).toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long'}));
 }
@@ -702,142 +760,156 @@ function renderOnDuty(divId){
   const a = assignedFor(divId, iso);
   const person = a ? memberById(a.personId) : null;
   const critArr = state.criticalLeave[iso] || [];
-  const critInThisDiv = critArr.map(id => memberById(id)).filter(m => m && m.divisionId === divId).map(m => m.name);
+  const leaveMembersInDiv = critArr.map(id => memberById(id)).filter(m => m && m.divisionId === divId);
   const conflict = isConflictDate(iso);
   let cls = 'rs-shiftnow-card';
   if(conflict) cls += ' is-conflict'; else if(person) cls += ' is-live';
+
+  const dayoffHtml = leaveMembersInDiv.length
+    ? leaveMembersInDiv.map(m => `<div class="rs-status-person">${avatarHTML(m,32)}<span>${m.name}</span></div>`).join('')
+    : '<div class="rs-status-empty">Tidak ada yang cuti hari ini</div>';
+
   el.innerHTML = `
     <div class="${cls}" id="ondutyClick-${divId}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div><div class="rs-shiftnow-time">${a && a.locked ? 'Assign manual' : 'Rotasi otomatis'}</div></div>
         <span class="rs-live-badge"><span class="rs-live-dot"></span>${conflict ? 'KONFLIK' : 'ONDUTY'}</span>
       </div>
-      <div class="rs-shiftnow-person">
-        ${avatarHTML(person, 48)}
-        <div><div class="rs-shiftnow-name">${person ? person.name : 'Belum ada petugas'}</div>${critInThisDiv.length ? `<div class="rs-shiftnow-code" style="color:var(--red-fg);font-weight:bold;">🏖️ Cuti: ${critInThisDiv.join(', ')}</div>` : ''}</div>
+      <div class="rs-status-grid">
+        <div class="rs-status-block">
+          <div class="rs-status-label">🟢 Onduty</div>
+          <div class="rs-status-person rs-status-person-main">
+            ${avatarHTML(person, 44)}
+            <span>${person ? person.name : 'Belum ada petugas'}</span>
+          </div>
+        </div>
+        <div class="rs-status-block">
+          <div class="rs-status-label">🏖️ Day-off</div>
+          ${dayoffHtml}
+        </div>
       </div>
     </div>`;
   document.getElementById('ondutyClick-' + divId).onclick = () => openDetailPanel(divId, iso);
 }
 
-/* ==================== RENDER: KALENDER PER DIVISI ==================== */
-function renderDivisionCalendar(divId){
+/* ==================== LEAVE (CUTI) — SEMUA ANGGOTA ==================== */
+function isOnLeave(dateISO, personId){ return (state.criticalLeave[dateISO] || []).includes(personId); }
+function addLeave(dateISO, personId){
+  if(isOnLeave(dateISO, personId)) return;
+  const arr = state.criticalLeave[dateISO] ? state.criticalLeave[dateISO].slice() : [];
+  arr.push(personId);
+  state.criticalLeave[dateISO] = arr;
+  markDirty();
+}
+function removeLeave(dateISO, personId){
+  if(!isOnLeave(dateISO, personId)) return;
+  const arr = state.criticalLeave[dateISO].filter(id => id !== personId);
+  if(arr.length) state.criticalLeave[dateISO] = arr; else delete state.criticalLeave[dateISO];
+  markDirty();
+}
+function monthDatesList(y, m){
+  const total = daysInMonth(y, m);
+  const list = [];
+  for(let day=1; day<=total; day++) list.push(`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`);
+  return list;
+}
+function dayNumOf(iso){ return Number(iso.split('-')[2]); }
+
+/* ==================== EXPAND/COLLAPSE STATE (UI-only, tidak disimpan) ==================== */
+let expandedOnDuty = {};
+let expandedDayOff = {};
+
+/* ==================== RENDER: RINGKASAN ONDUTY BULAN INI ==================== */
+function renderOnDutySummary(divId){
   const div = divisionState(divId);
   const d = parseISO(currentMonth);
   const y = d.getFullYear(), m = d.getMonth();
   document.getElementById('monthLabel-' + divId).textContent = capitalize(d.toLocaleDateString('id-ID', {month:'long', year:'numeric'}));
-  const total = daysInMonth(y,m);
-  const firstDow = (new Date(y,m,1).getDay() + 6) % 7;
-  const cells = [];
-  for(let i=0;i<firstDow;i++) cells.push(null);
-  for(let day=1; day<=total; day++) cells.push(day);
-  while(cells.length % 7 !== 0) cells.push(null);
+  const dates = monthDatesList(y, m);
 
-  document.getElementById('calWeekdays-' + divId).innerHTML = WEEKDAYS.map(w => `<div class="cal-weekday">${w}</div>`).join('');
-
-  const grid = document.getElementById('calGrid-' + divId);
-  grid.innerHTML = cells.map(day => {
-    if(day === null) return `<div class="cal-cell pad"></div>`;
-    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const a = assignedFor(divId, iso);
-    const isToday = iso === todayISO();
-    const conflict = isConflictDate(iso);
-    let chipHtml = `<div class="cal-empty-hint">—</div>`;
-    if(a){
-      const person = memberById(a.personId);
-      if(person){
-        chipHtml = `<div class="cal-chip" style="background:${person.color}" draggable="true" data-date="${iso}">
-          ${a.locked ? '<span class="pin">📌</span>' : ''}<span>${person.name}</span>
-        </div>`;
-      }
-    }
-    const leaveArrDiv = (state.criticalLeave[iso] || []).map(id => memberById(id)).filter(mm => mm && mm.divisionId === divId);
-    const leaveTag = leaveArrDiv.length ? `<div class="cal-leave-tags">🏖️ ${leaveArrDiv.map(mm => mm.name.split(' ')[0]).join(', ')}</div>` : '';
-    const fp = filterPersonId[divId];
-    const isMatch = fp && a && a.personId === fp;
-    const isDimmed = fp && !isMatch;
-    const cls = ['cal-cell'];
-    if(isToday) cls.push('today');
-    if(conflict) cls.push('conflict');
-    if(isDimmed) cls.push('dimmed');
-    if(isMatch) cls.push('highlight');
-    return `<div class="${cls.join(' ')}" data-date="${iso}" title="${conflict ? '⚠️ Konflik: ' + criticalTrioLabel() + ' cuti bersamaan' : ''}">
-      <div class="cal-date">${day}</div>
-      <div class="cal-assign">${chipHtml}</div>
-      ${leaveTag}
-      ${conflict ? '<div class="conflict-badge">⚠️</div>' : ''}
-    </div>`;
-  }).join('');
-
-  wireCalendarEvents(divId);
-  renderFilterStatusForDiv(divId);
-  renderSummaryForDiv(divId, cells.filter(x => x !== null).map(day => `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`));
-}
-function wireCalendarEvents(divId){
-  document.querySelectorAll(`#calGrid-${divId} .cal-cell[data-date]`).forEach(cell => {
-    cell.addEventListener('dragover', e => { e.preventDefault(); cell.classList.add('dragover'); });
-    cell.addEventListener('dragleave', () => cell.classList.remove('dragover'));
-    cell.addEventListener('drop', e => {
-      e.preventDefault();
-      cell.classList.remove('dragover');
-      let data;
-      try{ data = JSON.parse(e.dataTransfer.getData('text/plain')); }catch(err){ return; }
-      const targetDate = cell.dataset.date;
-      if(data.type === 'palette' && data.div === divId){
-        setOverride(divId, targetDate, data.id);
-        renderDivision(divId);
-        renderOverview();
-        showToast('Jadwal diperbarui.', 'success');
-      } else if(data.type === 'swap' && data.div === divId && data.date !== targetDate){
-        swapCells(divId, data.date, targetDate);
-        renderDivision(divId);
-        renderOverview();
-        showToast('Jadwal ditukar.', 'success');
-      }
-    });
-    cell.addEventListener('click', () => openDetailPanel(divId, cell.dataset.date));
-  });
-  document.querySelectorAll(`#calGrid-${divId} .cal-chip[data-date]`).forEach(chip => {
-    chip.addEventListener('dragstart', e => {
-      e.stopPropagation();
-      e.dataTransfer.setData('text/plain', JSON.stringify({type:'swap', date: chip.dataset.date, div: divId}));
-    });
-  });
-}
-function renderFilterStatusForDiv(divId){
-  const el = document.getElementById('filterStatus-' + divId);
-  const fp = filterPersonId[divId];
-  if(!fp){ el.style.display = 'none'; el.innerHTML = ''; return; }
-  const m = memberById(fp);
-  if(!m){ filterPersonId[divId] = null; el.style.display = 'none'; return; }
-  el.style.display = 'flex';
-  el.innerHTML = `<span>🔍 Menyorot jadwal: <b>${m.name}</b></span>`;
-  const btn = document.createElement('button');
-  btn.className = 'btn btn-ghost btn-sm';
-  btn.textContent = '✕ Hapus filter';
-  btn.onclick = () => { filterPersonId[divId] = null; renderDivisionCalendar(divId); };
-  el.appendChild(btn);
-}
-function renderSummaryForDiv(divId, monthDates){
-  const div = divisionState(divId);
-  const counts = {};
-  div.rotation.order.forEach(id => counts[id] = 0);
-  monthDates.forEach(iso => { const a = assignedFor(divId, iso); if(a && counts[a.personId] !== undefined) counts[a.personId]++; });
-  const el = document.getElementById('summaryCards-' + divId);
+  const el = document.getElementById('ondutySummary-' + divId);
   el.innerHTML = div.rotation.order.map(id => {
-    const m = memberById(id); if(!m) return '';
-    const active = filterPersonId[divId] === id;
-    return `<div class="s-card${active ? ' s-card-active' : ''}" style="background:${m.color}" data-id="${id}" title="Klik untuk highlight jadwal ${m.name}">
-      <div class="num">${counts[id]}</div>
-      <div class="lab">${m.name} — hari jaga</div>
+    const mem = memberById(id); if(!mem) return '';
+    const myDates = dates.filter(iso => { const a = assignedFor(divId, iso); return a && a.personId === id; });
+    const key = divId + '|' + id;
+    const open = !!expandedOnDuty[key];
+    const chips = myDates.length
+      ? myDates.map(iso => `<span class="date-chip" data-date="${iso}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}</span>`).join('')
+      : '<span class="empty">— tidak ada jadwal onduty bulan ini —</span>';
+    return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
+      <div class="ondoff-head" data-toggle="onduty" data-key="${key}">
+        <span class="dot" style="background:${mem.color}"></span>
+        <span class="name">${mem.name}</span>
+        <span class="count">${myDates.length} hari</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="ondoff-body">${chips}</div>
     </div>`;
   }).join('');
-  el.querySelectorAll('.s-card').forEach(card => {
-    card.onclick = () => {
-      filterPersonId[divId] = filterPersonId[divId] === card.dataset.id ? null : card.dataset.id;
-      renderDivisionCalendar(divId);
+
+  el.querySelectorAll('.ondoff-head[data-toggle="onduty"]').forEach(head => {
+    head.onclick = () => {
+      const key = head.dataset.key;
+      expandedOnDuty[key] = !expandedOnDuty[key];
+      renderOnDutySummary(divId);
     };
   });
+  el.querySelectorAll('.date-chip[data-date]').forEach(chip => {
+    chip.onclick = (e) => { e.stopPropagation(); openDetailPanel(divId, chip.dataset.date); };
+  });
+}
+
+/* ==================== RENDER: RINGKASAN DAY-OFF (CUTI) BULAN INI ==================== */
+function renderDayOffSummary(divId){
+  const d = parseISO(currentMonth);
+  const y = d.getFullYear(), m = d.getMonth();
+  const dates = monthDatesList(y, m);
+  const members = state.team.filter(mm => mm.divisionId === divId);
+
+  const el = document.getElementById('dayoffSummary-' + divId);
+  el.innerHTML = members.map(mem => {
+    const myDates = dates.filter(iso => isOnLeave(iso, mem.id));
+    const key = divId + '|' + mem.id;
+    const open = !!expandedDayOff[key];
+    const chips = myDates.length
+      ? myDates.map(iso => `<span class="date-chip leave-chip" data-date="${iso}" data-member="${mem.id}" data-div="${divId}" title="Klik untuk buka detail tanggal ini">${dayNumOf(iso)}<span class="rm" data-rmleave="1" data-date="${iso}" data-member="${mem.id}" title="Hapus tanda cuti">✕</span></span>`).join('')
+      : '<span class="empty">— tidak ada cuti bulan ini —</span>';
+    return `<div class="ondoff-card${open ? ' open' : ''}" data-key="${key}">
+      <div class="ondoff-head" data-toggle="dayoff" data-key="${key}">
+        <span class="dot" style="background:${mem.color}"></span>
+        <span class="name">${mem.name}</span>
+        <span class="count">${myDates.length} hari</span>
+        <span class="chev">▾</span>
+      </div>
+      <div class="ondoff-body">${chips}</div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.ondoff-head[data-toggle="dayoff"]').forEach(head => {
+    head.onclick = () => {
+      const key = head.dataset.key;
+      expandedDayOff[key] = !expandedDayOff[key];
+      renderDayOffSummary(divId);
+    };
+  });
+  el.querySelectorAll('.rm[data-rmleave]').forEach(rm => {
+    rm.onclick = (e) => {
+      e.stopPropagation();
+      removeLeave(rm.dataset.date, rm.dataset.member);
+      renderDivision(divId);
+      renderOverview();
+      showToast('Tanda cuti dihapus.', 'success');
+    };
+  });
+  el.querySelectorAll('.date-chip[data-date]').forEach(chip => {
+    chip.onclick = (e) => {
+      if(e.target.closest('[data-rmleave]')) return;
+      openDetailPanel(divId, chip.dataset.date);
+    };
+  });
+
+  const sel = document.getElementById('leaveMemberSelect-' + divId);
+  if(sel) sel.innerHTML = members.map(mem => `<option value="${mem.id}">${mem.name}</option>`).join('');
 }
 
 /* ==================== DETAIL PANEL (geser) ==================== */
@@ -875,15 +947,17 @@ function renderDetailBody(divId, dateISO){
   }).join('');
   html += `<div class="detail-opt detail-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
 
-  if(state.criticalTeamIds.length){
-    html += '<div class="detail-section-title">🏖️ Tandai Cuti Tim Kritikal (lintas divisi)</div>';
-    html += state.criticalTeamIds.map(id => {
-      const m = memberById(id);
-      if(!m) return '';
-      const checked = critArr.includes(id) ? 'checked' : '';
-      return `<label class="detail-crit-row"><input type="checkbox" data-crit="${id}" ${checked}>${avatarHTML(m,24)}${m.name}</label>`;
+  html += '<div class="detail-section-title">🏖️ Tandai Cuti</div>';
+  DIVISIONS_CONFIG.forEach(dc => {
+    const members = state.team.filter(mm => mm.divisionId === dc.id);
+    if(!members.length) return;
+    html += `<div class="detail-group-label">${dc.icon} ${dc.name}</div>`;
+    html += members.map(m => {
+      const isCrit = state.criticalTeamIds.includes(m.id);
+      const checked = critArr.includes(m.id) ? 'checked' : '';
+      return `<label class="detail-crit-row"><input type="checkbox" data-crit="${m.id}" ${checked}>${avatarHTML(m,24)}${m.name}${isCrit ? ' <span title="Tim Kritikal" style="color:var(--red-fg);">⚠️</span>' : ''}</label>`;
     }).join('');
-  }
+  });
   if(conflict){
     html += `<div class="detail-conflict-note">⚠️ Konflik: ${criticalTrioLabel()} cuti bersamaan pada tanggal ini — pastikan ada yang standby.</div>`;
   }
@@ -1119,8 +1193,8 @@ document.getElementById('importJsonFile').addEventListener('change', (e) => {
 
 /* ==================== INIT ==================== */
 function renderDivision(divId){
-  renderPalette(divId);
-  renderDivisionCalendar(divId);
+  renderOnDutySummary(divId);
+  renderDayOffSummary(divId);
   renderOrderList(divId);
   renderRotationConfig(divId);
   renderOnDuty(divId);
