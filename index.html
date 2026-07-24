@@ -312,6 +312,24 @@ const DIVISIONS_CONFIG = [
 // Dipakai untuk semua tampilan/tab — hanya divisi yang tidak "hidden" yang dirender.
 // Data & rotasi divisi yang disembunyikan tetap tersimpan, tinggal hapus flag "hidden" untuk memunculkan lagi.
 const VISIBLE_DIVISIONS_CONFIG = DIVISIONS_CONFIG.filter(dc => !dc.hidden);
+// Peta foto default (di-hosting di repo GitHub Pages yang sama) — dicocokkan ke nama anggota
+// (case-insensitive). Hanya dipakai untuk MENGISI field photo yang masih kosong; tidak pernah
+// menimpa foto yang sudah diatur manual lewat UI (lihat applyDefaultPhotos()).
+const DEFAULT_PHOTO_MAP = {
+  'harris': 'https://raw.githubusercontent.com/harris2026-sudo/digitech-monitoring-roster/main/harris.jpg',
+  'nyco': 'https://raw.githubusercontent.com/harris2026-sudo/digitech-monitoring-roster/main/nico-fahryan-sandy.jpg',
+  'nico fahryan sandy': 'https://raw.githubusercontent.com/harris2026-sudo/digitech-monitoring-roster/main/nico-fahryan-sandy.jpg',
+  'lukman gunawan': 'https://raw.githubusercontent.com/harris2026-sudo/digitech-monitoring-roster/main/lukman-gunawan.jpg',
+  'adhe setiawan': 'https://raw.githubusercontent.com/harris2026-sudo/digitech-monitoring-roster/main/adhe-setiawan.jpg'
+};
+function applyDefaultPhotos(team){
+  team.forEach(m => {
+    if(!m.photo){
+      const url = DEFAULT_PHOTO_MAP[String(m.name || '').trim().toLowerCase()];
+      if(url) m.photo = url;
+    }
+  });
+}
 // Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
 const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
 const STORAGE_KEY = 'roster:state';
@@ -415,6 +433,7 @@ function buildDefaultState(){
       overrides: {}
     };
   });
+  applyDefaultPhotos(team);
   return {
     team,
     divisions,
@@ -506,6 +525,7 @@ async function loadState(){
         parsed.team.forEach(m => { if(m.name === 'Wawan') m.name = 'Lukman Gunawan'; });
         if(!parsed.divisions) parsed = migrateOldState(parsed);
         parsed.team.forEach(m => { if(m.photo === undefined) m.photo = ''; });
+        applyDefaultPhotos(parsed.team);
         if(!parsed.criticalLeave) parsed.criticalLeave = {};
         if(!parsed.criticalTeamIds) parsed.criticalTeamIds = parsed.team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id);
         state = parsed;
@@ -781,6 +801,7 @@ function addMemberToDivision(divId){
   const name = input.value.trim();
   if(!name){ showToast('Nama tidak boleh kosong.', 'error'); return; }
   const m = { id: uid(), name, color: nextColor(), divisionId: divId, photo: '' };
+  applyDefaultPhotos([m]);
   state.team.push(m);
   divisionState(divId).rotation.order.push(m.id);
   input.value = '';
