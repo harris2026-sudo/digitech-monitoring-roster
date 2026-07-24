@@ -309,6 +309,9 @@ const DIVISIONS_CONFIG = [
 // Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
 const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
 const STORAGE_KEY = 'roster:state';
+// Toggle sementara: sembunyikan panel "Petugas Standby" di detail panel (klik tanggal).
+// Set kembali ke true jika ingin menampilkan lagi.
+const SHOW_PETUGAS_STANDBY = false;
 
 /* ==================== KONFIGURASI BACKEND (Google Apps Script) ====================
    Ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
@@ -946,14 +949,17 @@ function renderDetailBody(divId, dateISO){
   const a = assignedFor(divId, dateISO);
   const critArr = state.criticalLeave[dateISO] || [];
 
-  let html = '<div class="detail-section-title">👤 Petugas Standby</div>';
-  html += div.rotation.order.map(id => {
-    const m = memberById(id);
-    if(!m) return '';
-    const sel = a && a.personId === m.id ? ' selected' : '';
-    return `<div class="detail-opt${sel}" data-id="${m.id}">${avatarHTML(m,26)}${m.name}${a && a.personId===m.id && a.locked ? ' 📌' : ''}</div>`;
-  }).join('');
-  html += `<div class="detail-opt detail-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
+  let html = '';
+  if(SHOW_PETUGAS_STANDBY){
+    html += '<div class="detail-section-title">👤 Petugas Standby</div>';
+    html += div.rotation.order.map(id => {
+      const m = memberById(id);
+      if(!m) return '';
+      const sel = a && a.personId === m.id ? ' selected' : '';
+      return `<div class="detail-opt${sel}" data-id="${m.id}">${avatarHTML(m,26)}${m.name}${a && a.personId===m.id && a.locked ? ' 📌' : ''}</div>`;
+    }).join('');
+    html += `<div class="detail-opt detail-clear" data-clear="1">↩️ Kembalikan ke rotasi otomatis</div>`;
+  }
 
   html += '<div class="detail-section-title">🏖️ Tandai Cuti</div>';
   DIVISIONS_CONFIG.forEach(dc => {
@@ -967,22 +973,25 @@ function renderDetailBody(divId, dateISO){
   });
   body.innerHTML = html;
 
-  body.querySelectorAll('.detail-opt[data-id]').forEach(opt => {
-    opt.onclick = () => {
-      setOverride(divId, dateISO, opt.dataset.id);
-      showToast('Jadwal diperbarui.', 'success');
+  if(SHOW_PETUGAS_STANDBY){
+    body.querySelectorAll('.detail-opt[data-id]').forEach(opt => {
+      opt.onclick = () => {
+        setOverride(divId, dateISO, opt.dataset.id);
+        showToast('Jadwal diperbarui.', 'success');
+        renderDivision(divId);
+        renderOverview();
+        renderDetailBody(divId, dateISO);
+      };
+    });
+    const clearBtn = body.querySelector('.detail-clear');
+    if(clearBtn) clearBtn.onclick = () => {
+      clearOverride(divId, dateISO);
+      showToast('Dikembalikan ke rotasi otomatis.', 'success');
       renderDivision(divId);
       renderOverview();
       renderDetailBody(divId, dateISO);
     };
-  });
-  body.querySelector('.detail-clear').onclick = () => {
-    clearOverride(divId, dateISO);
-    showToast('Dikembalikan ke rotasi otomatis.', 'success');
-    renderDivision(divId);
-    renderOverview();
-    renderDetailBody(divId, dateISO);
-  };
+  }
   body.querySelectorAll('[data-crit]').forEach(cb => {
     cb.addEventListener('change', () => {
       toggleCriticalLeave(dateISO, cb.dataset.crit);
