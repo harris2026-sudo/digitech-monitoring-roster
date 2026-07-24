@@ -92,11 +92,12 @@
   .rs-shiftnow-card.is-conflict .rs-live-badge{display:inline-flex;background:var(--red-fg);}
   .rs-live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:rsPulse 1.4s infinite;}
   @keyframes rsPulse{0%{opacity:1;}50%{opacity:.25;}100%{opacity:1;}}
-  .rs-shiftnow-person{display:flex;align-items:center;gap:12px;}
-  .rs-shiftnow-card.is-live .rs-avatar, .rs-shiftnow-card.is-conflict .rs-avatar{width:56px !important;height:56px !important;box-shadow:0 0 0 3px rgba(30,122,52,.15);}
-  .rs-shiftnow-card.is-conflict .rs-avatar{box-shadow:0 0 0 3px rgba(156,0,6,.15);}
-  .rs-shiftnow-name{font-weight:bold;color:var(--navy);font-size:14px;}
+  .rs-shiftnow-person{display:flex;align-items:center;gap:10px;}
+  .rs-status-person-main .rs-avatar{box-shadow:0 0 0 3px rgba(30,122,52,.15);}
+  .is-onduty-person .rs-avatar{width:48px !important;height:48px !important;box-shadow:0 0 0 3px rgba(30,122,52,.15);}
+  .rs-shiftnow-name{font-weight:bold;color:var(--navy);font-size:14px;flex:1;}
   .rs-shiftnow-code{font-size:11px;color:#667;}
+  .rs-mini-badge{background:#1E7A34;color:#fff;font-size:9.5px;font-weight:bold;padding:3px 8px;border-radius:20px;letter-spacing:.3px;white-space:nowrap;}
 
   .rs-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   .rs-status-block{background:#F8FAFC;border-radius:10px;padding:10px 12px;}
@@ -201,6 +202,8 @@
   .order-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
   .order-item{display:flex;align-items:center;gap:8px;background:var(--zebra);border-radius:8px;padding:7px 10px;}
   .order-item .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .order-avatar{cursor:pointer;flex-shrink:0;border-radius:50%;transition:box-shadow .15s ease,transform .15s ease;}
+  .order-avatar:hover{box-shadow:0 0 0 2px var(--hilite);transform:scale(1.06);}
   .order-item .name{flex:1;font-size:12.5px;font-weight:bold;color:#333;}
   .order-item .mv{border:none;background:#fff;border-radius:5px;width:24px;height:24px;cursor:pointer;font-size:11px;color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.1);flex-shrink:0;}
 
@@ -402,7 +405,7 @@ function buildDefaultState(){
   const team = [];
   const divisions = DIVISIONS_CONFIG.map(dc => {
     const memberIds = dc.memberNames.map(name => {
-      const m = { id: uid(), name, color: nextColor(), divisionId: dc.id };
+      const m = { id: uid(), name, color: nextColor(), divisionId: dc.id, photo: '' };
       team.push(m);
       return m.id;
     });
@@ -469,10 +472,27 @@ function initials(name){
   if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
   return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
 }
+function escapeAttr(s){
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+// Dipanggil dari atribut onerror <img> ketika URL foto gagal dimuat — otomatis
+// jatuh ke avatar inisial berwarna supaya tampilan tidak pernah bolong/rusak.
+function handleAvatarError(img){
+  const size = img.dataset.size;
+  const fs = Math.round(size * 0.36);
+  const div = document.createElement('div');
+  div.className = 'rs-avatar';
+  div.style.cssText = `width:${size}px;height:${size}px;background:${img.dataset.color};border-color:${img.dataset.color};font-size:${fs}px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;flex-shrink:0;`;
+  div.textContent = img.dataset.initials;
+  img.replaceWith(div);
+}
 function avatarHTML(person, size){
   size = size || 44;
   const fs = Math.round(size * 0.36);
   if(!person) return `<div class="rs-avatar rs-avatar-empty" style="width:${size}px;height:${size}px;font-size:${fs}px;">–</div>`;
+  if(person.photo){
+    return `<img class="rs-avatar" src="${escapeAttr(person.photo)}" alt="${escapeAttr(person.name)}" data-size="${size}" data-color="${person.color}" data-initials="${escapeAttr(initials(person.name))}" onerror="handleAvatarError(this)" style="width:${size}px;height:${size}px;object-fit:cover;border-color:${person.color};background:${person.color};">`;
+  }
   return `<div class="rs-avatar" style="width:${size}px;height:${size}px;background:${person.color};border-color:${person.color};font-size:${fs}px;">${initials(person.name)}</div>`;
 }
 
@@ -485,6 +505,7 @@ async function loadState(){
       if(parsed && parsed.team){
         parsed.team.forEach(m => { if(m.name === 'Wawan') m.name = 'Lukman Gunawan'; });
         if(!parsed.divisions) parsed = migrateOldState(parsed);
+        parsed.team.forEach(m => { if(m.photo === undefined) m.photo = ''; });
         if(!parsed.criticalLeave) parsed.criticalLeave = {};
         if(!parsed.criticalTeamIds) parsed.criticalTeamIds = parsed.team.filter(m => CRITICAL_NAMES.includes(m.name)).map(m => m.id);
         state = parsed;
@@ -759,7 +780,7 @@ function addMemberToDivision(divId){
   const input = document.getElementById('newMemberName-' + divId);
   const name = input.value.trim();
   if(!name){ showToast('Nama tidak boleh kosong.', 'error'); return; }
-  const m = { id: uid(), name, color: nextColor(), divisionId: divId };
+  const m = { id: uid(), name, color: nextColor(), divisionId: divId, photo: '' };
   state.team.push(m);
   divisionState(divId).rotation.order.push(m.id);
   input.value = '';
@@ -776,13 +797,27 @@ function renderOrderList(divId){
     const m = memberById(id);
     if(!m) return '';
     return `<div class="order-item" data-id="${id}">
-      <span class="dot" style="background:${m.color}"></span>
+      <span class="order-avatar" data-act="photo" title="Klik untuk atur URL foto">${avatarHTML(m, 22)}</span>
       <span class="name">${idx+1}. ${m.name}</span>
       <button class="mv" data-act="up" ${idx===0?'disabled':''}>▲</button>
       <button class="mv" data-act="down" ${idx===div.rotation.order.length-1?'disabled':''}>▼</button>
       <button class="mv" data-act="del" title="Hapus dari divisi">✕</button>
     </div>`;
   }).join('');
+  el.querySelectorAll('.order-avatar').forEach(av => {
+    av.onclick = () => {
+      const id = av.closest('.order-item').dataset.id;
+      const m = memberById(id);
+      if(!m) return;
+      const url = prompt(`URL foto untuk ${m.name}:\n(kosongkan lalu OK untuk hapus foto dan kembali ke inisial)`, m.photo || '');
+      if(url === null) return;
+      m.photo = url.trim();
+      markDirty();
+      renderDivision(divId);
+      renderOverview();
+      showToast(m.photo ? `Foto ${m.name} diperbarui.` : `Foto ${m.name} dihapus, kembali ke inisial.`, 'success');
+    };
+  });
   el.querySelectorAll('.mv').forEach(btn => {
     btn.onclick = () => {
       const id = btn.closest('.order-item').dataset.id;
@@ -834,14 +869,14 @@ function renderOnDuty(divId){
   el.innerHTML = `
     <div class="${cls}" id="ondutyClick-${divId}">
       <div class="rs-shiftnow-top">
-        <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div><div class="rs-shiftnow-time">${a && a.locked ? 'Assign manual' : 'Rotasi otomatis'}</div></div>
+        <div><div class="rs-shiftnow-label">📍 ${todayLabel()}</div></div>
         <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
       </div>
       <div class="rs-status-grid">
         <div class="rs-status-block">
           <div class="rs-status-label">🟢 Day-On</div>
           <div class="rs-status-person rs-status-person-main">
-            ${avatarHTML(person, 44)}
+            ${avatarHTML(person, 56)}
             <span>${person ? person.name : 'Belum ada petugas'}</span>
           </div>
         </div>
@@ -1059,18 +1094,15 @@ function renderOverviewToday(){
     const members = state.team.filter(mm => mm.divisionId === dc.id);
     const rowsHtml = members.map(m => {
       const isOn = person && m.id === person.id;
-      let subtitle;
-      if(isOn) subtitle = a.locked ? 'Assign manual' : 'Rotasi otomatis';
-      else if(isOnLeave(iso, m.id)) subtitle = 'Cuti';
-      else subtitle = 'Day-off';
-      return `<div class="rs-shiftnow-person">
+      return `<div class="rs-shiftnow-person${isOn ? ' is-onduty-person' : ''}">
         ${avatarHTML(m, 40)}
-        <div><div class="rs-shiftnow-name">${m.name}</div><div class="rs-shiftnow-code">${subtitle}</div></div>
+        <div class="rs-shiftnow-name">${m.name}</div>
+        ${isOn ? '<span class="rs-mini-badge">ONDUTY</span>' : ''}
       </div>`;
     }).join('');
     html += `<div class="${cls}" data-div="${dc.id}">
       <div class="rs-shiftnow-top">
-        <div><div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div><div class="rs-shiftnow-time">${div.rotation.order.length} anggota</div></div>
+        <div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div>
         <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;">
