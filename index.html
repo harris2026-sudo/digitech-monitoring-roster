@@ -366,6 +366,12 @@ const SCHEDULE_IMPORT_MAINT = {
 };
 const SCHEDULE_IMPORT_VERSION = 'maint-v1';
 
+/* Import tambahan (sekali-jalan juga): cuti Harris 24 Jul - 1 Agu 2026, dari "Rooster BIB.xlsx" */
+const SCHEDULE_IMPORT_MAINT_2 = {
+  'Harris': ['2026-07-24', '2026-07-25', '2026-07-26', '2026-07-27', '2026-07-28', '2026-07-29', '2026-07-30', '2026-07-31', '2026-08-01'],
+};
+const SCHEDULE_IMPORT_VERSION_2 = 'maint-v2';
+
 /* ==================== STATE (persisted via window.storage) ==================== */
 const PALETTE_COLORS = ['#2E5FA3','#1E8E7E','#E07A3F','#7A5FBF','#C2547A','#3F9142','#C99A2E','#C0392B','#566573','#0E7C86'];
 let colorCursor = 0;
@@ -512,6 +518,19 @@ function applyScheduleImport(){
   });
   state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION] = true;
   if(count > 0) markDirty();
+
+  if(!state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION_2]){
+    let count2 = 0;
+    Object.keys(SCHEDULE_IMPORT_MAINT_2).forEach(name => {
+      const member = state.team.find(m => m.name === name && m.divisionId === 'maint');
+      if(!member) return;
+      SCHEDULE_IMPORT_MAINT_2[name].forEach(iso => {
+        if(!isOnLeave(iso, member.id)){ addLeave(iso, member.id); count2++; }
+      });
+    });
+    state.scheduleImportApplied[SCHEDULE_IMPORT_VERSION_2] = true;
+    if(count2 > 0) markDirty();
+  }
 }
 function markDirty(){
   dirty = true;
