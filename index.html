@@ -301,17 +301,23 @@
 const DIVISIONS_CONFIG = [
   { id:'maint', name:'Maintenance & Support', icon:'🔧', color:'#2E5FA3',
     memberNames:['Harris','Nyco','Taufik','Lukman Gunawan','Adhe Setiawan'] },
-  { id:'proj', name:'Project & Acceleration', icon:'🚀', color:'#1E8E7E',
+  { id:'proj', name:'Project & Acceleration', icon:'🚀', color:'#1E8E7E', hidden:true,
     memberNames:['Sony Salubongga','Abdillah','Ishaq Arifin'] },
-  { id:'dev', name:'Development', icon:'💻', color:'#C99A2E',
+  { id:'dev', name:'Development', icon:'💻', color:'#C99A2E', hidden:true,
     memberNames:['Dani Suryanda','Raka'] }
 ];
+// Dipakai untuk semua tampilan/tab — hanya divisi yang tidak "hidden" yang dirender.
+// Data & rotasi divisi yang disembunyikan tetap tersimpan, tinggal hapus flag "hidden" untuk memunculkan lagi.
+const VISIBLE_DIVISIONS_CONFIG = DIVISIONS_CONFIG.filter(dc => !dc.hidden);
 // Trio kritikal (lintas divisi): tidak boleh cuti bersamaan, minimal 1 harus standby.
 const CRITICAL_NAMES = ['Harris','Sony Salubongga','Nyco'];
 const STORAGE_KEY = 'roster:state';
 // Toggle sementara: sembunyikan panel "Petugas Standby" di detail panel (klik tanggal).
 // Set kembali ke true jika ingin menampilkan lagi.
 const SHOW_PETUGAS_STANDBY = false;
+// Toggle sementara: sembunyikan panel "Rekap Bulan Ini" (daftar hari + form tandai cuti) di tab divisi.
+// Set kembali ke true jika ingin menampilkan lagi.
+const SHOW_MONTH_RECAP = false;
 
 /* ==================== KONFIGURASI BACKEND (Google Apps Script) ====================
    Ganti URL di bawah ini dengan URL Web App hasil deploy Apps Script Anda.
@@ -609,7 +615,7 @@ function toggleCriticalLeave(dateISO, personId){
 function renderTabsBar(){
   const bar = document.getElementById('tabsBar');
   let html = `<div class="tab${activeTab === 'overview' ? ' active' : ''}" data-view="overview">🏠 Overview</div>`;
-  DIVISIONS_CONFIG.forEach(dc => {
+  VISIBLE_DIVISIONS_CONFIG.forEach(dc => {
     html += `<div class="tab${activeTab === dc.id ? ' active' : ''}" data-view="${dc.id}">${dc.icon} ${dc.name}</div>`;
   });
   bar.innerHTML = html;
@@ -646,6 +652,7 @@ function buildDivisionViewShell(dc){
         </div>
         <div class="palette-hint">Klik nama untuk buka/tutup daftar tanggal · klik tanggal untuk buka detail &amp; ubah petugas · klik ✕ pada tanggal cuti untuk menghapus tanda cuti.</div>
 
+        ${SHOW_MONTH_RECAP ? `
         <div class="ondoff-section">
           <h4 class="ondoff-title">📋 Rekap Bulan Ini</h4>
           <div class="ondoff-list" id="monthSummary-${dc.id}"></div>
@@ -654,7 +661,7 @@ function buildDivisionViewShell(dc){
             <input type="date" id="leaveDateInput-${dc.id}" data-div="${dc.id}">
             <button class="btn btn-primary btn-sm" data-act="addleave" data-div="${dc.id}">+ Tandai Cuti</button>
           </div>
-        </div>
+        </div>` : ''}
       </div>
     </div>
     <div class="card-box">
@@ -880,6 +887,7 @@ function renderMonthSummary(divId){
   const d = parseISO(currentMonth);
   const y = d.getFullYear(), m = d.getMonth();
   document.getElementById('monthLabel-' + divId).textContent = capitalize(d.toLocaleDateString('id-ID', {month:'long', year:'numeric'}));
+  if(!SHOW_MONTH_RECAP) return;
   const dates = monthDatesList(y, m);
   const members = state.team.filter(mm => mm.divisionId === divId);
 
@@ -981,7 +989,7 @@ function renderDetailBody(divId, dateISO){
   }
 
   html += '<div class="detail-section-title">🏖️ Tandai Cuti</div>';
-  DIVISIONS_CONFIG.forEach(dc => {
+  VISIBLE_DIVISIONS_CONFIG.forEach(dc => {
     const members = state.team.filter(mm => mm.divisionId === dc.id);
     if(!members.length) return;
     html += `<div class="detail-group-label">${dc.icon} ${dc.name}</div>`;
@@ -1042,20 +1050,31 @@ function renderOverview(){
 function renderOverviewToday(){
   const iso = todayISO();
   let html = '<div class="rs-shiftnow-grid">';
-  DIVISIONS_CONFIG.forEach(dc => {
+  VISIBLE_DIVISIONS_CONFIG.forEach(dc => {
     const div = divisionState(dc.id);
     const a = assignedFor(dc.id, iso);
     const person = a ? memberById(a.personId) : null;
     let cls = 'rs-shiftnow-card';
     if(person) cls += ' is-live';
+    const members = state.team.filter(mm => mm.divisionId === dc.id);
+    const rowsHtml = members.map(m => {
+      const isOn = person && m.id === person.id;
+      let subtitle;
+      if(isOn) subtitle = a.locked ? 'Assign manual' : 'Rotasi otomatis';
+      else if(isOnLeave(iso, m.id)) subtitle = 'Cuti';
+      else subtitle = 'Day-off';
+      return `<div class="rs-shiftnow-person">
+        ${avatarHTML(m, 40)}
+        <div><div class="rs-shiftnow-name">${m.name}</div><div class="rs-shiftnow-code">${subtitle}</div></div>
+      </div>`;
+    }).join('');
     html += `<div class="${cls}" data-div="${dc.id}">
       <div class="rs-shiftnow-top">
         <div><div class="rs-shiftnow-label">${dc.icon} ${dc.name}</div><div class="rs-shiftnow-time">${div.rotation.order.length} anggota</div></div>
         <span class="rs-live-badge"><span class="rs-live-dot"></span>DAY-ON</span>
       </div>
-      <div class="rs-shiftnow-person">
-        ${avatarHTML(person, 44)}
-        <div><div class="rs-shiftnow-name">${person ? person.name : 'Belum ada petugas'}</div><div class="rs-shiftnow-code">${person ? (a.locked ? 'Assign manual' : 'Rotasi otomatis') : ''}</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${rowsHtml}
       </div>
     </div>`;
   });
@@ -1093,7 +1112,7 @@ function renderOverviewWeek(){
     const isToday = iso === todayISO();
     rows += `<tr class="${isToday ? 'is-today' : ''}">
       <td class="rowlabel">${capitalize(d.toLocaleDateString('id-ID', {weekday:'short'}))}, ${d.getDate()}/${d.getMonth()+1}</td>
-      ${DIVISIONS_CONFIG.map(dc => {
+      ${VISIBLE_DIVISIONS_CONFIG.map(dc => {
         const a = assignedFor(dc.id, iso);
         const person = a ? memberById(a.personId) : null;
         return `<td>${person ? `<div class="rs-table-person">${avatarHTML(person,26)}<span>${person.name.split(' ')[0]}</span></div>` : '—'}</td>`;
@@ -1101,7 +1120,7 @@ function renderOverviewWeek(){
     </tr>`;
   }
   document.getElementById('overviewBody').innerHTML = `<div class="rs-week-table-wrap"><table class="rs-table">
-    <thead><tr><th>Tanggal</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
+    <thead><tr><th>Tanggal</th>${VISIBLE_DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
@@ -1116,7 +1135,7 @@ function renderOverviewMonth(){
     const isToday = iso === todayISO();
     rows += `<tr class="${isToday ? 'is-today' : ''}">
       <td class="rowlabel">${day}</td>
-      ${DIVISIONS_CONFIG.map(dc => {
+      ${VISIBLE_DIVISIONS_CONFIG.map(dc => {
         const a = assignedFor(dc.id, iso);
         const person = a ? memberById(a.personId) : null;
         return `<td>${person ? `<div class="rs-table-person">${avatarHTML(person,22)}<span style="font-size:10px;">${person.name.split(' ')[0]}</span></div>` : '—'}</td>`;
@@ -1124,7 +1143,7 @@ function renderOverviewMonth(){
     </tr>`;
   }
   document.getElementById('overviewBody').innerHTML = `<div class="rs-week-table-wrap" style="max-height:520px;overflow-y:auto;"><table class="rs-table">
-    <thead><tr><th>Tgl</th>${DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
+    <thead><tr><th>Tgl</th>${VISIBLE_DIVISIONS_CONFIG.map(dc => `<th>${dc.icon} ${dc.name}</th>`).join('')}</tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
@@ -1147,7 +1166,7 @@ document.getElementById('exportCsvBtn').onclick = () => {
   const y = d.getFullYear(), m = d.getMonth();
   const total = daysInMonth(y,m);
   let rows = [['Divisi','Tanggal','Hari','Petugas Standby','Status','Cuti Tim Kritikal']];
-  DIVISIONS_CONFIG.forEach(dc => {
+  VISIBLE_DIVISIONS_CONFIG.forEach(dc => {
     for(let day=1; day<=total; day++){
       const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
       const a = assignedFor(dc.id, iso);
@@ -1194,7 +1213,7 @@ function renderDivision(divId){
   renderOnDuty(divId);
 }
 function renderAllDivisions(){
-  DIVISIONS_CONFIG.forEach(dc => renderDivision(dc.id));
+  VISIBLE_DIVISIONS_CONFIG.forEach(dc => renderDivision(dc.id));
   renderOverview();
 }
 
@@ -1203,7 +1222,7 @@ function renderAllDivisions(){
     document.getElementById('modeBadge').textContent = '⚠️ APPS_SCRIPT_URL belum diisi — lihat komentar di bagian atas <script>';
     alert('APPS_SCRIPT_URL belum diisi. Buka file HTML ini, cari baris "const APPS_SCRIPT_URL", lalu tempel URL Web App Apps Script Anda di situ.');
   }
-  mountEl.innerHTML = DIVISIONS_CONFIG.map(buildDivisionViewShell).join('');
+  mountEl.innerHTML = VISIBLE_DIVISIONS_CONFIG.map(buildDivisionViewShell).join('');
   await loadState();
   applyScheduleImport();
   renderTabsBar();
